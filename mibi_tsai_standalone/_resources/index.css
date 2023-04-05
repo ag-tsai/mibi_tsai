@@ -1,0 +1,310 @@
+/* ########################################
+   ##########  MIBI TSAI STYLES  ##########
+   ########################################
+*/
+
+:root
+{--crosshair: crosshair;
+ --menu:      #c6c1b9;
+}
+body                                                                    {overflow:scroll;}
+#_layout_main                                                           {padding:0px 0px 300px 30px;}
+#_layout_main span.required,
+#_layout_main span.recommended,
+#_layout_main span.optional                                             {font-size:1.4rem; font-weight:600; margin-right:2px; padding:0px 3px 0px 3px; border-radius:5px;}
+#_layout_main span.required                                             {color:var(--banner_red  ); border:1px solid var(--banner_red  );}
+#_layout_main span.recommended                                          {color:var(--banner_green); border:1px solid var(--banner_green);}
+#_layout_main span.optional                                             {color:#333;              border:1px solid #333;}
+#_layout_main span.keyboard                                             {background-color:#eee; padding:0px 3px 0px 3px; border:1px solid #ccc; border-radius:5px;}
+#_layout_main #tiler h2                                                 {margin-bottom:3px;}
+#_layout_main #tiler ul li                                              {font-size:1.6rem;}
+#_layout_main #tiler p.file                                             {margin-bottom:0px;}
+
+#_layout_main #optical                                                  {padding:0px 20px 5px 0px;}
+#_layout_main #optical h2                                               {cursor:pointer;}
+#_layout_main #optical ol                                               {margin:2px 0px 0px 30px;}
+#_layout_main #optical ol li                                            {font-size:1.6rem; padding:0px 0px 0px 5px; margin:0px 0px 5px 0px;}
+#_layout_main #optical ol li ol                                         {margin:2px 0px 0px 0px; list-style-type:upper-alpha;}
+#_layout_main #optical #optical_shift_toggle span.b                     {font-weight:600;}
+#_layout_main #optical #optical_shift table                             {margin:0px 0px 10px 0px;}
+#_layout_main #optical #optical_shift table tr td                       {font-size:1.6rem; padding:0px 5px 0px 5px;}
+#_layout_main #optical #optical_shift tr:first-child td                 {font-size:1.6rem; text-align:center;}
+#_layout_main #optical #optical_shift tr td:first-child                 {font-size:1.6rem; text-align:center;}
+#_layout_main #optical #optical_manual_toggle span.b                    {font-weight:600;}
+#_layout_main #optical #optical_time                                    {width:fit-content; margin:5px 0px 0px 0px; padding:5px 8px 5px 8px; border-radius:5px;}
+#_layout_main #optical #optical_time.success                            {background-color:#eee; border:1px solid #ccc;}
+#_layout_main #optical #optical_manual_toggle                           {cursor:pointer;}
+#_layout_main #optical input[type=button]._layout_blue                  {width:600px; margin:2px 0px 12px 0px;}
+#_layout_main #optical input[type=button]._layout_green                 {width:600px; margin:0px 0px 20px 0px;}
+#_layout_main #optical table                                            {width:fit-content; margin:5px 0px 10px 0px;}
+#_layout_main #optical table tr td                                      {padding:2px 5px 0px 0px; line-height:1.6em;}
+#_layout_main #optical table tr:first-child td                          {font-size:1.6rem; white-space:nowrap;}
+#_layout_main #optical table tr td:first-child                          {font-size:1.6rem; padding-right:10px;}
+#_layout_main #optical table tr td:last-child                           {padding:2px 0px 0px 0px;}
+#_layout_main #optical table tr td select                               {width:100%;}
+#_layout_main #optical table tr td input[type=text]                     {width:75px;}
+
+#_layout_main #sed                                                      {padding:0px 20px 5px 0px;}
+#_layout_main #sed h2                                                   {cursor:pointer;}
+#_layout_main #sed ol                                                   {margin:2px 0px 0px 30px;}
+#_layout_main #sed ol li                                                {font-size:1.6rem; padding:0px 0px 0px 5px; margin:0px 0px 5px 0px;}
+#_layout_main #sed ol li ol                                             {margin:2px 0px 0px 0px; list-style-type:upper-alpha;}
+#_layout_main #sed #sed_shift_toggle                                    {cursor:pointer;}
+#_layout_main #sed #sed_shift_toggle span.b                             {font-weight:600;}
+#_layout_main #sed input[type=button]._layout_blue                      {width:600px; margin:2px 0px 12px 0px;}
+#_layout_main #sed table tr td                                          {white-space:nowrap; padding:2px 5px 0px 0px;}
+#_layout_main #sed table tr td input[type=text]                         {width:75px;}
+
+#_layout_main #files                                                    {padding:0px 20px 5px 0px;}
+#_layout_main #files h2                                                 {cursor:pointer;}
+#_layout_main #files ol                                                 {margin:2px 0px 0px 30px;}
+#_layout_main #files ol li                                              {font-size:1.6rem; padding:0px 0px 0px 5px;}
+#_layout_main #files #files_drop                                        {width:1000px; margin:10px 0px 15px 30px; padding:15px 15px 10px 15px; border:2px dashed #ccc; border-radius:5px; vertical-align:middle; z-index:1;}
+#_layout_main #files #files_drop div                                    {margin:0px 0px 5px 0px; vertical-align:middle;}
+#_layout_main #files #files_drop div:not(:first-child)                  {padding:0px 0px 0px 2px;}
+#_layout_main #files input[type=file]                                   {font-size:1.6rem; width:1000px; height:28px; margin:0px; padding:0px; border:none; border-radius:5px; cursor:pointer;}
+
+#_layout_main #labels                                                   {padding:0px 20px 25px 0px;}
+#_layout_main #labels h2                                                {cursor:pointer;}
+#_layout_main #labels ul                                                {margin:2px 0px 0px 30px; list-style-type:none;}
+#_layout_main #labels ul li                                             {font-size:1.6rem; padding:0px 0px 0px 5px;}
+#_layout_main #labels table                                             {width:fit-content;}
+#_layout_main #labels table tr td                                       {padding:0px;}
+#_layout_main #labels table tr td:last-child                            {text-align:right;}
+#_layout_main #labels input[type=button].labels_insert                  {width:150px; margin:5px 5px 8px 0px;}
+#_layout_main #labels input[type=button]                                {width:150px; margin:5px 0px 8px 3px;}
+#_layout_main #labels textarea                                          {height:250px; margin:0px; overflow-x:scroll; overflow-y:scroll; white-space:pre;}
+#_layout_main #tile_labels                                              {background-color:var(--button_blue); width:fit-content; padding:5px; border:1px solid #ddd; border-radius:5px; position:relative;}
+#_layout_main #tile_labels div                                          {text-align:right; line-height:1em; padding:3px 2px 0px 0px;}
+#_layout_main #tile_labels div span                                     {font-size:1.6rem; line-height:1em; cursor:pointer;}
+#_layout_main #tile_labels table                                        {border-spacing:5px; width:fit-content;}
+#_layout_main #tile_labels table tr td                                  {width:fit-content; vertical-align:middle;}
+#_layout_main #tile_labels table tr:first-child td                      {padding:0px; text-align:center; line-height:1em;}
+#_layout_main #tile_labels table tr td:first-child                      {padding:2px 8px 2px 0px;}
+#_layout_main #tile_labels table tr td span                             {font-size:1.6rem; background-color:#eee; padding:2px 5px 2px 5px; border-radius:5px; text-align:left; display:block; white-space:nowrap; cursor:pointer;}
+
+#_layout_main td.slide_bar                                              {width:fit-content;}
+#_layout_main h2.slide_options                                          {cursor:pointer;}
+#_layout_main div.slide_options                                         {padding:5px 0px 20px 30px;}
+#_layout_main table.slide_options tr td                                 {padding:0px;}
+#_layout_main table.slide_options tr:nth-child(3) td,
+#_layout_main table.slide_options tr:nth-child(7) td                    {padding-bottom:8px;}
+#_layout_main table.slide_options tr:nth-child(3) td input[type=button] {width:22px; height:22px;}
+#_layout_main table.slide_options tr td:first-child                     {padding-right:8px; text-align:left; font-size:1.6rem; font-weight:600;}
+#_layout_main table.slide_options input                                 {margin:0px 0px 3px 0px;}
+#_layout_main table.slide_options input[type=text]                      {width:80px; margin:0px 0px 3px 0px; padding:1px 3px 1px 3px;}
+#_layout_main table.slide_options td.xy input[type=text]                {width:80px;}
+#_layout_main table.slide_options input[type=button]                    {font-size:1.3rem; width:22px; height:22px; padding:0px; background-color:#666; color:#eee; vertical-align:middle; text-align:center;}
+#_layout_main table #tools td                                           {vertical-align:bottom;}
+#_layout_main #slide_zoom_tab                                           {font-size:1.6rem; font-weight:600; margin:0px 10px 0px 0px; padding:3px 0px 5px 5px; white-space:nowrap; display:inline-block; vertical-align:bottom;}
+#_layout_main #slide_zoom_tab input[type=text]                          {font-size:1.3rem; font-weight:500; width:50px; text-align:center; padding:1px 3px 1px 3px;}
+#_layout_main #slide_zoom_tab input[type=button]                        {font-size:1.3rem; width:22px; height:22px; padding:0px; background-color:#666; color:#eee; vertical-align:middle; text-align:center;}
+#_layout_main #slide_tabs                                               {display:inline-block; vertical-align:bottom;}
+#_layout_main #slide_tabs span.image_tab                                {font-size:1.6rem; font-weight:500; line-height:1.6rem; height:35px; margin:0px 0px 0px 10px; padding:5px 10px 5px 10px; border-radius:5px 5px 0px 0px;}
+#_layout_main #slide_tabs span.image_tab.active                         {background-color:#fff; color:#000; font-weight:600; border-top:1px solid #666; border-left:1px solid #666; border-right:1px solid #666; cursor:default;}
+#_layout_main #slide_tabs span.image_tab.inactive                       {background-color:#ccc; color:#000; cursor:pointer;}
+#_layout_main #slide_tabs span.image_tab.inactive:hover                 {font-weight:700;}
+
+#_layout_main #slide_coordinates                                        {margin:auto; vertical-align:middle; text-align:center; white-space:nowrap;}
+#_layout_main #slide_coordinates tr td                                  {width:fit-content; white-space:nowrap;}
+#_layout_main #slide_coordinates tr td.label                            {font-size:1.6rem; font-weight:600;}
+#_layout_main #slide_coordinates tr td.spacer                           {width:20px;}
+#_layout_main #slide_coordinates tr td.options                          {padding:0px 0px 0px 5px;}
+#_layout_main #slide_coordinates tr td.options input[type=text]         {width:35px; text-align:center;}
+#_layout_main #slide_coordinates tr td.options input[type=button]       {font-size:1.3rem; width:22px; height:22px; padding:0px; background-color:#666; color:#eee; vertical-align:middle; text-align:center;}
+
+#_layout_main #slide                                                    {position:relative; min-width:590px; min-height:532px; border:1px solid #ddd; border-radius:5px; overflow:hidden;}
+#_layout_main #slide canvas                                             {position:absolute; top:0px; left:0px; border-radius:5px; display:block; cursor:var(--crosshair);}
+#_layout_main #slide #slide_image                                       {position:absolute; top:0px; left:0px; border-radius:5px; display:block; overflow:hidden;}
+#_layout_main #slide #slide_image img                                   {position:absolute; top:0px; left:0px; display:none;}
+
+#_layout_main td.tile_bar                                               {width:100%; padding:0px 20px 0px 30px;}
+#_layout_main td.tile_bar.tile_builder                                  {padding:0px 0px 10px 30px; vertical-align:bottom;}
+#_layout_main td.tile_bar #tile_builder_div                             {padding:0px 0px 5px 3px;}
+#_layout_main td.tile_bar #tile_builder tr:first-child td               {font-weight:600; text-align:center;}
+#_layout_main td.tile_bar #tile_builder tr td:first-child               {text-align:left;}
+#_layout_main td.tile_bar #tile_builder tr td                           {padding-right:5px; white-space:nowrap;}
+#_layout_main td.tile_bar #tile_builder input,
+#_layout_main td.tile_bar #tile_builder select                          {height:25px;}
+#_layout_main td.tile_bar #tile_builder #tiles_build_name               {width:150px;}
+#_layout_main td.tile_bar #tile_builder #tiles_build_slide_id           {width:70px;}
+#_layout_main td.tile_bar #tile_builder #tiles_build_fov                {width:70px;}
+#_layout_main td.tile_bar #tile_builder #tiles_build_raster             {width:70px;}
+#_layout_main td.tile_bar #tile_builder #tiles_build_preset             {width:160px;}
+#_layout_main td.tile_bar #tile_builder input[type=button]              {width:80px;}
+
+#_layout_main #tiles_scroll                                                                               {width:fit-content; min-width:625px; min-height:500px; padding:15px 15px 500px 15px; overflow:scroll; border:1px solid #ddd; border-radius:5px; display:block;}
+#_layout_main #tiles div.tile_form                                                                        {background-color:#e6e3e0; width:fit-content; margin:0px 0px 15px 0px; padding:10px 10px 5px 10px; border-radius:5px; display:block;}
+#_layout_main #tiles div.tile_form:last-child                                                             {margin-bottom:0px;}
+#_layout_main #tiles div.tile_form > table                                                                {width:fit-content;}
+#_layout_main #tiles div.tile_form > table tr td table                                                    {width:fit-content; white-space:nowrap;}
+#_layout_main #tiles div.tile_form.tile_collapsed table.tile_settings tr:nth-child(n+2)                   {display:none;}
+#_layout_main #tiles div.tile_form.tile_collapsed td.tile_map                                             {display:none;}
+#_layout_main #tiles div.tile_form.tile_collapsed table.tile_settings tr:first-child td:nth-child(2)      {padding-left:5px;}
+#_layout_main #tiles div.tile_form.tile_expanded table.tile_settings tr:nth-child(n+2)                    {display:table-row;}
+#_layout_main #tiles div.tile_form.tile_expanded td.tile_map                                              {display:block;}
+#_layout_main #tiles div.tile_form.tile_expanded > table.tile_draw tr                                     {display:table-row;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td                                              {vertical-align:middle; line-height:1em;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td:first-child                                  {min-width:120px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr:first-child td:first-child input[type=checkbox] {position:relative; top:-1px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr:first-child td:first-child input[type=text]     {width:270px; margin-bottom:3px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr:first-child td:nth-child(2)                     {padding:0px 10px 1px 0px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td:nth-child(2)                                 {padding:0px 5px 1px 10px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td:nth-child(3)                                 {padding:0px 10px 1px 0px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td select                                       {width:160px; margin:0px 0px 2px 0px; padding:0px 5px 2px 5px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=text]                             {width:160px; margin:0px 0px 2px 0px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=text][readonly]                   {background-color:transparent; border:none;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_expand,
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_left,
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_right,
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_up,
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_down                 {font-size:1.3rem; width:22px; height:22px; padding:0px; vertical-align:middle; text-align:center;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_resize,
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_expand,
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_move,
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_source               {background-color:#666; color:#eee;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_resize,
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_expand               {font-size:1.6rem; font-weight:600; width:22px; height:22px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_resize:hover         {font-weight:700;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=checkbox]                         {margin-right:5px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_source               {font-size:1.5rem; font-weight:600; width:72px; height:22px;}
+#_layout_main #tiles div.tile_form table.tile_map                                                         {width:fit-content;}
+#_layout_main #tiles div.tile_form table.tile_map tr td                                                   {padding:1px 0px 0px 1px; line-height:0.8em;}
+#_layout_main #tiles div.tile_form table.tile_map tr td input[type=checkbox]                              {border:1px solid #ccc;}
+#_layout_main #tiles div.tile_form table.tile_draw                                                        {width:100%;}
+#_layout_main #tiles div.tile_form table.tile_draw tr td                                                  {width:100px; padding:5px 20px 0px 0px; text-align:left; white-space:nowrap;}
+#_layout_main #tiles div.tile_form table.tile_draw tr td label                                            {font-weight:bold;}
+#_layout_main #tiles div.tile_form table.tile_draw tr td input[type=radio]                                {margin:0px; position:relative; left:-2px;}
+#_layout_main #tiles div.tile_form table.tile_draw tr td input[type=radio]+label                          {font-weight:600; padding:0px 0px 0px 5px; position:relative; left:-2px;}
+#_layout_main #tiles div.tile_form table.tile_draw tr td:last-child                                       {width:100%; padding:5px 0px 0px 0px; vertical-align:bottom;}
+#_layout_main #tiles div.tile_form table.tile_draw tr td:last-child span                                  {text-align:right; display:block;}
+#_layout_main #tiles div.tile_form table.tile_draw tr td:last-child span:last-child                       {margin:3px 0px 0px 0px;}
+@-moz-document url-prefix() {
+#_layout_main #tiles div.tile_form table.tile_settings tr td select                                       {padding:2px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_expand               {padding:0px 0px 0px 0px; font-weight:bold;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_left                 {padding:0px 2px 0px 0px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_right                {padding:0px 0px 0px 2px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_up                   {padding:0px 0px 2px 0px;}
+#_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_down                 {padding:2px 0px 0px 0px;}
+}
+
+#_layout_main #tile_polygon                                                  {background-color:var(--menu); width:350px; padding:5px 8px 8px 8px; border-radius:5px; position:relative;}
+#_layout_main #tile_polygon div:first-child                                  {text-align:right; line-height:1em; padding:3px 0px 8px 0px;}
+#_layout_main #tile_polygon div span                                         {font-size:1.5rem; line-height:1em; cursor:pointer;}
+#_layout_main #tile_polygon p                                                {margin:0px; text-align:justify;}
+#_layout_main #tile_polygon p label                                          {font-size:1.6rem; font-weight:600; margin:8px 0px 0px 2px; cursor:pointer;}
+#_layout_main #tile_polygon p input[type=file]                               {font-size:1.6rem; width:100%; height:28px; margin:3px 0px 0px 0px; padding:0px; border:none; border-radius:5px; cursor:pointer;}
+#_layout_main #tile_polygon #tile_polygon_build_retain,
+#_layout_main #tile_polygon #tile_polygon_build_replace                      {width:100%; height:25px; background-color:#666; color:#eee; padding:3px 5px 3px 5px; border-radius:5px; text-align:center; cursor:pointer;}
+#_layout_main #tile_polygon #tile_polygon_build_retain                       {margin:10px 0px 0px 0px;}
+#_layout_main #tile_polygon #tile_polygon_build_replace                      {margin:5px 0px 0px 0px;}
+#_layout_main #tile_polygon #tile_polygon_build_retain:hover,
+#_layout_main #tile_polygon #tile_polygon_build_replace:hover                {font-weight:600;}
+#_layout_main #tile_polygon #tile_polygon_revert                             {font-weight:600; margin:10px 0px 0px 0px; padding:3px; line-height:1em; text-align:right;}
+
+#_layout_main #tile_tma                                                      {background-color:var(--menu); width:fit-content; padding:5px 8px 8px 8px; border-radius:5px; position:relative;}
+#_layout_main #tile_tma span.b                                               {font-weight:600;}
+#_layout_main #tile_tma div:first-child                                      {text-align:right; line-height:1em; padding:3px 0px 3px 0px;}
+#_layout_main #tile_tma div span                                             {font-size:1.5rem; line-height:1em; cursor:pointer;}
+#_layout_main #tile_tma_rows_columns                                         {border-spacing:2px; width:fit-content;}
+#_layout_main #tile_tma_rows_columns tr td                                   {width:fit-content; vertical-align:middle; white-space:nowrap;}
+#_layout_main #tile_tma_rows_columns tr td:first-child                       {padding:0px 5px 0px 0px;}
+#_layout_main #tile_tma_rows_columns tr td input[type=text]                  {width:50px;}
+#_layout_main #tile_tma_rows_columns tr td input[type=button].tile_resize    {font-size:1.6rem; width:22px; height:22px; background-color:#666; color:#eee;}
+#_layout_main #tile_tma_target_name                                          {margin:5px 0px 0px 2px;}
+#_layout_main #tile_tma_target_name tr td                                    {line-height:1.5em;}
+#_layout_main #tile_tma_target_name tr td label                              {padding:0px 8px 0px 5px;}
+#_layout_main #tile_tma_target_name tr td input[type=text]                   {margin:0px 8px 5px 5px; width:96%;}
+#_layout_main #tile_tma_target_name tr td label.tile_tma_name_rc_start       {width:55px; padding:0px 8px 0px 5px; display:inline-block;}
+#_layout_main #tile_tma_target_name tr td #tile_tma_name_rc_r,
+#_layout_main #tile_tma_target_name tr td #tile_tma_name_rc_c                {width:50px;}
+#_layout_main #tile_tma_target_name tr:nth-child(2) td                       {padding:0px 0px 10px 0px;}
+#_layout_main #tile_tma_order                                                {margin:5px 0px 0px 2px;}
+#_layout_main #tile_tma_order tr td                                          {line-height:1.5em; vertical-align:middle; white-space:nowrap;}
+#_layout_main #tile_tma_order tr td:first-child                              {width:fit-content; text-align:left;}
+#_layout_main #tile_tma_order tr td:nth-child(2),
+#_layout_main #tile_tma_order tr td:nth-child(3)                             {width:50px; text-align:center;}
+#_layout_main #tile_tma_order tr td span.b sub                               {position:relative; top:-8px; vertical-align:bottom;}
+#_layout_main #tile_tma #tile_tma_build_retain,
+#_layout_main #tile_tma #tile_tma_build_replace                              {width:100%; height:25px; background-color:#666; color:#eee; padding:3px 5px 3px 5px; border-radius:5px; text-align:center; cursor:pointer;}
+#_layout_main #tile_tma #tile_tma_build_retain                               {margin:10px 0px 0px 0px;}
+#_layout_main #tile_tma #tile_tma_build_replace                              {margin:5px 0px 0px 0px;}
+#_layout_main #tile_tma #tile_tma_build_retain:hover,
+#_layout_main #tile_tma #tile_tma_build_replace:hover                        {font-weight:600;}
+#_layout_main #tile_tma #tile_tma_revert                                     {font-weight:600; margin:10px 0px 0px 0px; padding:3px; line-height:1em; text-align:right;}
+
+#_layout_main #tools                                                         {padding:25px 20px 5px 0px;}
+#_layout_main #tools h2                                                      {cursor:pointer;}
+#_layout_main #tools ol                                                      {margin:2px 0px 0px 30px;}
+#_layout_main #tools ol li                                                   {font-size:1.6rem; padding:0px 0px 0px 5px; margin:0px 0px 5px 0px;}
+#_layout_main #tools input[type=button]._layout_blue                         {max-width:600px; width:100%; margin:2px 0px 12px 0px;}
+
+#_layout_main #tools #import                                                 {padding:0px 0px 20px 0px;}
+#_layout_main #tools #import_drop                                            {margin:10px 0px 15px 0px; padding:15px 15px 10px 15px; border:2px dashed #ccc; border-radius:5px; vertical-align:middle; z-index:1; max-width:600px;}
+#_layout_main #tools #import_drop div                                        {margin:0px 0px 5px 0px; vertical-align:middle;}
+#_layout_main #tools #import_drop div:not(:first-child)                      {padding:0px 0px 0px 2px;}
+#_layout_main #tools #import input[type=file]                                {font-size:1.6rem; width:fit-content; height:28px; margin:0px; padding:0px; border:none; border-radius:5px; cursor:pointer; max-width:600px;}
+#_layout_main #tools #import table                                           {max-width:600px; width:100%; margin:5px 0px 10px 0px;}
+#_layout_main #tools #import table tr td                                     {padding:2px 5px 0px 0px; line-height:1.6em;}
+#_layout_main #tools #import table tr:first-child td                         {font-size:1.6rem; white-space:nowrap;}
+#_layout_main #tools #import table tr td:first-child                         {max-width:600px; width:100%;}
+#_layout_main #tools #import table tr td:last-child                          {padding:2px 0px 0px 0px;}
+#_layout_main #tools #import table tr td select                              {max-width:600px; width:100%;}
+#_layout_main #tools #import table tr td input[type=text]                    {width:75px;}
+#_layout_main #tools #import_prepend                                         {margin:0px 5px 0px 0px;}
+#_layout_main #tools #import_prepend_text                                    {margin:0px 0px 8px 0px; width:100%; max-width:600px;}
+#_layout_main #tools #import_discard                                         {margin:2px 0px 0px 0px;}
+#_layout_main #tools #import_append                                          {margin:8px 0px 8px 0px;}
+#_layout_main #tools #import_errors                                          {max-width:600px; width:100%; padding:0px 0px 0px 50px;}
+#_layout_main #tools #import_errors div._layout_warnings                     {max-width:600px; width:100%; margin:15px 0px 15px 0px; padding:15px;}
+#_layout_main #tools #import_errors div._layout_warnings ul li               {font-size:1.6rem;}
+#_layout_main #tools #import_errors div._layout_warnings p                   {margin-top:10px;}
+#_layout_main #tools #import_errors div._layout_warnings p a                 {font-size:1.6rem; color:#dad7cb; font-weight:600;}
+
+#_layout_main #tools #navigation_toggle                                      {margin:8px 0px 0px 0px;}
+#_layout_main #tools #navigation ol                                          {margin:2px 0px 0px 30px;}
+#_layout_main #tools #navigation ol li                                       {font-size:1.6rem; padding:0px 0px 0px 5px; margin:0px 0px 5px 0px;}
+#_layout_main #tools #navigation ol li ol                                    {margin:2px 0px 0px 0px; list-style-type:upper-alpha;}
+#_layout_main #tools #navigation #navigation_coordinates_toggle              {cursor:pointer;}
+#_layout_main #tools #navigation #navigation_coordinates_toggle span.b       {font-weight:600;}
+#_layout_main #tools #navigation table                                       {width:fit-content; margin:5px 0px 10px 0px;}
+#_layout_main #tools #navigation table tr td                                 {padding:2px 5px 0px 0px; line-height:1.6em;}
+#_layout_main #tools #navigation table tr td:last-child                      {padding:2px 0px 0px 0px;}
+#_layout_main #tools #navigation table tr td input[type=text]                {width:75px;}
+#_layout_main #tools #navigation_adjust,
+#_layout_main #tools #navigation_code                                        {max-width:600px;}
+#_layout_main #tools #navigation_adjustments                                 {max-width:600px; width:100%; margin:5px 0px 8px 0px;}
+#_layout_main #tools #navigation_errors                                      {max-width:600px; width:100%; padding:0px 0px 0px 50px;}
+#_layout_main #tools #navigation_errors div._layout_warnings                 {max-width:600px; width:100%; margin:15px 0px 15px 0px; padding:15px;}
+#_layout_main #tools #navigation_errors div._layout_warnings ul li           {font-size:1.6rem;}
+#_layout_main #tools #navigation_errors div._layout_warnings p               {margin-top:10px;}
+#_layout_main #tools #navigation_errors div._layout_warnings p a             {font-size:1.6rem; color:#dad7cb; font-weight:600;}
+#_layout_main #tools #navigation_adjustments_output                          {max-width:600px; width:100%; padding:0px 0px 30px 50px;}
+#_layout_main #tools #navigation_adjustments_output ul li                    {font-size:1.6rem;}
+
+#_layout_main #json                                                          {height:0%; padding:20px 20px 20px 30px;}
+#_layout_main #json_summary                                                  {margin:0px; padding:5px 20px 0px 20px;}
+#_layout_main #json_summary table.estimate                                   {margin:0px 0px 10px 0px;}
+#_layout_main #json_summary table.estimate tr td                             {padding:0px 5px 2px 0px; font-size:1.6rem; white-space:nowrap;}
+#_layout_main #json_summary table.estimate tr td:first-child:not([colspan])  {font-size:1.6rem; font-weight:600; padding-right:15px;}
+#_layout_main #json_summary table.estimate tr td:nth-child(2):not([colspan]) {padding-right:15px;}
+#_layout_main #json_summary table.estimate tr td span.duplicate              {padding:1px 3px 1px 3px; background-color:var(--banner_red); color:#fff; border-radius:5px;}
+#_layout_main #json p.json input[type=datetime-local]                        {width:600px; height:25px; padding:0px 5px 0px 5px; font-size:1.6rem; vertical-align:middle;}
+#_layout_main #json p.json input                                             {width:600px; margin-top:10px;}
+#_layout_main #json_warnings div._layout_warnings                            {width:625px; margin:20px 0px 15px 0px; padding:15px;}
+#_layout_main #json_warnings div._layout_warnings ul li                      {font-size:1.6rem;}
+#_layout_main #json_warnings div._layout_warnings p                          {margin-top:10px;}
+#_layout_main #json_warnings div._layout_warnings p a                        {font-size:1.6rem; color:#dad7cb; font-weight:600;}
+
+#_layout_main #json_resume_split h2                                          {cursor:pointer; margin:50px 0px 0px 0px;}
+#_layout_main #json_resume_split h3                                          {margin:2px 0px 8px 0px;}
+#_layout_main #json_resume_split table                                       {margin:0px 0px 25px 42px;}
+#_layout_main #json_resume_split table tr td                                 {font-size:1.6rem; padding:0px 5px 0px 0px;}
+#_layout_main #json_resume_split #json_resume                                {padding:0px 30px 0px 0px;}
+#_layout_main #json_resume_split #json_resume p                              {font-size:1.6rem;}
+#_layout_main #json_resume_split #json_resume_select                         {width:300px; height:30px;}
+#_layout_main #json_resume_split table tr td table                           {margin:0px 0px 15px 0px;}
+#_layout_main #json_resume_split table tr td table tr td                     {height:30px; white-space:nowrap;}
+#_layout_main #json_resume_split input[type=text]                            {font-size:1.6rem; width:50px; margin:0px 3px 2px 3px; text-align:center;}
+#_layout_main #json_resume_split input[type=button]                          {width:600px; margin:0px 0px 8px 0px;}
+#_layout_main #json_resume_split table tr td[colspan] h3                     {margin:25px 0px 8px 0px;}

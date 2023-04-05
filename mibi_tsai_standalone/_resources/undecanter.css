@@ -1,0 +1,171 @@
+/*
+######################################
+##########  REDWOOD LAYOUT  ##########
+######################################
+
+The decanter.css takes over many of the default styles used for layout, most
+annoyingly table {min-width}, table {border-collapse}, and div {display}.
+input[type=radio] and input[type=checkbox] were also clipped and replaced with
+label::before. Default styles in user .css files also mess up decanter styles. Thus, all
+content styles must be marked with #_layout_main.
+
+Font weights
+100  Thin (Hairline)
+200  Extra Light (Ultra Light)
+300  Light
+400  Normal
+500  Medium
+600  Semi Bold (Demi Bold)
+700  Bold
+800  Extra Bold (Ultra Bold)
+900  Black (Heavy)
+
+These custom styles are shared across many pages and should be included in all stylesheets going forward:
+#_layout_main input[type=button  ]._layout_blue
+#_layout_main input[type=button  ]._layout_green
+#_layout_main input[type=button  ]._layout_red
+#_layout_main div._layout_success
+#_layout_main div._layout_failure
+#_layout_main div._layout_warnings
+#_layout_main div._layout_success  h2
+#_layout_main div._layout_failure  h2
+#_layout_main div._layout_warnings h2
+#_layout_main div._layout_success  li
+#_layout_main div._layout_failure  li
+#_layout_main div._layout_warnings li
+*/
+
+/* ##########  VARIABLES  ########## */
+:root
+{--h_text:           #333333;
+ --input_background: #f6f3f0;
+ --button_red:       #efc3c9;
+ --button_green:     #b9efb3;
+ --button_blue:      #b3e3f3;
+ --banner_red:       #990000;
+ --banner_green:     #006600;
+}
+
+/* ##########  LAYOUT STYLES  ########## */
+section._layout_masthead             {box-shadow: 0 3px 6px rgba(0,0,0,.13),0 3px 6px rgba(0,0,0,.1); position:relative; background-color: #fff; width:100%;}
+div._layout_brand_bar                {background-color:#b1040e; width:100%; height:30px; padding:6px 0px 0px 30px; text-align:left; vertical-align:middle;}
+div._layout_brand_bar a              {display:block;}
+div._layout_lockup                   {padding:27px 0px 0px 30px; margin-bottom:12px;}
+section._layout_masthead nav         {margin-left:30px; margin-right:30px;}
+footer._layout_footer                {background-color:#f4f4f4; width:100%; padding:48px 0px 100px 50px; text-align:left;}
+footer._layout_footer div            {margin-bottom:20px; line-height:1.5em;}
+footer._layout_footer div span.b     {font-weight:600;}
+
+/* ##########  MAIN SECTION STYLES  ########## */
+#_layout_main                        {width:100%; min-height:80vh; padding-top:20px; padding-bottom:200px;}
+#_layout_main *                      {vertical-align:top; text-align:justify;}
+#_layout_main a                      {text-decoration:none;}
+#_layout_main code,
+#_layout_main pre,
+#_layout_main .code,
+#_layout_main div.monospace,
+#_layout_main div.code,
+#_layout_main span.monospace,
+#_layout_main span.code,
+#_layout_main input[type=text].code,
+#_layout_main textarea.code          {font-family:'Menlo', 'Consolas', 'Monaco', 'Andale Mono', monospace; font-size:0.85em;}
+#_layout_main form                   {font-family:inherit; font-size:11pt; margin:0px; padding:0px;}
+#_layout_main h1                     {font-size:28pt; font-weight:700; color:var(--h_text); margin-bottom:0.2em; margin-top:0.5em;}
+#_layout_main h2                     {font-size:23pt; font-weight:700; color:var(--h_text); margin-bottom:0em;}
+#_layout_main h3                     {font-size:18pt; font-weight:700; color:var(--h_text); margin-bottom:0em;}
+#_layout_main h4                     {font-size:16pt; font-weight:700; color:var(--h_text); margin-bottom:0em;}
+#_layout_main h5                     {font-size:13pt; font-weight:700; color:var(--h_text); margin-bottom:0em;}
+#_layout_main h6                     {font-size:12pt; font-weight:700; color:var(--h_text); margin-bottom:0em;}
+#_layout_main img                    {line-height:0em; border:0px; display:inline-block;}
+#_layout_main li                     {margin-top:0px; margin-bottom:0px; padding:0px; line-height:1.5em;}
+#_layout_main ol                     {margin-top:0px; margin-bottom:0px;}
+#_layout_main ul                     {margin-top:0px; margin-bottom:0px;}
+#_layout_main p                      {font-size:11pt; font-weight:400; line-height:1.5em;}
+#_layout_main sup                    {position:relative; top:0.5em;}
+#_layout_main sub                    {position:relative; top:-0.5em;}
+#_layout_main table,
+#_layout_main table tbody,
+#_layout_main table thead            {font-size:11pt; line-height:1.5em; margin-bottom:0px; min-width:0px; border-spacing:0px; border-collapse:separate;}
+#_layout_main table tr               {margin:0px; padding:0px; border:none;}
+#_layout_main table td,
+#_layout_main table th               {margin:0px; padding:0px; border:none;}
+
+/* ##########  TEXT BOX ELEMENTS  ########## */
+#_layout_main input[type=text          ],
+#_layout_main input[type=password      ],
+#_layout_main input[type=file          ],
+#_layout_main input[type=datetime-local],
+#_layout_main select,
+#_layout_main textarea                             {font-family:inherit; font-size:11pt; font-weight:400; text-decoration:none;
+                                                    margin:0px; border:1px solid #cccccc; border-radius:5px; background-color:var(--input_background); color:#000;
+                                                    display:inline-block; max-width:none; text-align:left;   vertical-align:middle; appearance:none; -webkit-appearance:none;}
+#_layout_main textarea                             {padding:5px;}
+#_layout_main textarea.code                        {color:#222;}
+#_layout_main select                               {height:22px; padding:2px 5px 2px 5px; vertical-align:middle; background-color:var(--input_background); background-image:url('common/svg_arrow_down.svg'); background-position:right 0.8rem center; background-repeat:no-repeat; background-size:1.2rem;}
+#_layout_main input[type=file          ],
+#_layout_main input[type=file          ]:hover,
+#_layout_main input[type=file          ]:focus     {background-color:transparent; outline:none; box-shadow:none;}
+/* ##########  SINGLE-LINE TEXT BOX ELEMENTS  ########## */
+#_layout_main input[type=text          ],
+#_layout_main input[type=password      ],
+#_layout_main input[type=file          ],
+#_layout_main input[type=datetime-local]            {height:22px; padding:2px 5px 2px 5px;}
+#_layout_main input:hover                           {text-decoration:none;}
+/* ##########  BUTTONS  ########## */
+#_layout_main input[type=button  ],
+#_layout_main input[type=reset   ],
+#_layout_main input[type=submit  ]                  {font-family:inherit; font-size:12pt; font-weight:500; text-decoration:none;
+                                                     height:30px; margin:0px; padding:2px 5px 2px 5px; border-radius:5px;
+                                                     display:inline-block; max-width:none; text-align:center; vertical-align:middle; appearance:none; -webkit-appearance:none; cursor:pointer;}
+#_layout_main input[type=button  ]                  {background-color:#ccc; color:#000;}
+#_layout_main input[type=button  ]._layout_red,
+#_layout_main input[type=reset   ]                  {border:1px solid var(--button_red  ); background-color:var(--button_red  ); color:#000;}
+#_layout_main input[type=button  ]._layout_green,
+#_layout_main input[type=submit  ]                  {border:1px solid var(--button_green); background-color:var(--button_green); color:#000;}
+#_layout_main input[type=button  ]._layout_blue     {border:1px solid var(--button_blue ); background-color:var(--button_blue ); color:#000;}
+#_layout_main input[type=button  ]:hover,
+#_layout_main input[type=reset   ]:hover,
+#_layout_main input[type=submit  ]:hover            {font-weight:700;}
+/* ##########  CHECKBOX AND RADIO  ########## */
+#_layout_main input[type=checkbox]                  {width:15px; height:15px; margin:0px; border:none; display:inline-block; max-width:none; vertical-align:middle; position:relative; top:-2px; cursor:pointer; clip:auto; clip-path:none;}
+#_layout_main input[type=radio   ]                  {width:15px; height:15px; margin:0px; border:none; display:inline-block; max-width:none; vertical-align:middle; position:relative; top:-2px; cursor:pointer; clip:auto; clip-path:none; box-shadow:none; -webkit-box-shadow:none;}
+#_layout_main label                                 {display:inline-block; margin:0px; padding:0px; cursor:pointer; max-width:none;}
+#_layout_main label::before                         {content:none;}
+#_layout_main .b                                    {font-weight:bold;}
+#_layout_main .u                                    {text-decoration:underline;}
+#_layout_main .i                                    {font-style:italic;}
+
+/* ##########  TOOL STYLES  ########## */
+/* ._layout_red and ._layout_green defined above */
+#_layout_main div._layout_success                   {color:#fff; background-color:var(--banner_green); padding:5px; border:1px solid var(--banner_green); border-radius:5px; text-align:left;}
+#_layout_main div._layout_failure                   {color:#fff; background-color:var(--banner_red  ); padding:5px; border:1px solid var(--banner_red  ); border-radius:5px; text-align:left;}
+#_layout_main div._layout_warnings                  {color:#fff; background-color:var(--banner_red  ); padding:5px; border:1px solid var(--banner_red  ); border-radius:5px; text-align:left;}
+#_layout_main div._layout_success h2,
+#_layout_main div._layout_failure h2,
+#_layout_main div._layout_warnings h2               {color:#fff; font-size:16pt; font-weight:bold; margin:0px; text-align:left;}
+#_layout_main div._layout_success li,
+#_layout_main div._layout_failure li,
+#_layout_main div._layout_warnings li               {font-size:12pt; font-weight:600;}
+#_layout_main div._layout_tools                     {display:inline-block; width:330px; margin:0px 20px 20px 0px; padding:12px 20px 20px 20px; background-color:var(--input_background); border-radius:10px;}
+#_layout_main div._layout_tools p                   {font-size:12pt; line-height:1.5em; margin-bottom:0px;}
+#_layout_main div._layout_tools p a                 {font-size:12pt; font-weight:500;}
+#_layout_main div._layout_tools input[type=text]    {height:24px; background-color:#fff;}
+#_layout_main div._layout_tools input[type=submit],
+#_layout_main div._layout_tools input[type=button]  {font-size:11pt; background-color:#ccc; color:#000; border:1px solid #ccc; height:22px; width:90px; padding:2px 5px 2px 5px; vertical-align:middle;}
+#_layout_main div._layout_tools form+h3,
+#_layout_main div._layout_tools p+h3                {margin-top:20px; margin-bottom:3px;}
+
+/* ##########  FONTS  ########## */
+/* from https://decanter.stanford.edu/page/brand-design-elements-typography/ */
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_extra_light.ttf'       ) format('truetype'); font-weight:200; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_extra_light_italic.ttf') format('truetype'); font-weight:200; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_light.ttf'             ) format('truetype'); font-weight:300; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_light_italic.ttf'      ) format('truetype'); font-weight:300; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_regular.ttf'           ) format('truetype'); font-weight:400; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_italic.ttf'            ) format('truetype'); font-weight:400; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_semibold.ttf'          ) format('truetype'); font-weight:600; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_semibold_italic.ttf'   ) format('truetype'); font-weight:600; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_bold.ttf'              ) format('truetype'); font-weight:700; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_bold_italic.ttf'       ) format('truetype'); font-weight:700; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_black.ttf'             ) format('truetype'); font-weight:900; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_black_italic.ttf'      ) format('truetype'); font-weight:900; font-style:italic;}

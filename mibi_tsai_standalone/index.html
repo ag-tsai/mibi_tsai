@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html>
+<!-- ###########################################################
+     ###########################################################
+     ##########                                       ##########
+     ##########   Copyright Albert G. Tsai, MD, PhD   ##########
+     ##########                                       ##########
+     ###########################################################
+     ########################################################### -->
+<head>
+<title>tsai &rsaquo; research &rsaquo; mibi tsai</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<meta name="copyright" content="© Albert G Tsai, MD, PhD"/>
+<meta http-equiv="Content-Style-Type" content="text/css"/>
+<meta http-equiv="Content-Script-Type" content="text/javascript"/>
+<script type="text/javascript" src="_resources/decanter/js/decanter.js"></script>
+<link rel="stylesheet" type="text/css" href="_resources/decanter/css/decanter.css"/>
+<link rel="stylesheet" type="text/css" href="_resources/undecanter.css"/>
+<script type="text/javascript" src="_resources/classes.js"></script>
+<script type="text/javascript" src="_resources/index.js"></script>
+<link rel="stylesheet" type="text/css" href="_resources/index.css"/>
+</head>
+<body>
+<header>
+<section class="_layout_masthead">
+  <div class="_layout_brand_bar"><a href="https://stanford.edu" target="_blank"><img src="_resources/_images/logo_brand_bar.png" width="143" height="18" alt="Stanford"/></a></div>
+  <section>
+    <div class="_layout_lockup"><a href="https://tsai.stanford.edu" target="_blank"><img src="_resources/_images/logo_lockup.png" width="405" height="47" alt="Tsai Laboratory"/></a></div>
+    <nav class="su-main-nav no-js su-main-nav--light" aria-label="main menu">
+      <button class="su-main-nav__toggle su-main-nav__toggle--right" aria-expanded="false">Menu</button>
+      <ul class="su-main-nav__menu-lv1">
+        <li id="url_mibi_tracker"><a href="" target="_blank">MIBItracker</a></li>
+        <li id="url_mibi_control"><a href="" target="_blank">MIBIcontrol</a></li>
+        <li id="url_mibi_hv"     ><a href="" target="_blank">MIBIhv</a></li>
+        <li id="url_run_log"     ><a href="" target="_blank">Run Log</a></li>
+        <li class="su-main-nav__item--parent" onmouseover="this.click();" onmouseout="if(this.getElementsByTagName('a')[0].getAttribute('aria-expanded')=='true') this.click(); document.activeElement.blur();">
+          <a href="#" aria-expanded="false">Utilities</a>
+          <ul class="su-main-nav__menu-lv2">
+            <li id="url_mibi_configuration"><a href="" target="_blank">Configuration UI</a></li>
+            <li id="url_mibi_service"      ><a href="" target="_blank">Service UI</a></li>
+            <li id="url_mibi_settings"     ><a href="" target="_blank">Settings UI</a></li>
+            <li id="url_mibi_documentation"><a href="" target="_blank">MIBI documentation</a></li>
+            <li id="url_mibi_quickstart"   ><a href="https://storage.googleapis.com/mibitracker-static/docs/MIBIscopeQuickStartGuide.pdf" target="_blank">MIBIscope quickstart guide</a></li>
+            <li                            ><a href="mailto:support@ionpath.com" target="_blank">Email Ionpath support</a></li>
+          </ul>
+        </li>
+        <li><a href="#footer" style="font-weight:700; color:#008566;">Citation &amp; Latest Version</a></li>
+      </ul>
+    </nav>
+  </section>
+</section>
+</header>
+<main>
+  <section id="_layout_main">
+    <article>
+
+<h1>MIBI Tile/SED/Array Interface 2023.03.31 Standalone</h1>
+
+<table id="tiler">
+ 
+ <!-- ##############################################
+      ##########  OPTICAL COREGISTRATION  ##########
+      ############################################## -->
+ <tr>
+  <td id="optical" colspan="2">
+   <h2 id="optical_toggle" onclick="tsai.element_toggle(this);">[+] Optical Coregistration</h2>
+   <div style="display:none;">
+    <ol>
+
+     <!-- ##########  AUTOMATIC COREGISTRATION  ########## -->
+     <li><span class="required">Required</span> Coregistration solves the matrices needed to align optical camera image x, y pixel coordinates with stage motor x, y micron coordinates.
+      <div id="optical_time" style="display:none;"></div>
+     </li>
+     <li>Click the button below to copy the code to the clipboard.
+      <br/><input type="button" class="_layout_blue" value="Copy automatic coregistration code to clipboard" onclick="tsai.optical_automatic_code();"/>
+     </li>
+     <li>In the MIBI Run interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
+     <li>Paste <span class="keyboard">Ctrl+V</span> the code into the Console and press <span class="keyboard">Enter</span>. Open the link generated in the console.</li>
+
+     <!-- ##########  MANUAL COREGISTRATION  ########## -->
+     <li><span id="optical_manual_toggle" onclick="tsai.element_toggle(this);"><span class="b">[+]</span> <span class="optional">Not recommended</span> <a href="javascript:void(0);">Manual coregistration</a></span>
+      <div style="display:none;">
+       <ol>
+        <li>The automatic coregistration above infers the MIBI's optical-to-stage motor coregistration formulas. But when the MIBI's formulas are incorrect, then automatic coregistration will also be incorrect. The procedure below corrects the coregistration for this web page but not for the MIBI Run interface.</li>
+        <li>Contact Ionpath to correct the MIBI's optical-to-stage motor coregistration and it should usually be fixed within an hour.</li>
+        <li>If you insist on kludging it yourself, click the button below to copy the code to the clipboard.
+         <br/><input type="button" class="_layout_blue" value="Copy manual coregistration code to clipboard" onclick="tsai.optical_manual_code();"/>
+        <li>Paste <span class="keyboard">Ctrl+V</span> the code into the Console and press <span class="keyboard">Enter</span>. For each fiducial, center it in the SED view and store it by typing <span class="keyboard">1</span>, <span class="keyboard">2</span>, <span class="keyboard">3</span>, or <span class="keyboard">4</span>. When finished, type <span class="keyboard">Escape</span> and open the link generated in the console.</li>
+        <li>Load the image file. Drag and drop onto the page or use the file input box below.</li>
+        <li>Click each <span class="b">Optical</span> button and click on the center of the corresponding fiducial in the image. When finished, click Use manual coregistration.
+         <table>
+          <tr>
+           <td><span class="b">Fiducial</span></td>
+           <td colspan="4"><span class="b">Micron</span> coordinates</td>
+           <td>&nbsp;</td>
+           <td colspan="5"><span class="b">Optical</span> coordinates</td>
+          </tr>
+          <tr>
+           <td>Top left</td>
+           <td>x</td><td><input id="optical_coordinates_0_1_x" type="text" onfocus="tsai.optical_coordinates(0, 1);" onchange="tsai.optical_coordinates(0, 1);"/></td>
+           <td>y</td><td><input id="optical_coordinates_0_1_y" type="text" onfocus="tsai.optical_coordinates(0, 1);" onchange="tsai.optical_coordinates(0, 1);"/></td>
+           <td>&nbsp;</td>
+           <td><input name="action_radio" id="optical_coordinates_0" type="radio" onclick="return tsai.optical_coordinates(0, 0);"/></td>
+           <td>x</td><td><input id="optical_coordinates_0_0_x" type="text" onfocus="tsai.optical_coordinates(0, 0);" onchange="tsai.optical_coordinates(0, 0);"/></td>
+           <td>y</td><td><input id="optical_coordinates_0_0_y" type="text" onfocus="tsai.optical_coordinates(0, 0);" onchange="tsai.optical_coordinates(0, 0);"/></td>
+          </tr>
+           <td>Top right</td>
+           <td>x</td><td><input id="optical_coordinates_1_1_x" type="text" onfocus="tsai.optical_coordinates(1, 1);" onchange="tsai.optical_coordinates(1, 1);"/></td>
+           <td>y</td><td><input id="optical_coordinates_1_1_y" type="text" onfocus="tsai.optical_coordinates(1, 1);" onchange="tsai.optical_coordinates(1, 1);"/></td>
+           <td>&nbsp;</td>
+           <td><input name="action_radio" id="optical_coordinates_1" type="radio" onclick="return tsai.optical_coordinates(1, 0);"/></td>
+           <td>x</td><td><input id="optical_coordinates_1_0_x" type="text" onfocus="tsai.optical_coordinates(1, 0);" onchange="tsai.optical_coordinates(1, 0);"/></td>
+           <td>y</td><td><input id="optical_coordinates_1_0_y" type="text" onfocus="tsai.optical_coordinates(1, 0);" onchange="tsai.optical_coordinates(1, 0);"/></td>
+          </tr>
+           <td>Bottom left</td>
+           <td>x</td><td><input id="optical_coordinates_2_1_x" type="text" onfocus="tsai.optical_coordinates(2, 1);" onchange="tsai.optical_coordinates(2, 1);"/></td>
+           <td>y</td><td><input id="optical_coordinates_2_1_y" type="text" onfocus="tsai.optical_coordinates(2, 1);" onchange="tsai.optical_coordinates(2, 1);"/></td>
+           <td>&nbsp;</td>
+           <td><input name="action_radio" id="optical_coordinates_2" type="radio" onclick="return tsai.optical_coordinates(2, 0);"/></td>
+           <td>x</td><td><input id="optical_coordinates_2_0_x" type="text" onfocus="tsai.optical_coordinates(2, 0);" onchange="tsai.optical_coordinates(2, 0);"/></td>
+           <td>y</td><td><input id="optical_coordinates_2_0_y" type="text" onfocus="tsai.optical_coordinates(2, 0);" onchange="tsai.optical_coordinates(2, 0);"/></td>
+          </tr>
+           <td>Bottom right</td>
+           <td>x</td><td><input id="optical_coordinates_3_1_x" type="text" onfocus="tsai.optical_coordinates(3, 1);" onchange="tsai.optical_coordinates(3, 1);"/></td>
+           <td>y</td><td><input id="optical_coordinates_3_1_y" type="text" onfocus="tsai.optical_coordinates(3, 1);" onchange="tsai.optical_coordinates(3, 1);"/></td>
+           <td>&nbsp;</td>
+           <td><input name="action_radio" id="optical_coordinates_3" type="radio" onclick="return tsai.optical_coordinates(3, 0);"/></td>
+           <td>x</td><td><input id="optical_coordinates_3_0_x" type="text" onfocus="tsai.optical_coordinates(3, 0);" onchange="tsai.optical_coordinates(3, 0);"/></td>
+           <td>y</td><td><input id="optical_coordinates_3_0_y" type="text" onfocus="tsai.optical_coordinates(3, 0);" onchange="tsai.optical_coordinates(3, 0);"/></td>
+          </tr>
+         </table>
+         <input type="button" class="_layout_blue" value="Use manual coregistration" onclick="tsai.optical_set();"/>
+        </li>
+       </ol>
+      </li>
+      <li id="optical_link">To use the optical coregistration settings on another computer or browser, click the button below and paste/send the link.
+       <br/><input type="button" class="_layout_blue" value="Copy coregistered link to clipboard" onclick="tsai.coregistration_link();"/>
+      </li>
+     </ol>
+    </div>
+   </div>
+  </td>
+ </tr>
+
+ <!-- #############################
+      ##########  FILES  ##########
+      ############################# -->
+ <tr>
+  <td id="files" colspan="2">
+   <h2 id="files_toggle" onclick="tsai.element_toggle(this);">[&minus;] Files</h2>
+   <div>
+    <ol>
+     <li><span class="recommended">Recommended</span> Name the slide image file with the name of your run so they pair.</li>
+     <li><span class="required">Required</span> Load the slide image file. Drag and drop onto this page or use the file input box below.</li>
+     <li><span class="required">Required</span> Load a JSON with &ge;1 FOV from the loaded slide (needed to extract the slide ID and section ID).</li>
+    </ol>
+    <div id="files_drop"
+     ondrop     ="event.stopPropagation(); event.preventDefault(); tsai.files_drop(event, tsai.files_sort);"
+     ondragenter="event.stopPropagation(); event.preventDefault();"
+     ondragover ="event.stopPropagation(); event.preventDefault(); tsai.files_drag_over('files_drop');"
+     ondragleave="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('files_drop');"
+     onmouseout ="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('files_drop');">
+     <div><input type="file" onchange="tsai.files_load(this, tsai.files_sort);" alt="" multiple/></div>
+     <div id="files_image" style="display:none;"></div>
+     <div id="files_json" style="display:none;"></div>
+    </div>
+   </div>
+  </td>
+ </tr>
+
+ <!-- #################################
+      ##########  SED TILER  ##########
+      ################################# -->
+ <tr>
+  <td id="sed" colspan="2">
+   <h2 id="sed_toggle" onclick="tsai.element_toggle(this);">[+] SED Tiler</h2>
+   <div style="display:none;">
+    <ol>
+     <li>Click a box in each row below and click on the optical image to select corner points for the full SED image.
+      <table>
+       <tr>
+        <td><input name="action_radio" id="sed_coordinates_0" type="radio" onclick="return tsai.sed_coordinates(0);"/></td>
+        <td>x</td><td><input id="sed_coordinates_0_x" type="text" onfocus="tsai.sed_coordinates(0);" onchange="tsai.sed_coordinates(0);"/></td>
+        <td>y</td><td><input id="sed_coordinates_0_y" type="text" onfocus="tsai.sed_coordinates(0);" onchange="tsai.sed_coordinates(0);"/></td>
+       </tr>
+       <tr>
+        <td><input name="action_radio" id="sed_coordinates_1" type="radio" onclick="return tsai.sed_coordinates(1);"/></td>
+        <td>x</td><td><input id="sed_coordinates_1_x" type="text" onfocus="tsai.sed_coordinates(1);" onchange="tsai.sed_coordinates(1);"/></td>
+        <td>y</td><td><input id="sed_coordinates_1_y" type="text" onfocus="tsai.sed_coordinates(1);" onchange="tsai.sed_coordinates(1);"/></td>
+       </tr>
+      </table>
+     </li>
+     <li>Click the button below to copy the SED code to the clipboard.
+      <br/><input type="button" class="_layout_blue" value="Copy SED scan and shift correction code to clipboard" onclick="tsai.sed_code();"/>
+     <li>In the MIBI Run interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
+     <li>Paste <span class="keyboard">Ctrl+V</span> the code into the Console and press <span class="keyboard">Enter</span>.</li>
+     <li>Switch to SED Mode, set the imaging mode to <span class="b">QC - 300 &micro;m</span>, adjust the gain, and focus the image.</li>
+     <li><span id="sed_shift_toggle" onclick="tsai.element_toggle(this);"><span class="b">[+]</span> <span class="optional">If necessary</span> Determine the correction coefficients using the controls.</span>
+      <div style="display:none;">
+       <ol>
+        <li>Type <span class="keyboard">Shift+C</span> to generate the checkerboard image.</li>
+        <li>Adjust the coefficients using the <span class="keyboard">1</span>, <span class="keyboard">2</span>, <span class="keyboard">3</span>, and <span class="keyboard">4</span> buttons.</li>
+        <li>Type <span class="keyboard">S</span> to save the checkerboard image to a PNG file. You may add characters to the beginning of the file name but the entire file name should not exceed 255 characters.</li>
+        <li>Load the checkerboard image file. Drag and drop onto this page or use the file input box in the Files section above. Shift corrections should automatically load here:
+         <table>
+          <tr>
+           <td>x</td><td>correction = &Delta;x &times; </td><td><input id="sed_shift_x_x" type="text" value="0" onchange="tsai.sed_shift_set();"/></td>
+           <td>                     + &Delta;y &times; </td><td><input id="sed_shift_x_y" type="text" value="0" onchange="tsai.sed_shift_set();"/></td>
+          </tr>
+          <tr>
+           <td>y</td><td>correction = &Delta;x &times; </td><td><input id="sed_shift_y_x" type="text" value="0" onchange="tsai.sed_shift_set();"/></td>
+           <td>                     + &Delta;y &times; </td><td><input id="sed_shift_y_y" type="text" value="0" onchange="tsai.sed_shift_set();"/></td>
+          </tr>
+         </table>
+        </li>
+        <li>Enter the amount to crop from the left and right of each maximum-sized SED tile, e.g. 0.08 crops 8% from that side.
+         <table>
+          <tr>
+           <td>left </td><td><input id="sed_crop_0" type="text" onchange="tsai.sed_crop();"/></td><td>&nbsp;</td>
+           <td>right</td><td><input id="sed_crop_1" type="text" onchange="tsai.sed_crop();"/></td>
+          </tr>
+         </table>
+        </li>
+       </ol>
+      </div>
+     </li>
+     <li>Type <span class="keyboard">Shift+T</span> to begin the tiled SED scan. Wait until complete or type <span class="keyboard">Shift+/</span> to halt before complete.</li>
+     <li>The tiled SED image should automatically be saved once generated. You may add characters to the beginning of the file name but the entire file name should not exceed 255 characters.</li>
+     <li>Load the tiled SED image. Drag and drop onto this page or use the file input box in the Files section above.</li>
+   </div>
+  </td>
+ </tr>
+ 
+ <!-- ########################################
+      ##########  LABEL MAP EDITOR  ##########
+      ######################################## -->
+ <tr>
+  <td id="labels" colspan="2">
+   <h2 onclick="tsai.element_toggle(this);">[+] Label Map</h2>
+   <div style="display:none;">
+    <ul>
+     <li><span class="optional">Optional</span> Paste below a line- and tab-separated list of labels, e.g. a TMA from Excel.
+      <table id="labels_table">
+       <tr>
+        <td>
+         <input type="button" value="New Row (\n)"        class="_layout_blue labels_insert" onclick="tsai.labels_insert('\n' );"/>
+         <input type="button" value="New Column (\t)"     class="_layout_blue labels_insert" onclick="tsai.labels_insert('\t' );"/>
+         <input type="button" value="Label Newline (\\n)" class="_layout_blue labels_insert" onclick="tsai.labels_insert('\\n');"/>
+        </td>
+        <td><input type="button" onclick="document.getElementById('labels_map').value='';" value="Clear" class="_layout_red"/></td>
+       </tr>
+       <tr><td colspan="2"><textarea id="labels_map" onchange="tsai.labels_load();"></textarea></td></tr>
+      </table>
+     </li>
+    </ul>
+   </div>
+  </td>
+ </tr>
+ <tr>
+ <tr>
+  <td class="slide_bar">
+   <h2 class="slide_options" onclick="tsai.element_toggle(this);">[+] Slide Options</h2>
+   <div class="slide_options" style="display:none;">
+    <table class="slide_options">
+     <tr>
+      <td colspan="2">Cursor size</td>
+      <td>
+       <input id="slide_cursor_size" type="text" value="" onchange="tsai.draw_cursor_size();"/>
+       <input type="button" value="&#9660;" onclick="tsai.draw_cursor_size_crement(-2);"/>
+       <input type="button" value="&#9650;" onclick="tsai.draw_cursor_size_crement( 2);"/>
+      </td>
+     </tr>
+     <tr>
+      <td colspan="2">Cursor opacity</td>
+      <td>
+       <input id="slide_cursor_opacity" type="text" value="" onchange="tsai.draw_cursor_opacity();"/>
+       <input type="button" value="&#9660;" onclick="tsai.draw_cursor_opacity_crement(-0.05);"/>
+       <input type="button" value="&#9650;" onclick="tsai.draw_cursor_opacity_crement( 0.05);"/>
+      </td>
+     </tr>
+     <tr>
+      <td colspan="2">Cursor color</td>
+      <td>
+       <input id="slide_cursor_color" type="text" value="#ffffff" onchange="tsai.draw_cursor_color(this.value);"/>
+       <input type="button" onclick="tsai.draw_cursor_color('#ffffff');" style="background-color: #fff; border:1px solid #ccc;"/>
+       <input type="button" onclick="tsai.draw_cursor_color('#000000');" style="background-color: #000; border:1px solid #ccc;"/>
+      </td>
+     </tr>
+     <tr>
+      <td colspan="2">Line thickness</td>
+      <td>
+       <input id="slide_line_thickness" type="text" value="" onchange="tsai.draw_line_thickness();"/>
+       <input type="button" value="&#9660;" onclick="tsai.draw_line_thickness_crement(-0.5);"/>
+       <input type="button" value="&#9650;" onclick="tsai.draw_line_thickness_crement( 0.5);"/>
+      </td>
+     </tr>
+     <tr>
+      <td colspan="2">TMA crosshair</td>
+      <td>
+       <input id="slide_tma_crosshair" type="text" value="" onchange="tsai.draw_tma_crosshair();"/>
+       <input type="button" value="&#9660;" onclick="tsai.draw_tma_crosshair_crement(-0.5);"/>
+       <input type="button" value="&#9650;" onclick="tsai.draw_tma_crosshair_crement( 0.5);"/>
+      </td>
+     </tr>
+     <tr>
+      <td colspan="2">Brightness</td>
+      <td>
+       <input id="slide_brightness" type="text" value="1" onchange="tsai.draw_filter();"/>
+       <input type="button" value="&#9660;" onclick="tsai.draw_filter_crement('brightness', -0.1);"/>
+       <input type="button" value="&#9650;" onclick="tsai.draw_filter_crement('brightness', 0.1);"/>
+      </td>
+     </tr>
+     <tr>
+      <td colspan="2">Contrast</td>
+      <td>
+       <input id="slide_contrast" type="text" value="1" onchange="tsai.draw_filter();"/>
+       <input type="button" value="&#9660;" onclick="tsai.draw_filter_crement('contrast', -0.1);"/>
+       <input type="button" value="&#9650;" onclick="tsai.draw_filter_crement('contrast', 0.1);"/>
+      </td>
+     </tr>
+     <tr>
+      <td>Pixels</td>
+      <td>x</td>
+      <td class="xy"><input id="slide_x_pixels" type="text" value=""/> &nbsp; y <input id="slide_y_pixels" type="text" value=""/>
+      </td>
+     <tr>
+     <tr>
+      <td>Microns</td>
+      <td>x</td>
+      <td class="xy"><input id="slide_x_microns" type="text" value=""/> &nbsp; y <input id="slide_y_microns" type="text" value=""/>
+      </td>
+     </tr>
+    </table>
+   </div>
+  </td>
+  <td class="tile_bar">
+   <h2>Tiles</h2>
+  </td>
+ </tr>
+ <tr id="tools">
+  <td class="slide_bar">
+   <div id="slide_zoom_tab">Zoom
+    <input id="slide_zoom" type="text" value="1" onchange="tsai.draw_zoom();"/>
+    <input type="button" value="&#9660;" onclick="tsai.draw_zoom_crement(1/Math.sqrt(2));"/>
+    <input type="button" value="&#9650;" onclick="tsai.draw_zoom_crement(Math.sqrt(2));"/>
+   </div>
+   <div id="slide_tabs">&nbsp;</div>
+  </td>
+  <td class="tile_bar">
+   <div id="tile_builder_div" class="tile_bar tile_builder" style="display:none;">&nbsp;</div>
+  </td>
+ </tr>
+ <tr>
+  
+  <!-- ##########################################
+       ##########  SLIDE CANVAS/IMAGE  ##########
+       ########################################## -->
+  <td class="slide_bar">
+   <div id="slide">
+    <div id="slide_image">
+     <img id="image_import"  width="1" height="1" style="z-index:1;"></canvas>
+     <img id="image_optical" width="1" height="1" style="z-index:2;"></canvas>
+     <img id="image_sed"     width="1" height="1" style="z-index:3;"></canvas>
+    </div>
+    <canvas id="canvas_draw"   width="1" height="1" style="z-index:4;"></canvas>
+   </div>
+  </td>
+  
+  <!-- ###################################
+       ##########  TILE EDITOR  ##########
+       ################################### -->
+  <td class="tile_bar">
+   <div id="tiles_scroll">
+    <div id="tiles">
+    </div>
+    <!-- ##########  POLYGON  ########## -->
+    <div id="tile_polygon" style="display:none;">
+     <div><span onclick="tsai.polygon_close();">Close [&times;]</span></div>
+     <p>Click on the slide image to draw a polygonal area. This tool will cover the area with FOVs with the above parameters. Alternatively, import polygon coordinates below in <a href="javascript:tsai.polygon_example();">JSON format</a>
+      <!-- <br/><label for="tile_polygon_file_load">WEHI H&amp;E Import</label> -->
+      <br/><input id="tile_polygon_file" type="file" onchange="tsai.polygon_file_load(this);" alt=""/>
+     </p>
+     <div id="tile_polygon_build_retain"  style="display:none;" onclick="tsai.polygon_file_import(false);">Import polygons</div>
+     <div id="tile_polygon_build_replace" style="display:none;" onclick="tsai.polygon_file_import(true );">Import polygons and delete this tile</div>
+     <div id="tile_polygon_revert" style="display:none;"><span onclick="javascript:tsai.polygon_file_revert();">Revert to before polygons import</span></div>
+    </div>
+    
+    <!-- ##########  POLYGON  ########## -->
+    <div id="tile_tma" style="display:none;">
+     <div><span onclick="tsai.tma_close();">Close [&times;]</span></div>
+     <table id="tile_tma_rows_columns">
+      <tr>
+       <td><label for="tile_tma_rows" class="tile_tma_rc">Rows</label></td>
+       <td>
+        <input id="tile_tma_rows" type="text" value="1" onchange="tsai.tma_resize(this, 0);"/>
+        <input type="button" class="tile_resize" value="&minus;" onclick="tsai.tma_crement(-1, 0);"/>
+        <input type="button" class="tile_resize" value="+"       onclick="tsai.tma_crement( 1, 0);"/>
+       </td>
+      </tr>
+      <tr>
+       <td><label for="tile_tma_columns" class="tile_tma_rc">Columns</label></td>
+       <td>
+        <input id="tile_tma_columns" type="text" value="1" onchange="tsai.tma_resize(this, 1);"/>
+        <input type="button" class="tile_resize" value="&minus;" onclick="tsai.tma_crement(0, -1);"/>
+        <input type="button" class="tile_resize" value="+"       onclick="tsai.tma_crement(0,  1);"/>
+       </td>
+      </tr>
+     </table>
+     <table id="tile_tma_target_name">
+      <tr><td><input name="tile_tma_target"  id="tile_tma_target_tile"  type="radio" checked/></td><td><label for="tile_tma_target_tile"> Target points are center of <span class="b">tile</span></label></td></tr>
+      <tr><td><input name="tile_tma_target"  id="tile_tma_target_fov"   type="radio"        /></td><td><label for="tile_tma_target_fov" > Target points are center of <span class="b">top left FOV</span></label></td></tr>
+      <tr>
+       <td><input id="tile_tma_prepend" type="checkbox"/></td>
+       <td><label for="tile_tma_prepend">(Optional) Prepend tile names with</label><br/><input id="tile_tma_prepend_text" type="text" value="" onkeydown="tsai.tma_prepend(event);"/></td>
+      </tr>
+      <tr>
+       <td><input name="tile_tma_format"  id="tile_tma_name_rc"  type="radio" checked/></td>
+       <td><label for="tile_tma_name_rc">Name tiles as <span class="b">R#C#</span> starting at</label>
+        <br/><label for="tile_tma_name_rc_r" class="tile_tma_name_rc_start">row   </label> <input id="tile_tma_name_rc_r" type="text" value="1" onchange="tsai.tma_name_rc(this, 0);"/>
+        <br/><label for="tile_tma_name_rc_c" class="tile_tma_name_rc_start">column</label> <input id="tile_tma_name_rc_c" type="text" value="1" onchange="tsai.tma_name_rc(this, 1);"/>
+       </td>
+      </tr>
+      <tr><td><input name="tile_tma_format"  id="tile_tma_name_map" type="radio"        /></td><td><label for="tile_tma_name_map"> Name tiles with <span class="b">label map</span></label></td></tr>
+      <tr><td><input name="tile_tma_format"  id="tile_tma_name_rcm" type="radio"        /></td><td><label for="tile_tma_name_rcm"> <span class="b">Combine</span> R#C# above and label map </label></td></tr>
+     </table>
+     <table id="tile_tma_order">
+      <tr>
+       <td>&nbsp;</td>
+       <td title="Clockwise" class="b">CW &#8635;</td>
+       <td title="Counter-clockwise" class="b">CCW &#8634;</td>
+      </tr>
+      <tr>
+       <td>Start <span class="b">top left</span> of TMA</td>
+       <td><input name="tile_tma_order" id="tl0" type="radio" onclick="tsai.tma_order(this.id);" checked/></td>
+       <td><input name="tile_tma_order" id="tl1" type="radio" onclick="tsai.tma_order(this.id);"/></td>
+      </tr>
+      <tr>
+       <td>Start <span class="b">top right</span></td>
+       <td><input name="tile_tma_order" id="tr0" type="radio" onclick="tsai.tma_order(this.id);"/></td>
+       <td><input name="tile_tma_order" id="tr1" type="radio" onclick="tsai.tma_order(this.id);"/></td>
+      </tr>
+      <tr>
+       <td>Start <span class="b">bottom left</span></td>
+       <td><input name="tile_tma_order" id="bl0" type="radio" onclick="tsai.tma_order(this.id);"/></td>
+       <td><input name="tile_tma_order" id="bl1" type="radio" onclick="tsai.tma_order(this.id);"/></td>
+      </tr>
+      <tr>
+       <td>Start <span class="b">bottom right</span></td>
+       <td><input name="tile_tma_order" id="br0" type="radio" onclick="tsai.tma_order(this.id);"/></td>
+       <td><input name="tile_tma_order" id="br1" type="radio" onclick="tsai.tma_order(this.id);"/></td>
+      </tr>
+     </table>
+     <div id="tile_tma_build_retain"  style="display:none;" onclick="tsai.tma_build(false);">Build TMA</div>
+     <div id="tile_tma_build_replace" style="display:none;" onclick="tsai.tma_build(true );">Build TMA and replace original tile/FOV</div>
+     <div id="tile_tma_revert" style="display:none;"><span onclick="javascript:tsai.tma_revert();">Revert to before last TMA</span></div>
+    </div>
+    <div id="tile_labels" style="display:none;"></div>
+    <input id="labels_tile" type="hidden" value="'+tile+'">
+   </div>
+  </td>
+ </tr>
+ <tr>
+  <td id="tools">
+   
+   <!-- ##############################
+        ##########  IMPORT  ##########
+        ############################## -->
+   <h2 id="import_toggle" onclick="tsai.element_toggle(this);">[+] Import</h2>
+   <div id="import" style="display:none;">
+    <ol>
+     <li><span class="optional">Optional</span> Importing FOVs (e.g. a serial section) requires four coordinate pairs to coregister tissue on the two slides. It only repositions R1C1 of each tile, only works on optical images, and assumes both use the same optical-to-stage motor coregistration (unless using the From presets).</li>
+     <!-- <li><span class="recommended">Recommended</span> Save the currently loaded tiles to a new JSON file.</li> -->
+     <li>Load the <span class="b">prior (serial section) image <span class="i">and</span> JSON</span> using the file input box below, or drag and drop within the dotted lines.
+      <div id="import_drop"
+       ondrop="event.stopPropagation(); event.preventDefault(); tsai.files_drop(event, tsai.import_sort);"
+       ondragenter="event.stopPropagation(); event.preventDefault();"
+       ondragover="event.stopPropagation(); event.preventDefault(); tsai.files_drag_over('import_drop');"
+       ondragleave="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('import_drop');"
+       onmouseout="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('import_drop');">
+       <div><input type="file" onchange="tsai.files_load(this, tsai.import_sort);" alt="" multiple/></div>
+       <div id="import_image" style="display:none;"></div>
+       <div id="import_json" style="display:none;"></div>
+      </div>
+     </li>
+     <li>If importing without coregistration, click <a href="javascript:tsai.import_identity();">here</a> and go to step 6. Otherwise, click each <span class="b">From</span> button and click on a unique tissue location in the image.</li>
+      <table>
+       <tr><td colspan="2"><span class="b">From</span> presets</td><td colspan="5"><span class="b">From</span> import coordinates</td><td>&nbsp;</td><td colspan="5"><span class="b">To</span> target coordinates</td></tr>
+       <tr>
+        <td><select id="import_coordinates_0_select" onchange="tsai.import_coordinates_select(this, 0);"></select></td>
+        <td>&nbsp;</td>
+        <td><input name="action_radio" id="import_coordinates_0_0" type="radio" onclick="return tsai.import_coordinates(0, 0);"/></td>
+        <td>x</td><td><input id="import_coordinates_0_0_x" type="text" onfocus="tsai.import_coordinates(0, 0);" onchange="tsai.import_coordinates(0, 0);"/></td>
+        <td>y</td><td><input id="import_coordinates_0_0_y" type="text" onfocus="tsai.import_coordinates(0, 0);" onchange="tsai.import_coordinates(0, 0);"/></td>
+        <td>&nbsp;</td>
+        <td><input name="action_radio" id="import_coordinates_0_1" type="radio" onclick="return tsai.import_coordinates(0, 1);"/></td>
+        <td>x</td><td><input id="import_coordinates_0_1_x" type="text" onfocus="tsai.import_coordinates(0, 1);" onchange="tsai.import_coordinates(0, 1);"/></td>
+        <td>y</td><td><input id="import_coordinates_0_1_y" type="text" onfocus="tsai.import_coordinates(0, 1);" onchange="tsai.import_coordinates(0, 1);"/></td>
+       </tr>
+       <tr>
+        <td><select id="import_coordinates_1_select" onchange="tsai.import_coordinates_select(this, 1);"></select></td>
+        <td>&nbsp;</td>
+        <td><input name="action_radio" id="import_coordinates_1_0" type="radio" onclick="return tsai.import_coordinates(1, 0);"/></td>
+        <td>x</td><td><input id="import_coordinates_1_0_x" type="text" onfocus="tsai.import_coordinates(1, 0);" onchange="tsai.import_coordinates(1, 0);"/></td>
+        <td>y</td><td><input id="import_coordinates_1_0_y" type="text" onfocus="tsai.import_coordinates(1, 0);" onchange="tsai.import_coordinates(1, 0);"/></td>
+        <td>&nbsp;</td>
+        <td><input name="action_radio" id="import_coordinates_1_1" type="radio" onclick="return tsai.import_coordinates(1, 1);"/></td>
+        <td>x</td><td><input id="import_coordinates_1_1_x" type="text" onfocus="tsai.import_coordinates(1, 1);" onchange="tsai.import_coordinates(1, 1);"/></td>
+        <td>y</td><td><input id="import_coordinates_1_1_y" type="text" onfocus="tsai.import_coordinates(1, 1);" onchange="tsai.import_coordinates(1, 1);"/></td>
+       </tr>
+       <tr>
+        <td><select id="import_coordinates_2_select" onchange="tsai.import_coordinates_select(this, 2);"></select></td>
+        <td>&nbsp;</td>
+        <td><input name="action_radio" id="import_coordinates_2_0" type="radio" onclick="return tsai.import_coordinates(2, 0);"/></td>
+        <td>x</td><td><input id="import_coordinates_2_0_x" type="text" onfocus="tsai.import_coordinates(2, 0);" onchange="tsai.import_coordinates(2, 0);"/></td>
+        <td>y</td><td><input id="import_coordinates_2_0_y" type="text" onfocus="tsai.import_coordinates(2, 0);" onchange="tsai.import_coordinates(2, 0);"/></td>
+        <td>&nbsp;</td>
+        <td><input name="action_radio" id="import_coordinates_2_1" type="radio" onclick="return tsai.import_coordinates(2, 1);"/></td>
+        <td>x</td><td><input id="import_coordinates_2_1_x" type="text" onfocus="tsai.import_coordinates(2, 1);" onchange="tsai.import_coordinates(2, 1);"/></td>
+        <td>y</td><td><input id="import_coordinates_2_1_y" type="text" onfocus="tsai.import_coordinates(2, 1);" onchange="tsai.import_coordinates(2, 1);"/></td>
+       </tr>
+       <tr>
+        <td><select id="import_coordinates_3_select" onchange="tsai.import_coordinates_select(this, 3);"></select></td>
+        <td>&nbsp;</td>
+        <td><input name="action_radio" id="import_coordinates_3_0" type="radio" onclick="return tsai.import_coordinates(3, 0);"/></td>
+        <td>x</td><td><input id="import_coordinates_3_0_x" type="text" onfocus="tsai.import_coordinates(3, 0);" onchange="tsai.import_coordinates(3, 0);"/></td>
+        <td>y</td><td><input id="import_coordinates_3_0_y" type="text" onfocus="tsai.import_coordinates(3, 0);" onchange="tsai.import_coordinates(3, 0);"/></td>
+        <td>&nbsp;</td>
+        <td><input name="action_radio" id="import_coordinates_3_1" type="radio" onclick="return tsai.import_coordinates(3, 1);"/></td>
+        <td>x</td><td><input id="import_coordinates_3_1_x" type="text" onfocus="tsai.import_coordinates(3, 1);" onchange="tsai.import_coordinates(3, 1);"/></td>
+        <td>y</td><td><input id="import_coordinates_3_1_y" type="text" onfocus="tsai.import_coordinates(3, 1);" onchange="tsai.import_coordinates(3, 1);"/></td>
+       </tr>
+      </table>
+     </li>
+     <li>For each <span class="b">To</span> box, click its corresponding location in the new slide.</li>
+     <li>If the slides use different optical-to-stage motor coregistration or are otherwise misaligned, try selecting From coordinates from the From presets.</li>
+     <li><input id="import_prepend" type="checkbox"/><label for="import_prepend"><span class="optional">Optional</span> Prepend tile names with</label>
+      <br/><input id="import_prepend_text" type="text" value="" onkeydown="tsai.import_prepend(event);"/>
+     </li>
+     <li>Click on one of the Import options.
+      <br/><input id="import_discard" type="button" onclick="tsai.import_build(false);" value="Import and discard existing FOVs"   class="_layout_blue"/>
+      <br/><input id="import_append"  type="button" onclick="tsai.import_build(true);"  value="Import add append to existing FOVs" class="_layout_blue"/>
+     </li>
+     <li>To undo, reload the target JSON by clicking and dragging onto this window.</li>
+    </ol>
+    <div id="import_errors"></div>
+   </div>
+   
+   <!-- #################################################
+        ##########  FOV NAVIGATION/ADJUSTMENT  ##########
+        ################################################# -->
+   <h2 id="navigation_toggle" onclick="tsai.element_toggle(this);">[+] FOV Navigation/Adjustment</h2>
+   <div id="navigation" style="display:none;">
+    <ol>
+     <li><span class="recommended">Helpful for TMA</span> This adds controls for navigating/adjusting FOVs and saving SED images in the MIBI Run interface, particularly if SED tiling is unavailable (e.g., SED coefficients are inaccurate). Repositioning or changing the FOV size (&micro;m) can only be done on R1C1.</li>
+     <li>Click the button below to copy the code to the clipboard.
+      <br/><input id="navigation_code" type="button" onclick="tsai.navigation_code();" value="Copy FOV navigation code to clipboard" class="_layout_blue"/>
+     </li>
+     <li>In the MIBI Run interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
+     <li>Paste <span class="keyboard">Ctrl+V</span> the code into the Console and press <span class="keyboard">Enter</span>.</li>
+     <li>Paste the console output into the box below and click Adjust. Alternatively, drag and drop the adjustment output text file onto this page.
+      <br/><textarea id="navigation_adjustments"></textarea>
+      <br/><input id="navigation_adjust" type="button" onclick="tsai.navigation_adjust();" value="Adjust" class="_layout_blue"/>
+     </li>
+    </ol>
+    <div id="navigation_errors"></div>
+    <div id="navigation_adjustments_output"></div>
+   </div>
+  </td>
+  
+  <!-- ####################################
+       ##########  JSON BUILDER  ##########
+       #################################### -->
+  <td id="json" class="tile_bar">
+   <h2>Output</h2>
+   <div id="json_summary"></div>
+   <p class="json"><input id="json_time" type="datetime-local" value="" onchange="tsai.time_calculate();"/>
+    <!-- <br/><input type="button" onclick="tsai.time_calculate();" value="Estimate run time" class="_layout_blue"/> -->
+    <br/><input type="button" onclick="tsai.json_build_download(0);" value="Create JSON file (sequential order)"                             class="_layout_green"/>
+    <br/><input type="button" onclick="tsai.json_build_download(1);" value="Create JSON file (random order, keeping tiles together)"         class="_layout_green"/>
+    <br/><input type="button" onclick="tsai.json_build_download(2);" value="Create JSON file (random order, different tiles mixed together)" class="_layout_green"/>
+    <br/><input type="button" onclick="tsai.image_save(true);"       value="Save tiled image" class="_layout_blue"/>
+    <br/><input type="button" onclick="tsai.image_save(false);"      value="Save base image"  class="_layout_blue"/>
+   </p>
+   <div id="json_warnings"></div>
+  
+  <!-- ################################################
+       ##########  RESUME AND/OR SPLIT JSON  ##########
+       ################################################ -->
+   <div id="json_resume_split">
+    <h2 id="json_resume_split_toggle" onclick="tsai.element_toggle(this);">[+] Resume and/or Split</h2>
+    <div style="display:none;">
+     <table>
+      <tr>
+       <td id="json_resume"></td>
+       <td id="split">
+        <h3>Split</h3>
+        <table>
+         <tr>
+          <td><input id="json_split_none" name="json_split" type="radio" checked/></td>
+          <td><label for="json_split_none">Do not split</label></td>
+         </tr>
+         <tr>
+          <td><input id="json_split_fovs" name="json_split" type="radio"/></td>
+          <td>Split by every
+           <input id="json_split_number" type="text" onfocus="tsai.json_split_select('json_split_fovs');"/> FOVs
+          </td>
+         </tr>
+         <tr>
+          <td><input id="json_split_time" name="json_split" type="radio"/></td>
+          <td>Split by every
+           <input id="json_split_hours" type="text" value="6" onfocus="tsai.json_split_select('json_split_time');"/> hours
+           <input id="json_split_minutes" type="text" value="0" onfocus="tsai.json_split_select('json_split_time');"/> minutes
+          </td>
+         </tr>
+        </table>
+       </td>
+     </tr>
+      <tr><td colspan="2"><input type="button" onclick="tsai.json_resume_split_write(0);" value="Create resume/split JSON file(s) (sequential order)" class="_layout_green"/></td></tr>
+      <tr><td colspan="2"><input type="button" onclick="tsai.json_resume_split_write(1);" value="Create resume/split JSON file(s) (random order, keeping tiles together)" class="_layout_green"/></td></tr>
+      <tr><td colspan="2"><input type="button" onclick="tsai.json_resume_split_write(2);" value="Create resume/split JSON file(s) (random order, different tiles mixed together)" class="_layout_green"/></td></tr>
+      <tr><td id="json_resume_split_buttons" colspan="2"></td></tr>
+     </table>
+    </div>
+   </div>
+  </td>
+ </tr>
+</table>
+
+<!-- #######################################
+     ##########  HIDDEN ELEMENTS  ##########
+     ####################################### -->
+<canvas id="canvas_prerender" width="1" height="1" style="display:none;"></canvas>
+<script type="text/javascript">/* <![CDATA[ */ tsai.onload(); /* ]]> */ </script>
+
+<!-- ##############################
+     ##########  FOOTER  ##########
+     ############################## -->
+    </article>
+  </section>
+</main>
+<footer id="footer" class="_layout_footer">
+  <div><a href="https://tsai.stanford.edu" target="_blank"><img src="_resources/_images/logo_footer.png" width="371" height="39" alt="Tsai Laboratory"/></a></div>
+  <div><span class="b">If you use this tool, please cite our paper:</span>
+   <br/>Piyadasa H, Oberlton B, Kong A, Fullaway CC, Varra SR, Sowers C, Tsai AG. Rapid setup of tissue microarray and tiled area imaging on the Multiplexed Ion Beam Imaging microscope (MIBIscope) using the Tile/SED/Array Interface (TSAI). Manuscript submitted for review
+  </div>
+  <div><span class="b">Online version:</span>
+   <br/><a href="https://tsai.stanford.edu/research/mibi_tsai">https://tsai.stanford.edu/research/mibi_tsai</a>
+  </div>
+  <div><span class="b">Usage instructions:</span>
+   <br/>A manuscript is submitted for review and <a href="#">protocols.io</a> instructions will be provided here if accepted.
+  </div>
+</footer>
+</body>
+</html>
