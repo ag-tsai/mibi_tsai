@@ -271,7 +271,7 @@ coordinates_line_opacity(  opacity      ) {tsai.coordinates.line_opacity=opacity
    ################################# */
 
 onload()
-{tsai.url_tsai(window.location.href);
+{tsai.url_tsai(window.location.protocol+'//'+window.location.host+window.location.pathname);
  if(tsai.url.standalone)
  {var urls=[
    ['url_run_log'           , tsai.url.run_log],
@@ -2216,7 +2216,7 @@ coregistration_load()
  var search=window.location.search.toLowerCase().replace(/[^\d]+$/, '');
  if(     search.indexOf('?automatic=')==0)
  {if(tsai.coregistration_set('automatic', search.substring('?automatic='.length), tsai.time_format().readable))
-  window.location=tsai.json.href;
+  window.location=tsai.url.tsai;
   return;
  }
  else if(search.indexOf('?manual='   )==0)
@@ -2227,7 +2227,7 @@ coregistration_load()
    for(var index=0; index<4; index++) tsai.coordinates.optical[index]=manual_full[index].split(',').map(function(element) {return parseFloat(element);});
    tsai.optical_coordinates_fill();
    if(tsai.coregistration_set('manual', manual, tsai.time_format().readable))
-   {window.location=tsai.json.href;
+   {window.location=tsai.url.tsai;
     return;
   }}
   else
@@ -2371,8 +2371,8 @@ coregistration_cookie_set()
 }
 
 coregistration_link()
-{if(!['automatic', 'manual'].includes(tsai.coregistration.last)) navigator.clipboard.writeText(tsai.json.href);
- else navigator.clipboard.writeText(tsai.json.href+'?'+tsai.coregistration.last+'='+tsai.coregistration[tsai.coregistration.last+'_coordinates']+'+');
+{if(!['automatic', 'manual'].includes(tsai.coregistration.last)) navigator.clipboard.writeText(tsai.url.tsai);
+ else navigator.clipboard.writeText(tsai.url.tsai+'?'+tsai.coregistration.last+'='+tsai.coregistration[tsai.coregistration.last+'_coordinates']+'+');
 }
 
 /* ################################################
@@ -2427,7 +2427,7 @@ optical_automatic_code()
 +' setTimeout(()=>{map.click(map.quad.left, map.quad.bottom);}, 4000);'
 +' setTimeout(()=>{map.click(map.quad.right, map.quad.bottom);}, 5000);'
 +' setTimeout(()=>{console.info=map.info; map.canvas.onclick=null; logger.level=2;'
-+ ' console.log(\'\\nTiler link:\\n'+tsai.json.href+'?automatic=\'+map.result.replace(/\\s*/g, \'\')+\'\\n\\n\\n\'); map=null;}, 6000);'; // need character at end of link due to truncation
++ ' console.log(\'\\nTiler link:\\n'+tsai.url.tsai+'?automatic=\'+map.result.replace(/\\s*/g, \'\')+\'\\n\\n\\n\'); map=null;}, 6000);'; // need character at end of link due to truncation
  navigator.clipboard.writeText(b);
 }
 
@@ -2510,7 +2510,7 @@ optical_manual_code()
   +   ' {if(this.coordinates[index*2]==\'\') errors+=this.description[index]+\' not set.\\n\';'
   +    '}'
   +   ' if(errors!=\'\' && !confirm(errors+\'Click OK to exit anyway. Click cancel to continue setting fiducial coordinates.\')) return \'\';'
-  +   ' console.log(\'\\nTiler link:\\n'+tsai.json.href+'?manual=\'+this.coordinates.join(\',\')+\'+\'' // need character at end of link due to truncation
+  +   ' console.log(\'\\nTiler link:\\n'+tsai.url.tsai+'?manual=\'+this.coordinates.join(\',\')+\'+\'' // need character at end of link due to truncation
   +   ' +\'\\n\\n\\n\');'
   +   ' document.removeEventListener(\'keydown\', map_key, false);'
   +   ' map=null;'
@@ -3111,11 +3111,12 @@ move_nudge(event, tile, x_nudge, y_nudge)
 }
 
 move_action(type, event, position)
-{if(!document.getElementById('tile_'+tsai.action.item+'_active') || !document.getElementById('tile_'+tsai.action.item+'_active').checked) return;
+{var active=(document.getElementById('tile_'+tsai.action.item+'_active') && document.getElementById('tile_'+tsai.action.item+'_active').checked);
  switch(type)
  {/* ##########  MOUSEMOVE  ########## */
   case 'mouseup':
   case 'mousemove':
+   if(!active) return;
    if(tsai.action.mouse_dragged)
    {var optical=tsai.coregistration_from_micron(tsai.image.transform, {x: tsai.tiles[tsai.action.item].fov.centerPointMicrons.x, y: tsai.tiles[tsai.action.item].fov.centerPointMicrons.y});
     var optical_x=optical.x+position.x-tsai.action.mouse_down.x;
@@ -3135,14 +3136,17 @@ move_action(type, event, position)
    }}
    break;
   case 'mousedown':
+   if(!active) return;
    tsai.canvas.draw.style.cursor='grabbing';
    break;
   case 'mouseout':
-    tsai.draw_clear(tsai.canvas.draw_context);
-    tsai.canvas.draw_context.drawImage(tsai.canvas.prerender, 0, 0);
-    tsai.tile_draw(tsai.canvas.draw_context, tsai.action.item, tsai.tiles[tsai.action.item].fov.centerPointMicrons.x, tsai.tiles[tsai.action.item].fov.centerPointMicrons.y, false);
+   if(!active) return;
+   tsai.draw_clear(tsai.canvas.draw_context);
+   tsai.canvas.draw_context.drawImage(tsai.canvas.prerender, 0, 0);
+   tsai.tile_draw(tsai.canvas.draw_context, tsai.action.item, tsai.tiles[tsai.action.item].fov.centerPointMicrons.x, tsai.tiles[tsai.action.item].fov.centerPointMicrons.y, false);
    // NO break;
   case 'mouseover':
+   if(!active) return;
    tsai.action_prerender('move', tsai.action.item, false);
    tsai.draw_clear(tsai.canvas.draw_context);
    tsai.canvas.draw_context.drawImage(tsai.canvas.prerender, 0, 0);
@@ -3155,10 +3159,10 @@ move_action(type, event, position)
    if(document.activeElement!=document.getElementById('tile_'+tsai.action.item+'_move') && document.activeElement!=document.body) return;
    if(document.activeElement.tagName.toLowerCase()=='textarea' || (document.activeElement.tagName.toLowerCase()=='input' && document.activeElement.type=='text')) return;
    switch(event.code)
-   {case 'ArrowUp'   : tsai.move_nudge(event, tsai.action.item,  0,  1); event.stopPropagation(); event.preventDefault(); break;
-    case 'ArrowDown' : tsai.move_nudge(event, tsai.action.item,  0, -1); event.stopPropagation(); event.preventDefault(); break;
-    case 'ArrowLeft' : tsai.move_nudge(event, tsai.action.item, -1,  0); event.stopPropagation(); event.preventDefault(); break;
-    case 'ArrowRight': tsai.move_nudge(event, tsai.action.item,  1,  0); event.stopPropagation(); event.preventDefault(); break;
+   {case 'ArrowUp'   : if(!active) return; tsai.move_nudge(event, tsai.action.item,  0,  1); event.stopPropagation(); event.preventDefault(); break;
+    case 'ArrowDown' : if(!active) return; tsai.move_nudge(event, tsai.action.item,  0, -1); event.stopPropagation(); event.preventDefault(); break;
+    case 'ArrowLeft' : if(!active) return; tsai.move_nudge(event, tsai.action.item, -1,  0); event.stopPropagation(); event.preventDefault(); break;
+    case 'ArrowRight': if(!active) return; tsai.move_nudge(event, tsai.action.item,  1,  0); event.stopPropagation(); event.preventDefault(); break;
     case 'KeyT':
      document.getElementById('tile_'+tsai.action.item+'_active').checked=(!document.getElementById('tile_'+tsai.action.item+'_active').checked);
      tsai.tile_hover_click(tsai.action.item);
@@ -3169,6 +3173,7 @@ move_action(type, event, position)
     case 'Digit2': ;
     case 'Digit4': ;
     case 'Digit8':
+     if(!active) return;
      var buttons={Digit2: 200, Digit4: 400, Digit8: 800};
      var fov=parseInt(document.getElementById('tile_'+tsai.action.item+'_fov').value);
      if(fov!=buttons[event.code])
@@ -3208,8 +3213,8 @@ move_action(type, event, position)
      }}
      event.stopPropagation();
      event.preventDefault();
-    }
-    break;
+   }
+   break;
 }}
 
 /* ###############################
