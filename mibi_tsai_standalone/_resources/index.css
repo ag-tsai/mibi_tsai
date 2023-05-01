@@ -59,9 +59,12 @@ body                                                                    {overflo
 #_layout_main #files h2                                                 {cursor:pointer;}
 #_layout_main #files ol                                                 {margin:2px 0px 0px 30px;}
 #_layout_main #files ol li                                              {font-size:1.6rem; padding:0px 0px 0px 5px;}
-#_layout_main #files #files_drop                                        {width:1000px; margin:10px 0px 15px 30px; padding:15px 15px 10px 15px; border:2px dashed #ccc; border-radius:5px; vertical-align:middle; z-index:1;}
+#_layout_main #files #files_drop                                        {width:1000px; margin:10px 0px 15px 0px; padding:15px 15px 10px 15px; border:2px dashed #ccc; border-radius:5px; vertical-align:middle; z-index:1;}
 #_layout_main #files #files_drop div                                    {margin:0px 0px 5px 0px; vertical-align:middle;}
 #_layout_main #files #files_drop div:not(:first-child)                  {padding:0px 0px 0px 2px;}
+#_layout_main #files #files_append                                      {width:1000px; margin:10px 0px 15px 0px; padding:15px 15px 10px 15px; border:2px dashed #ccc; border-radius:5px; vertical-align:middle; z-index:1;}
+#_layout_main #files #files_append div                                  {margin:0px 0px 5px 0px; vertical-align:middle;}
+#_layout_main #files #files_append div:not(:first-child)                {padding:0px 0px 0px 2px;}
 #_layout_main #files input[type=file]                                   {font-size:1.6rem; width:1000px; height:28px; margin:0px; padding:0px; border:none; border-radius:5px; cursor:pointer;}
 
 #_layout_main #labels                                                   {padding:0px 20px 25px 0px;}
