@@ -23,10 +23,10 @@
     General               : cookie_set, cookie_get, array_copy, time_pad, time_format, element_position***, element_toggle, element_toggle_on, element_toggle_off, menus_close
     Matrix                : matrix_diagonal, matrix_identity, matrix_inverse, matrix_transpose, matrix_dot_matrix, matrix_dot_vector, matrix_perspective_coefficients***, matrix_perspective***, matrix_perspective_transform***, matrix_perspective_reverse***
     General action        : action_position***, action_event***, action_clear, action_prerender***
-    Files                 : files_drop, files_drag_over, files_drag_leave, files_load***, files_sort***
+    Files                 : files_drop, files_append, files_drag_over, files_drag_leave, files_load***, files_sort***
     Label                 : labels_insert, labels_load, labels_build, labels_select, labels_close
     Image                 : image_load***, image_tab***, image_tab_reset, image_save
-    JSON parse            : json_equal, json_parse_id, json_parse_preset, json_warnings, json_warnings_clear, json_read***, json_load***
+    JSON parse            : json_equal, json_parse_id, json_parse_preset, json_warnings, json_warnings_clear, json_read***, json_append, json_load***
     JSON write            : json_changed, json_resume_write, json_split_select, json_seconds_to_hours_minutes, json_resume_split_write***, json_resume_split_download, json_random, json_build***, json_export***, json_build_download, json_time***
     Draw shapes           : draw_clear***, draw_line***, draw_rect, draw_cursor, draw_cursor_size, draw_cursor_color, draw_cursor_size_crement, draw_cursor_opacity, draw_cursor_opacity_crement, draw_line_thickness, draw_line_thickness_crement
     Draw image            : draw_zoom, draw_zoom_crement, draw_filter, draw_filter_crement, draw_reset***
@@ -713,6 +713,14 @@ files_sort(file)
    if(document.getElementById('files_json').innerHTML.length>8) tsai.element_toggle_off('files_toggle');
 }}}
 
+files_append(file)
+{var extension=file.name.substring(file.name.lastIndexOf('.'));
+ if(extension=='.json')
+ {document.getElementById('files_appended').innerHTML+=(document.getElementById('files_appended').innerHTML.trim()==''?'':'<br/>')+file.name;
+  document.getElementById('files_appended').style.display='';
+  tsai.json_append(file);
+}}
+
 
 /* ##########################################
    ##########################################
@@ -1007,6 +1015,38 @@ json_read(file)
  }}) ();
 }
 
+json_append(file)
+{(async () =>
+  {const file_text=await file.text();
+   var append=JSON.parse(file_text);
+   tsai.json.original.fovs=tsai.json.original.fovs.concat(append.fovs);
+   if(tsai.menus_close())
+   {if(('fovs' in append) && append.fovs.length>0)
+    {for(var index=0; index<append.fovs.length; index++) // check tsai.json.slide_id
+     {var slide_id=Math.abs(parseInt(append.fovs[index].slideId));
+      if(tsai.json.slide_id==0 && !isNaN(slide_id)) tsai.json.slide_id=slide_id;
+      else append.fovs[index].slideId=tsai.json.slide_id;
+      var section_id=Math.abs(parseInt(append.fovs[index].sectionId));
+      if(isNaN(section_id))
+      {tsai.json_warnings('<li>'+append.fovs[index].name+' invalid sectionId '+append.fovs[index].sectionId+'</li>');
+       if(tsai.json.section_ids.length>0) append.fovs[index].sectionId=tsai.json.section_ids[0];
+      }
+      else if(!tsai.json.section_ids.includes(section_id)) tsai.json.section_ids.push(section_id);
+    }}
+    tsai.scratch.shift={x_x: tsai.coregistration.shift.x_x, x_y: tsai.coregistration.shift.x_y, y_x: tsai.coregistration.shift.y_x, y_y: tsai.coregistration.shift.y_y}
+    tsai.tiles=tsai.tiles.concat(tsai.json_load(file_text, tsai.json_warnings)); // appends tiles from the new json rather than replacing them all
+    tsai.scratch.shift={}; // clear scratch.shift so not used in import_action
+    if(tsai.tiles.length>0)
+    {tsai.tiles_write(0);
+     tsai.action_clear(true);
+     tsai.json_time(false);
+     tsai.json_resume_write();
+    }
+    tsai.tiles_builder();
+    document.getElementById('tile_builder_div').style.display='';
+ }}) ();
+}
+
 json_load(json_input, warnings) // if(main==true) coregisters and loads into tile pane
 {if(json_input.match(/\"fovs\"\s*:\s*\[/)==null) {warnings('\n<li>Invalid file, "fovs":[ not found.</li>'); return [];}
  var tiles=[];
@@ -1028,7 +1068,7 @@ json_load(json_input, warnings) // if(main==true) coregisters and loads into til
     tsai.mibi.fovs.push(fov_size);
    }
    fov.fovSizeMicrons=fov_size;
-   if('x_x' in tsai.scratch.shift)
+   if('x_x' in tsai.scratch.shift && typeof tsai.scratch.shift.x_x!='undefined')
    {fov.centerPointMicrons.x=Math.round(fov.centerPointMicrons.x-fov_size*(column-1+((row   -1)*tsai.scratch.shift.x_y)+((column-1)*tsai.scratch.shift.x_x)));
     fov.centerPointMicrons.y=Math.round(fov.centerPointMicrons.y+fov_size*(row   -1+((column-1)*tsai.scratch.shift.y_x)+((row   -1)*tsai.scratch.shift.y_y)));
    }
@@ -1662,7 +1702,7 @@ tiles_draw(context, except)
 tile_draw(context, tile, x, y, fill)
 {var color=tsai.canvas.line_colors[tile%tsai.canvas.line_colors.length][0];
  if(tsai.image.type=='sed') tsai.tile_corners_shifted(tile, x, y, tsai.tile_corners_draw, {context: context, tile: tile, fill: fill, color: color});
- else                              tsai.tile_corners(        tile, x, y, tsai.tile_corners_draw, {context: context, tile: tile, fill: fill, color: color});
+ else                       tsai.tile_corners(        tile, x, y, tsai.tile_corners_draw, {context: context, tile: tile, fill: fill, color: color});
  context.globalAlpha=1;
 }
 
@@ -3004,19 +3044,49 @@ sed_shift_set(shift)
 
 sed_coordinates_draw()
 {tsai.draw_clear(tsai.canvas.draw_context);
- tsai.canvas.draw_context.globalAlpha=tsai.coordinates.line_opacity;
- var coordinates=[];
+ var corners={input:[], tl:{x: 0, y: 0}, tr:{x: 0, y: 0}, bl:{x: 0, y: 0}, br:{x: 0, y: 0}};
  for(var index=0; index<2; index++)
  {if(isNaN(tsai.coordinates.sed[index][0]) || isNaN(tsai.coordinates.sed[index][1]) || typeof tsai.coordinates.sed[index][0]=='string' || typeof tsai.coordinates.sed[index][1]=='string') continue;
-  else coordinates.push(tsai.coregistration_from_micron(tsai.image.transform, {x: tsai.coordinates.sed[index][0], y: tsai.coordinates.sed[index][1]}));
+  else corners.input.push({x: tsai.coordinates.sed[index][0], y: tsai.coordinates.sed[index][1], optical: tsai.coregistration_from_micron(tsai.image.transform, {x: tsai.coordinates.sed[index][0], y: tsai.coordinates.sed[index][1]})});
  }
- if(coordinates.length==2)
- {tsai.draw_clear(tsai.canvas.draw_context);
-  tsai.draw_rect(tsai.canvas.draw_context, coordinates[0], coordinates[1], tsai.coordinates.line_color_default);
+ if(corners.input.length==2)
+ {var left, top, width, height;
+  if(corners.input[0].x<corners.input[1].x) {left=corners.input[0].x; width=corners.input[1].x-corners.input[0].x;}
+  else                                      {left=corners.input[1].x; width=corners.input[0].x-corners.input[1].x;}
+  if(corners.input[0].y>corners.input[1].y) {top=corners.input[0].y; height=corners.input[0].y-corners.input[1].y;}
+  else                                      {top=corners.input[1].y; height=corners.input[1].y-corners.input[0].y;}
+  corners.tl=tsai.coregistration_from_micron(tsai.image.transform, {x: left, y: top});
+  corners.tr=tsai.coregistration_from_micron(tsai.image.transform, {x: left+width*(1+tsai.coregistration.shift.x_x), y: top-width*tsai.coregistration.shift.y_x});
+  corners.br=tsai.coregistration_from_micron(tsai.image.transform, {x: left+width*(1+tsai.coregistration.shift.x_x)+height*tsai.coregistration.shift.x_y, y: top-width*tsai.coregistration.shift.y_x-height*(1+tsai.coregistration.shift.y_y)});
+  corners.bl=tsai.coregistration_from_micron(tsai.image.transform, {x: left+height*tsai.coregistration.shift.x_y, y: top-height*(1+tsai.coregistration.shift.y_y)});
+  /* tsai.draw_line(tsai.canvas.draw_context, corners.tl, corners.tr, tsai.coordinates.line_color_default, tsai.coordinates.line_thickness);
+     tsai.draw_line(tsai.canvas.draw_context, corners.tr, corners.br, tsai.coordinates.line_color_default, tsai.coordinates.line_thickness);
+     tsai.draw_line(tsai.canvas.draw_context, corners.br, corners.bl, tsai.coordinates.line_color_default, tsai.coordinates.line_thickness);
+     tsai.draw_line(tsai.canvas.draw_context, corners.bl, corners.tl, tsai.coordinates.line_color_default, tsai.coordinates.line_thickness); */
+  tsai.canvas.draw_context.beginPath();
+  tsai.canvas.draw_context.moveTo(corners.tl.x-tsai.image.crop, corners.tl.y);
+  tsai.canvas.draw_context.lineTo(corners.tr.x-tsai.image.crop, corners.tr.y);
+  tsai.canvas.draw_context.lineTo(corners.br.x-tsai.image.crop, corners.br.y);
+  tsai.canvas.draw_context.lineTo(corners.bl.x-tsai.image.crop, corners.bl.y);
+  tsai.canvas.draw_context.lineTo(corners.tl.x-tsai.image.crop, corners.tl.y);
+  /* console.log(left+'\t'+top
+   +'\n'+(left+width*(1+tsai.coregistration.shift.x_x))+'\t'+(top-width*tsai.coregistration.shift.y_x)
+   +'\n'+(left+width*(1+tsai.coregistration.shift.x_x)+height*tsai.coregistration.shift.x_y)+'\t'+(top-width*tsai.coregistration.shift.y_x-height*(1+tsai.coregistration.shift.y_y))
+   +'\n'+(left+height*tsai.coregistration.shift.x_y)+'\t'+(top-height*(1+tsai.coregistration.shift.y_y+'\n')));
+  */
+  tsai.canvas.draw_context.globalAlpha=tsai.canvas.hover_fill_opacity/2;
+  tsai.canvas.draw_context.fillStyle=tsai.coordinates.line_color_default;
+  tsai.canvas.draw_context.fill();
+  tsai.canvas.draw_context.globalAlpha=tsai.canvas.hover_line_opacity/2;
  }
- for(var index=0; index<coordinates.length; index++)
- {tsai.draw_line(tsai.canvas.draw_context, {x: coordinates[index].x-tsai.coordinates.crosshair, y: coordinates[index].y}, {x: coordinates[index].x+tsai.coordinates.crosshair, y: coordinates[index].y}, tsai.coordinates.line_colors[index][0], tsai.coordinates.line_thickness);
-  tsai.draw_line(tsai.canvas.draw_context, {x: coordinates[index].x, y: coordinates[index].y-tsai.coordinates.crosshair}, {x: coordinates[index].x, y: coordinates[index].y+tsai.coordinates.crosshair}, tsai.coordinates.line_colors[index][0], tsai.coordinates.line_thickness);
+ if(corners.input.length==2)
+ {tsai.canvas.draw_context.globalAlpha=tsai.coordinates.line_opacity/2;
+  tsai.draw_rect(tsai.canvas.draw_context, corners.input[0].optical, corners.input[1].optical, tsai.coordinates.line_color_default);
+ }
+ tsai.canvas.draw_context.globalAlpha=tsai.coordinates.line_opacity
+ for(var index=0; index<corners.input.length; index++)
+ {tsai.draw_line(tsai.canvas.draw_context, {x: corners.input[index].optical.x-tsai.coordinates.crosshair, y: corners.input[index].optical.y}, {x: corners.input[index].optical.x+tsai.coordinates.crosshair, y: corners.input[index].optical.y}, tsai.coordinates.line_colors[index][0], tsai.coordinates.line_thickness);
+  tsai.draw_line(tsai.canvas.draw_context, {x: corners.input[index].optical.x, y: corners.input[index].optical.y-tsai.coordinates.crosshair}, {x: corners.input[index].optical.x, y: corners.input[index].optical.y+tsai.coordinates.crosshair}, tsai.coordinates.line_colors[index][0], tsai.coordinates.line_thickness);
  }
  tsai.canvas.draw_context.globalAlpha=1;
 }
@@ -3249,7 +3319,7 @@ corners_coordinates(tile)
    if(row==0) tsai.scratch.corners.columns.push([]);
  }}
  if(tsai.image.type=='sed') tsai.tile_corners_shifted(tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, tsai.corners_coordinates_load, '');
- else                              tsai.tile_corners(        tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, tsai.corners_coordinates_load, '');
+ else                       tsai.tile_corners(        tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, tsai.corners_coordinates_load, '');
  tsai.scratch.corners.left=tsai.scratch.corners.columns[0][0];
  tsai.scratch.corners.right=tsai.scratch.corners.columns[tsai.scratch.corners.columns.length-1][1];
  tsai.scratch.corners.top=tsai.scratch.corners.rows[0][0];
