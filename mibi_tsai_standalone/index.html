@@ -152,18 +152,30 @@
     <ol>
      <li><span class="recommended">Recommended</span> Name the slide image file with the name of your run so they pair.</li>
      <li><span class="required">Required</span> Load the slide image file. Drag and drop onto this page or use the file input box below.</li>
-     <li><span class="required">Required</span> Load a JSON with &ge;1 FOV from the loaded slide (needed to extract the slide ID and section ID).</li>
+     <li><span class="required">Required</span> Load a JSON with &ge;1 FOV from the loaded slide (needed to extract the slide ID and section ID).
+      <div id="files_drop"
+       ondrop     ="event.stopPropagation(); event.preventDefault(); tsai.files_drop(event, tsai.files_sort);"
+       ondragenter="event.stopPropagation(); event.preventDefault();"
+       ondragover ="event.stopPropagation(); event.preventDefault(); tsai.files_drag_over('files_drop');"
+       ondragleave="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('files_drop');"
+       onmouseout ="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('files_drop');">
+       <div><input type="file" onchange="tsai.files_load(this, tsai.files_sort);" alt="" multiple/></div>
+       <div id="files_image" style="display:none;"></div>
+       <div id="files_json" style="display:none;"></div>
+      </div>
+     </li>
+     <li>To append a JSON file, use the file input box below. Coregistration parameters within this file will be ignored. Slide ID will be ignored unless not previously set.
+      <div id="files_append"
+       ondrop     ="event.stopPropagation(); event.preventDefault(); tsai.files_drop(event, tsai.files_append);"
+       ondragenter="event.stopPropagation(); event.preventDefault();"
+       ondragover ="event.stopPropagation(); event.preventDefault(); tsai.files_drag_over('files_append');"
+       ondragleave="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('files_append');"
+       onmouseout ="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('files_append');">
+       <div><input type="file" onchange="tsai.files_load(this, tsai.files_append);" alt="" multiple/></div>
+       <div id="files_appended" style="display:none;"></div>
+      </div>      
+     </li>
     </ol>
-    <div id="files_drop"
-     ondrop     ="event.stopPropagation(); event.preventDefault(); tsai.files_drop(event, tsai.files_sort);"
-     ondragenter="event.stopPropagation(); event.preventDefault();"
-     ondragover ="event.stopPropagation(); event.preventDefault(); tsai.files_drag_over('files_drop');"
-     ondragleave="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('files_drop');"
-     onmouseout ="event.stopPropagation(); event.preventDefault(); tsai.files_drag_leave('files_drop');">
-     <div><input type="file" onchange="tsai.files_load(this, tsai.files_sort);" alt="" multiple/></div>
-     <div id="files_image" style="display:none;"></div>
-     <div id="files_json" style="display:none;"></div>
-    </div>
    </div>
   </td>
  </tr>
