@@ -966,7 +966,9 @@ json_read(file)
    empty.fovs=[];
    tsai.json.empty=JSON.stringify(empty);
    if(tsai.menus_close())
-   {tsai.json.slide_id=0;
+   {document.getElementById('files_appended').innerHTML='';
+    document.getElementById('files_appended').style.display='none';
+    tsai.json.slide_id=0;
     tsai.json.section_ids=[];
     tsai.json_warnings_clear();
     tsai.navigation_errors_clear();
