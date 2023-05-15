@@ -585,8 +585,8 @@
   <td id="json" class="tile_bar">
    <h2>Output</h2>
    <div id="json_summary"></div>
-   <p class="json"><input id="json_time" type="datetime-local" value="" onchange="tsai.time_calculate();"/>
-    <!-- <br/><input type="button" onclick="tsai.time_calculate();" value="Estimate run time" class="_layout_blue"/> -->
+   <p class="json"><input id="json_time" type="datetime-local" value="" onchange="tsai.json_time();"/>
+    <!-- <br/><input type="button" onclick="tsai.json_time();" value="Estimate run time" class="_layout_blue"/> -->
     <br/><input type="button" onclick="tsai.json_build_download(0);" value="Create JSON file (sequential order)"                             class="_layout_green"/>
     <br/><input type="button" onclick="tsai.json_build_download(1);" value="Create JSON file (random order, keeping tiles together)"         class="_layout_green"/>
     <br/><input type="button" onclick="tsai.json_build_download(2);" value="Create JSON file (random order, different tiles mixed together)" class="_layout_green"/>
