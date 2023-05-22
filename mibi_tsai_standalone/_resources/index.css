@@ -116,7 +116,7 @@ body                                                                    {overflo
 #_layout_main #slide_coordinates tr td.options input[type=text]         {width:35px; text-align:center;}
 #_layout_main #slide_coordinates tr td.options input[type=button]       {font-size:1.3rem; width:22px; height:22px; padding:0px; background-color:#666; color:#eee; vertical-align:middle; text-align:center;}
 
-#_layout_main #slide                                                    {position:relative; min-width:590px; min-height:532px; border:1px solid #ddd; border-radius:5px; overflow:hidden;}
+#_layout_main #slide                                                    {position:relative; min-width:590px; min-height:532px; max-height:calc(100vh - 80px); border:1px solid #ddd; border-radius:5px; overflow:scroll;}
 #_layout_main #slide canvas                                             {position:absolute; top:0px; left:0px; border-radius:5px; display:block; cursor:var(--crosshair);}
 #_layout_main #slide #slide_image                                       {position:absolute; top:0px; left:0px; border-radius:5px; display:block; overflow:hidden;}
 #_layout_main #slide #slide_image img                                   {position:absolute; top:0px; left:0px; display:none;}
@@ -136,7 +136,7 @@ body                                                                    {overflo
 #_layout_main td.tile_bar #tile_builder #tiles_build_preset             {width:160px;}
 #_layout_main td.tile_bar #tile_builder input[type=button]              {width:80px;}
 
-#_layout_main #tiles_scroll                                                                               {width:fit-content; min-width:625px; min-height:500px; padding:15px 15px 500px 15px; overflow:scroll; border:1px solid #ddd; border-radius:5px; display:block;}
+#_layout_main #tiles_scroll                                                                               {width:fit-content; min-width:625px; min-height:500px; max-height:calc(100vh - 80px); padding:15px 15px 500px 15px; overflow:scroll; border:1px solid #ddd; border-radius:5px; display:block;}
 #_layout_main #tiles div.tile_form                                                                        {background-color:#e6e3e0; width:fit-content; margin:0px 0px 15px 0px; padding:10px 10px 5px 10px; border-radius:5px; display:block;}
 #_layout_main #tiles div.tile_form:last-child                                                             {margin-bottom:0px;}
 #_layout_main #tiles div.tile_form > table                                                                {width:fit-content;}
