@@ -9,6 +9,7 @@
 }
 body                                                                    {overflow:scroll;}
 #_layout_main                                                           {padding:0px 0px 300px 30px;}
+#_layout_main label                                                     {user-select:none;}
 #_layout_main span.required,
 #_layout_main span.recommended,
 #_layout_main span.optional                                             {font-size:1.4rem; font-weight:600; margin-right:2px; padding:0px 3px 0px 3px; border-radius:5px;}
@@ -91,7 +92,7 @@ body                                                                    {overflo
 #_layout_main div.slide_options                                         {padding:5px 0px 20px 30px;}
 #_layout_main table.slide_options tr td                                 {padding:0px;}
 #_layout_main table.slide_options tr:nth-child(3) td,
-#_layout_main table.slide_options tr:nth-child(7) td                    {padding-bottom:8px;}
+#_layout_main table.slide_options tr:nth-child(8) td                    {padding-bottom:8px;}
 #_layout_main table.slide_options tr:nth-child(3) td input[type=button] {width:22px; height:22px;}
 #_layout_main table.slide_options tr td:first-child                     {padding-right:8px; text-align:left; font-size:1.6rem; font-weight:600;}
 #_layout_main table.slide_options input                                 {margin:0px 0px 3px 0px;}
@@ -107,7 +108,8 @@ body                                                                    {overflo
 #_layout_main #slide_tabs span.image_tab.active                         {background-color:#fff; color:#000; font-weight:600; border-top:1px solid #666; border-left:1px solid #666; border-right:1px solid #666; cursor:default;}
 #_layout_main #slide_tabs span.image_tab.inactive                       {background-color:#ccc; color:#000; cursor:pointer;}
 #_layout_main #slide_tabs span.image_tab.inactive:hover                 {font-weight:700;}
-
+#_layout_main #slide_labels_tab                                         {font-size:1.6rem; font-weight:600; margin:0px 10px 0px 10px; padding:5px 0px 3px 5px; white-space:nowrap; display:inline-block; vertical-align:bottom;}
+#_layout_main #slide_labels_tab input[type=checkbox]                    {vertical-align:middle;}
 #_layout_main #slide_coordinates                                        {margin:auto; vertical-align:middle; text-align:center; white-space:nowrap;}
 #_layout_main #slide_coordinates tr td                                  {width:fit-content; white-space:nowrap;}
 #_layout_main #slide_coordinates tr td.label                            {font-size:1.6rem; font-weight:600;}
@@ -116,7 +118,7 @@ body                                                                    {overflo
 #_layout_main #slide_coordinates tr td.options input[type=text]         {width:35px; text-align:center;}
 #_layout_main #slide_coordinates tr td.options input[type=button]       {font-size:1.3rem; width:22px; height:22px; padding:0px; background-color:#666; color:#eee; vertical-align:middle; text-align:center;}
 
-#_layout_main #slide                                                    {position:relative; min-width:590px; min-height:532px; max-height:calc(100vh - 80px); border:1px solid #ddd; border-radius:5px; overflow:scroll;}
+#_layout_main #slide                                                    {position:relative; min-width:590px; min-height:532px; max-height:calc(100vh - 80px); border:1px solid #ddd; border-radius:5px; overflow-y:scroll; overflow-x:hidden;}
 #_layout_main #slide canvas                                             {position:absolute; top:0px; left:0px; border-radius:5px; display:block; cursor:var(--crosshair);}
 #_layout_main #slide #slide_image                                       {position:absolute; top:0px; left:0px; border-radius:5px; display:block; overflow:hidden;}
 #_layout_main #slide #slide_image img                                   {position:absolute; top:0px; left:0px; display:none;}
