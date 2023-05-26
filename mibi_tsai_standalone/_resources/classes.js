@@ -15,7 +15,7 @@
      action               : type***, item***, mouse_down, mouse_up, mouse_dragged, nudge_opt, nudge, nudge_shift
      tiles***             : [] -> {fov, map, original}
      image***, images*** {optical, sed, import} -> name, key***, img, type, crop, coordinates***, scale***, transform***, brightness, contrast, loaded
-     canvas               : draw***, draw_context***, prerender***, prerender_context***, div, optical_crop, optical_bounds {left, right, top, bottom}, cursor_size, cursor_opacity, cursor_color, line_thickness, line_circle, line_color, line_colors, hover_line_opacity, hover_fill_opacity
+     canvas               : draw***, draw_context***, prerender***, prerender_context***, div, optical_crop, optical_bounds {left, right, top, bottom}, cursor_size, cursor_opacity, cursor_color, slide_labels, slide_labels_font, slide_labels_size, line_thickness, line_circle, line_color, line_colors, hover_line_opacity, hover_fill_opacity
      tma                  : crosshair, line_opacity, labels, rows, columns, row_start, column_start, order, orders {tl0, tl1, tr0, tr1, br0, br1, bl0, bl}, points, corners, corner_adjust, corner_start, revert
      scratch              : tiles, polygon***, polygons, polygons_revert, corners, shift***
      coordinates          : optical, import, sed, crosshair, line_color_default, line_thickness, line_opacity, line_colors
@@ -30,7 +30,7 @@
     JSON write            : json_changed, json_resume_write, json_split_select, json_seconds_to_hours_minutes, json_resume_split_write***, json_resume_split_download, json_random, json_build***, json_export***, json_build_download, json_time***
     Draw shapes           : draw_clear***, draw_line***, draw_rect, draw_cursor, draw_cursor_size, draw_cursor_color, draw_cursor_size_crement, draw_cursor_opacity, draw_cursor_opacity_crement, draw_line_thickness, draw_line_thickness_crement
     Draw image            : draw_zoom, draw_zoom_crement, draw_filter, draw_filter_crement, draw_reset***
-    Tile draw general     : tile_corners_shifted***, tile_corners***, tile_corners_draw***, tiles_draw***, tile_draw***, tile_hover***, tile_hover_click
+    Tile draw general     : tile_corners_shifted***, tile_corners***, tile_corners_draw***, tiles_draw***, tile_draw***, draw_slide_labels, draw_slide_labels_size, draw_slide_labels_size_crement, tile_hover***, tile_hover_click
     Tile builder          : tiles_selects, tiles_builder, tiles_builder_slide_id, tiles_build
     Tile div              : tiles_write***, tile_div***, tile_menu, tile_expand, tile_name, tile_position_set, tile_fov, tile_raster, tile_preset, tile_dwell, tile_depth, tile_slide_id, tile_section_id, tile_reset, tile_delete, tile_pixels
     Tile map              : tile_map_crement, tile_map_unshift, tile_map_resize***, tile_map_check
@@ -182,6 +182,9 @@ canvas={
  cursor_size:        27,        // default cursor size
  cursor_opacity:     0.8,       // default cursor opacity
  cursor_color:       '#fff',    // default cursor color
+ slide_labels:       false,     // draw FOV labels onto slide image
+ slide_labels_font:  'Source Sans Pro', // default tile label font
+ slide_labels_size:  18,        // default tile label font size
  line_thickness:     2,         // default line thickness
  line_circle:        5,         // default detection radius for closing polygon and expanding tma
  line_color:         '#ffffff', // default line color
@@ -248,6 +251,9 @@ action_nudge(              microns      ) {tsai.action.nudge=microns;}
 action_nudge_shift(        microns      ) {tsai.action.nudge_shift=microns;}
 cursor_size(               pixels       ) {tsai.canvas.cursor_size=pixels;}
 cursor_opacity(            opacity      ) {tsai.canvas.cursor_opacity=opacity;}
+slide_labels(              bool         ) {tsai.canvas.slide_labels=bool;}
+slide_labels_font(         font         ) {tsai.canvas.slide_labels_font=font;}
+slide_labels_size(         size         ) {tsai.canvas.slide_labels_size=size;}
 line_thickness(            pixels       ) {tsai.canvas.line_thickness=pixels;}
 line_circle(               pixels       ) {tsai.canvas.line_circle=pixels;}
 line_color_default(        color        ) {tsai.canvas.line_color=color;}
@@ -304,12 +310,14 @@ onload()
  document        .addEventListener('dragover' , function(event) {event.stopPropagation(); event.preventDefault();}, false);
  // miscellaneous cosmetic setup
  tsai.tiles=tsai.json_load('{"exportDateTime": "'+tsai.time_format().json+'", "fovFormatVersion": "1.5", "fovs": []}');
- document.getElementById('json_time').value=tsai.time_format().json;
- document.getElementById('labels_table').style.width=(parseFloat(document.getElementById('tiles_scroll').getBoundingClientRect().right)-80)+'px';
- document.getElementById('slide_cursor_size').value=tsai.canvas.cursor_size;
+ document.getElementById('json_time'           ).value=tsai.time_format().json;
+ document.getElementById('labels_table'        ).style.width=(parseFloat(document.getElementById('tiles_scroll').getBoundingClientRect().right)-80)+'px';
+ document.getElementById('slide_cursor_size'   ).value=tsai.canvas.cursor_size;
  document.getElementById('slide_cursor_opacity').value=tsai.canvas.cursor_opacity;
  document.getElementById('slide_line_thickness').value=tsai.canvas.line_thickness;
- document.getElementById('slide_tma_crosshair').value=tsai.tma.crosshair;
+ document.getElementById('slide_tma_crosshair' ).value=tsai.tma.crosshair;
+ document.getElementById('slide_labels'        ).checked=tsai.canvas.slide_labels;
+ document.getElementById('slide_labels_size'   ).value=tsai.canvas.slide_labels_size;
  tsai.json_resume_write();
  tsai.draw_cursor();
  for(var index=0; index<4; index++)
@@ -716,7 +724,8 @@ files_sort(file)
 files_append(file)
 {var extension=file.name.substring(file.name.lastIndexOf('.'));
  if(extension=='.json')
- {document.getElementById('files_appended').innerHTML+=(document.getElementById('files_appended').innerHTML.trim()==''?'':'<br/>')+file.name;
+ {if(!('fovs' in tsai.json.original) && !confirm('A prior .json has not beed loaded. The coregistration may not be correct and tile structure may not be rebuilt correctly. Are you sure you want to continue?')) return;
+  document.getElementById('files_appended').innerHTML+=(document.getElementById('files_appended').innerHTML.trim()==''?'':'<br/>')+file.name;
   document.getElementById('files_appended').style.display='';
   tsai.json_append(file);
 }}
@@ -849,12 +858,12 @@ image_tab(key, scale)
  tsai.canvas.div_image.style.width=width+'px';
  tsai.canvas.div_image.style.height=height+'px';
  width-=2*tsai.image.crop;
- tsai.canvas.div_slide.style.width=width+'px';
- tsai.canvas.div_slide.style.height=height+'px';
  tsai.canvas.draw.width=width;
  tsai.canvas.draw.height=height;
  tsai.canvas.prerender.width=width;
  tsai.canvas.prerender.height=height;
+ tsai.canvas.div_slide.style.height=height+'px';
+ tsai.canvas.div_slide.style.width=(width+(window.innerHeight<height-80?17:0))+'px';
  tsai.image.scale=scale;
  Object.keys(tsai.images).forEach((image)=>{tsai.images[image].img.style.display=(image==key?'block':'none');});
  document.getElementById('tiles_scroll').style.height=tsai.canvas.draw.height+'px';
@@ -877,9 +886,17 @@ image_tab_reset(key)
 image_save(tiles)
 {if(!tsai.menus_close('labels')) return;
  if(!tsai.image.loaded) return;
- tsai.canvas.prerender_context.drawImage(tsai.image.img, tsai.image.crop/tsai.image.scale, 0, tsai.image.img.naturalWidth, tsai.image.img.naturalHeight, 0, 0, tsai.image.img.width, tsai.image.img.height);
- if(tiles) tsai.canvas.prerender_context.drawImage(tsai.canvas.draw, 0, 0);
- tsai.canvas.prerender.toBlob(
+ var canvas=document.createElement('canvas');
+ var context=canvas.getContext('2d');
+ canvas.style='display:none;';
+ canvas.width=tsai.image.img.width;
+ canvas.height=tsai.image.img.height;
+ document.body.appendChild(canvas);
+ context.filter='brightness('+tsai.image.brightness+') contrast('+tsai.image.contrast+')';
+ context.drawImage(tsai.image.img, tsai.image.crop/tsai.image.scale, 0, tsai.image.img.naturalWidth, tsai.image.img.naturalHeight, 0, 0, tsai.image.img.width, tsai.image.img.height);
+ context.filter='brightness(1) contrast(1)';
+ if(tiles) context.drawImage(tsai.canvas.draw, 0, 0);
+ canvas.toBlob(
   (blob)=>
   {let url=window.URL || window.webkitURL;
   let anchor=document.createElement('a');
@@ -1021,7 +1038,8 @@ json_append(file)
 {(async () =>
   {const file_text=await file.text();
    var append=JSON.parse(file_text);
-   tsai.json.original.fovs=tsai.json.original.fovs.concat(append.fovs);
+   if('fovs' in tsai.json.original) tsai.json.original.fovs=tsai.json.original.fovs.concat(append.fovs);
+   else tsai.json.original=append;
    if(tsai.menus_close())
    {if(('fovs' in append) && append.fovs.length>0)
     {for(var index=0; index<append.fovs.length; index++) // check tsai.json.slide_id
@@ -1706,6 +1724,44 @@ tile_draw(context, tile, x, y, fill)
  if(tsai.image.type=='sed') tsai.tile_corners_shifted(tile, x, y, tsai.tile_corners_draw, {context: context, tile: tile, fill: fill, color: color});
  else                       tsai.tile_corners(        tile, x, y, tsai.tile_corners_draw, {context: context, tile: tile, fill: fill, color: color});
  context.globalAlpha=1;
+ if(tsai.canvas.slide_labels)
+ {var found=false;
+  var rows=tsai.tiles[tile].map.length;
+  var columns=tsai.tiles[tile].map[0].length;
+  for(var row=0; row<rows; row++)
+  {for(var column=0; column<columns; column++)
+   {if(tsai.tiles[tile].map[row][column]==1)
+    {var fov=tsai.tiles[tile].fov.fovSizeMicrons;
+     var top=tsai.coregistration_from_micron(tsai.image.transform, {x: x+((column-0.5)*fov), y: y-((row-0.5)*fov)});
+     context.font='normal normal normal '+tsai.canvas.slide_labels_size+'px "'+tsai.canvas.slide_labels_font+'"';
+     context.fillStyle=color;
+     context.fillText(tsai.tiles[tile].fov.name, top.x-tsai.image.crop, top.y-(0.3*tsai.canvas.slide_labels_size));
+     found=true;
+     break;
+   }}
+   if(found) break;
+}}}
+
+draw_slide_labels(checkbox)
+{if(tsai.canvas.slide_labels==checkbox.checked) return;
+ else
+ {tsai.canvas.slide_labels=checkbox.checked;
+  tsai.tiles_draw(tsai.canvas.draw_context, []);
+}}
+
+draw_slide_labels_size()
+{var size=parseFloat(document.getElementById('slide_labels_size').value.replace(/[^0-9\.]/g,''));
+ if(isNaN(size)) document.getElementById('slide_labels_size').value=tsai.canvas.slide_labels_size;
+ else if(size!=tsai.canvas.slide_labels_size)
+ {if(size<5) size=5;
+  tsai.canvas.slide_labels_size=size;
+  document.getElementById('slide_labels_size').value=size;
+  if(tsai.canvas.slide_labels) tsai.tiles_draw(tsai.canvas.draw_context, []);
+}}
+
+draw_slide_labels_size_crement(increment)
+{document.getElementById('slide_labels_size').value=tsai.canvas.slide_labels_size+increment;
+ tsai.draw_slide_labels_size();
 }
 
 tile_hover(tile, mouse_over)
@@ -1730,8 +1786,7 @@ tile_hover(tile, mouse_over)
    }}}}}
    if(results.found>0 && results.found<results.threshold)
    {var fov=tsai.tiles[tile].fov.fovSizeMicrons;
-    var top_left={x: tsai.tiles[tile].fov.centerPointMicrons.x+((results.x-0.5)*fov), y: tsai.tiles[tile].fov.centerPointMicrons.y-((results.y-0.5)*fov)};
-    var apex=tsai.coregistration_from_micron(tsai.image.transform, top_left);
+    var apex=tsai.coregistration_from_micron(tsai.image.transform, {x: tsai.tiles[tile].fov.centerPointMicrons.x+((results.x-0.5)*fov), y: tsai.tiles[tile].fov.centerPointMicrons.y-((results.y-0.5)*fov)});
     apex.x-=tsai.image.crop;
     tsai.canvas.draw_context.beginPath();
     tsai.canvas.draw_context.moveTo(apex.x-3, apex.y-3);
@@ -2103,7 +2158,7 @@ tile_section_id(tile)
 
 tile_reset(tile)
 {var name=(tsai.tiles[tile].fov.name.trim()!=''?' ('+tsai.tiles[tile].fov.name+')':'');
- if(!confirm('Are you sure you want to reset the tile '+(tile+1)+name+'?')) return;
+ if(!confirm('Are you sure you want to reset tile '+(tile+1)+name+'?')) return;
  tsai.tiles[tile].fov=JSON.parse(tsai.tiles[tile].original.fov);
  tsai.tiles[tile].map=JSON.parse(tsai.tiles[tile].original.map);
  document.getElementById('tile_'+tile).outerHTML=tsai.tile_div(tile, false);
@@ -2257,7 +2312,7 @@ coregistration_load()
  // check window.location.search for ?sed= or ?automatic= or ?manual=
  var search=window.location.search.toLowerCase().replace(/[^\d]+$/, '');
  if(     search.indexOf('?automatic=')==0)
- {if(tsai.coregistration_set('automatic', search.substring('?automatic='.length), tsai.time_format().readable))
+ {if(tsai.coregistration_set('automatic', search.substring('?automatic='.length).replaceAll('%7c', '|'), tsai.time_format().readable))
   window.location=tsai.url.tsai;
   return;
  }
