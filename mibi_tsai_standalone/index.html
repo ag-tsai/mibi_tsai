@@ -54,7 +54,7 @@
   <section id="_layout_main">
     <article>
 
-<h1>MIBI Tile/SED/Array Interface 2023.03.31 Standalone</h1>
+<h1>MIBI Tile/SED/Array Interface 2023.05.28 Standalone</h1>
 
 <table id="tiler">
  
@@ -315,6 +315,14 @@
       </td>
      </tr>
      <tr>
+      <td colspan="2">Label font size</td>
+      <td>
+       <input id="slide_labels_size" type="text" value="" onchange="tsai.draw_slide_labels_size();"/>
+       <input type="button" value="&#9660;" onclick="tsai.draw_slide_labels_size_crement(-0.5);"/>
+       <input type="button" value="&#9650;" onclick="tsai.draw_slide_labels_size_crement( 0.5);"/>
+      </td>
+     </tr>
+     <tr>
       <td colspan="2">Brightness</td>
       <td>
        <input id="slide_brightness" type="text" value="1" onchange="tsai.draw_filter();"/>
@@ -357,6 +365,10 @@
     <input type="button" value="&#9650;" onclick="tsai.draw_zoom_crement(Math.sqrt(2));"/>
    </div>
    <div id="slide_tabs">&nbsp;</div>
+   <div id="slide_labels_tab">
+    <input id="slide_labels" type="checkbox" onclick="tsai.draw_slide_labels(this);"/>
+    <label for="slide_labels"> Label tiles</label>
+   </div>
   </td>
   <td class="tile_bar">
    <div id="tile_builder_div" class="tile_bar tile_builder" style="display:none;">&nbsp;</div>
@@ -397,7 +409,7 @@
      <div id="tile_polygon_revert" style="display:none;"><span onclick="javascript:tsai.polygon_file_revert();">Revert to before polygons import</span></div>
     </div>
     
-    <!-- ##########  POLYGON  ########## -->
+    <!-- ##########  TMA  ########## -->
     <div id="tile_tma" style="display:none;">
      <div><span onclick="tsai.tma_close();">Close [&times;]</span></div>
      <table id="tile_tma_rows_columns">
