@@ -21,7 +21,8 @@ If you wish to integrate your instrument's FOV presets as well as links to your 
 7. For each line `tsai.preset_recommended('...', [...]);`, edit the preset/dwell time combinations to match those recommended on your MIBIcontrol.
 8. Uncomment (remove `//` from) and edit the various other presets to change the default style settings, e.g. line thickness or arrow key nudge distance.
 9. Save your changes to `index.js`.
-10. Open `index.html`.
+10. If uploading to a web server, perform `chmod 755 *.*` on all directories.
+11. Open `index.html`.
 
 ## 3. Usage instructions
 Screen capture videos will be submitted as part of a manuscript submission. Usage instructions will also be placed on on protocols.io if accepted.
