@@ -58,6 +58,9 @@ tsai.coregistration_default('0,0,-27.408,75.483|1131,0,51.487,76.103|0,1131,-26.
 // tsai.action_nudge_shift(200);       // default nudge distance in microns
 // tsai.cursor_size(27);               // default cursor size
 // tsai.cursor_opacity(0.8);           // default cursor opacity
+// tsai.slide_labels(false);           // draw tile labels onto slide image
+// tsai.slide_labels_font('Source Sans Pro'); // default font for slide image tile labels
+// tsai.slide_labels_size(18);         // default size for slide image tile labels
 // tsai.line_thickness(2);             // default line thickness
 // tsai.line_circle(5);                // default detection radius for closing polygon and expanding tma
 // tsai.line_color_default('#ffffff'); // default line color
