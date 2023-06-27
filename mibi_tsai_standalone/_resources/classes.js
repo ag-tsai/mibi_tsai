@@ -9,9 +9,9 @@
    Major sections (*** denotes important):
     Variables and user functions for changing settings
      url                  : standalone, tsai, run_log, mibi_tracker, mibi_control, mibi_configuration, mibi_hv, mibi_service, mibi_settings
-     json                 : slide_id, section_ids, name, original, empty, split
-     mibi                 : fovs, rasters, dwells, presets, recommended, sed_crop {left, right}
-     coregistration       : cookie, last, automatic_time, automatic_coordinates, manual_time, manual_coordinates, default, shift*** {x_x, x_y, y_x, y_y}
+     json                 : slide_id, section_ids, name, original, empty, tiles, list {sequential, random}, split, changed, resume, rearrange
+     mibi                 : version, fovs, focus_sites, focus_onlys, rasters, dwells, presets, recommended, sed_crop {left, right}
+     coregistration       : cookie, last, automatic_time, automatic_coordinates, manual_time, manual_coordinates, json, default, shift*** {x_x, x_y, y_x, y_y}
      action               : type***, item***, mouse_down, mouse_up, mouse_dragged, nudge_opt, nudge, nudge_shift
      tiles***             : [] -> {fov, map, original}
      image***, images*** {optical, sed, import} -> name, key***, img, type, crop, coordinates***, scale***, transform***, brightness, contrast, loaded
@@ -20,19 +20,19 @@
      scratch              : tiles, polygon***, polygons, polygons_revert, corners, shift***
      coordinates          : optical, import, sed, crosshair, line_color_default, line_thickness, line_opacity, line_colors
     Body onload           : onload***
-    General               : cookie_set, cookie_get, array_copy, time_pad, time_format, element_position***, element_toggle, element_toggle_on, element_toggle_off, menus_close
+    General               : cookie_set, cookie_get, copy_array, time_pad, time_format, element_position***, element_toggle, element_toggle_on, element_toggle_off, menus_close
     Matrix                : matrix_diagonal, matrix_identity, matrix_inverse, matrix_transpose, matrix_dot_matrix, matrix_dot_vector, matrix_perspective_coefficients***, matrix_perspective***, matrix_perspective_transform***, matrix_perspective_reverse***
     General action        : action_position***, action_event***, action_clear, action_prerender***
     Files                 : files_drop, files_append, files_drag_over, files_drag_leave, files_load***, files_sort***
     Label                 : labels_insert, labels_load, labels_build, labels_select, labels_close
     Image                 : image_load***, image_tab***, image_tab_reset, image_save
-    JSON parse            : json_equal, json_parse_id, json_parse_preset, json_warnings, json_warnings_clear, json_read***, json_append, json_load***
-    JSON write            : json_changed, json_resume_write, json_split_select, json_seconds_to_hours_minutes, json_resume_split_write***, json_resume_split_download, json_random, json_build***, json_export***, json_build_download, json_time***
+    JSON parse            : json_equal, json_equal_strict, json_parse_id, json_parse_preset, json_warnings, json_warnings_clear, json_read***, json_append, json_load***
+    JSON build            : json_summary***, json_radio, json_fovs***, json_empty, json_resume, json_lists***, json_sort, json_random, json_random_groups, json_buttons, json_dragover, json_dragdrop, json_dragstart, json_dragbefore, json_split, json_split_fovs, json_split_time, json_time, json_export
     Draw shapes           : draw_clear***, draw_line***, draw_rect, draw_cursor, draw_cursor_size, draw_cursor_color, draw_cursor_size_crement, draw_cursor_opacity, draw_cursor_opacity_crement, draw_line_thickness, draw_line_thickness_crement
-    Draw image            : draw_zoom, draw_zoom_crement, draw_filter, draw_filter_crement, draw_reset***
-    Tile draw general     : tile_corners_shifted***, tile_corners***, tile_corners_draw***, tiles_draw***, tile_draw***, draw_slide_labels, draw_slide_labels_size, draw_slide_labels_size_crement, tile_hover***, tile_hover_click
+    Draw image            : draw_zoom, draw_zoom_crement, draw_filter, draw_filter_crement, draw_key, draw_reset***
+    Tile draw general     : tile_fov_corners***, tile_draw_autofocus***, tile_draw_fov***, tiles_draw***, tile_draw***, draw_slide_labels, draw_slide_labels_size, draw_slide_labels_size_crement, draw_slide_focus_circles, tile_hover***, tile_hover_click
     Tile builder          : tiles_selects, tiles_builder, tiles_builder_slide_id, tiles_build
-    Tile div              : tiles_write***, tile_div***, tile_menu, tile_expand, tile_name, tile_position_set, tile_fov, tile_raster, tile_preset, tile_dwell, tile_depth, tile_slide_id, tile_section_id, tile_reset, tile_delete, tile_pixels
+    Tile div              : tiles_write***, tile_div***, tile_menu, tile_expand, tile_name, tile_position_set, tile_fov, tile_raster, tile_preset, tile_dwell, tile_depth, tile_focus_site, tile_focus_only, tile_slide_id, tile_section_id, tile_reset, tile_delete, tile_pixels
     Tile map              : tile_map_crement, tile_map_unshift, tile_map_resize***, tile_map_check
     Coregistration        : coregistration_load***, coregistration_set***, coregistration_cookie_set, coregistration_link, coregistration_from_micron***, coregistration_to_micron***
     Optical coregistration: optical_to_base64, optical_from_base64, optical_automatic_code***, optical_coordinates_fill, optical_manual_code***, optical_coordinates_draw, optical_coordinates***, optical_action***, optical_set
@@ -83,31 +83,43 @@ class MIBI_TSAI {
 
 
 url={
- standalone:         false,     // true writes URLs to standalone navigation bar
- tsai:               '',        // url to TSAI
- run_log:            '',        // url to run log
- mibi_tracker:       '',        // url to MIBItracker
- mibi_control:       'http://ionpath/#/',          // url to MIBIcontrol
- mibi_configuration: 'http://ionpath/config-ui/',  // url to MIBI configuration UI
- mibi_hv:            'http://ionpath/hv-ui/',      // url to MIBI HV control
- mibi_service:       'http://ionpath/service-ui/', // url to MIBI service UI
- mibi_settings:      'http://ionpath/settings-ui/' // url to MIBI settings UI
+ standalone:            false,     // true writes URLs to standalone navigation bar
+ tsai:                  '',        // url to TSAI
+ run_log:               '',        // url to run log
+ mibi_tracker:          '',        // url to MIBItracker
+ mibi_control:          'http://ionpath/#/',          // url to MIBIcontrol
+ mibi_configuration:    'http://ionpath/config-ui/',  // url to MIBI configuration UI
+ mibi_hv:               'http://ionpath/hv-ui/',      // url to MIBI HV control
+ mibi_service:          'http://ionpath/service-ui/', // url to MIBI service UI
+ mibi_settings:         'http://ionpath/settings-ui/' // url to MIBI settings UI
 }
 json={
- slide_id:           0,
- section_ids:        [], 
- name:               '',        // file name (pulled from image)
- original:           {},        // parsed json file
- empty:              '',        // stringified json file without FOVs
- split:              []         // storage for split FOVs [{button, suffix, [fovs]}]
+ slide_id:              0,
+ section_ids:           [], 
+ name:                  '',        // file name (pulled from image)
+ original:              {},        // parsed json file
+ empty:                 '',        // stringified json file without FOVs
+ tiles:                 [],        // tiles for last json_lists
+ list:
+ {sequential:           [],        // sequential array of {fov:reference to fov, tile:tile_index, group:group_index, focus_x:x, focus_y:y, time:seconds}
+  random:               []         // randomized array of {fov:reference to fov, tile:tile_index, group:group_index, focus_x:x, focus_y:y, time:seconds}
+ },
+ split:                 [],        // array of {button, suffix with fovs, [fovs]}
+ changed:               false,     // if tiles changed from json.original
+ resume:                0          // last index for json resume
 }
 mibi={
- fovs:               [],        // list of allowable fov sizes
- rasters:            [],        // list of allowable imaging raster sizes
- dwells:             [],        // list of allowable dwell times and their corresponding indexes
- presets:            {},        // jsons of default fovs
- recommended:        {},        // recommended settings for fovs
- sed_crop:           {left: 0, right:0} // number 
+ fovs:                  [],        // list of allowable fov sizes
+ version:               '1.6',     // fovFormatVersion
+ version_latest:        '1.6',     // current fovFormatVersion
+ version_prior:         '1.5',     // version prior to focusOnly and focusSite
+ focus_sites:           ['None', 'FOV', 'NW', 'N', 'NE', 'W', 'E', 'SW', 'S', 'SE'], // list of allowable focus sites
+ focus_onlys:           [0, 1],    // list of allowable focus only values
+ dwells:                [],        // list of allowable dwell times and their corresponding indexes
+ rasters:               [],        // list of allowable imaging raster sizes
+ presets:               {},        // dictionary of [version][jsons of default fovs]
+ recommended:           {},        // recommended settings for fovs
+ sed_crop:              {left: 0, right:0} // percentage to crop from left and right of SED image
 }
 coregistration={
  cookie:                '',     // name of coregistration cookie
@@ -116,118 +128,130 @@ coregistration={
  automatic_coordinates: '',     // automatic coregistration coordinates as string
  manual_time:           '',     // time manual coregistration performed
  manual_coordinates:    '',     // manual coregistration coordinates as string
+ json:                  '',     // json coregistration coordinates as string
  default:               '',     // default coregistration coordinates as string
  shift:                 {x_x: 0, x_y: 0, y_x: 0, y_y: 0} // correction coefficients for mibi shift
 }
 action={
- type:               '',        // selected action
- item:               -1,        // identifier (e.g. index) of item (e.g. tile) selected for action
- mouse_down:         {},        // canvas coordinate on mousedown {x: x, y: y}
- mouse_up:           {},        // canvas coordinate on mouseup   {x: x, y: y}
- mouse_dragged:      false,     // if mouse moved between mousedown and mouseup, if mousedown==mouseup can be that user returned to the exact same position
- nudge_opt:          20,        // microns to nudge tiles when using tile arrow nudge buttons or tile arrow keys
- nudge:              100,       // microns to nudge tiles when using tile arrow nudge buttons or tile arrow keys
- nudge_shift:        200
+ type:                  '',        // selected action
+ item:                  -1,        // identifier (e.g. index) of item (e.g. tile) selected for action
+ mouse_down:            {},        // canvas coordinate on mousedown {x: x, y: y}
+ mouse_up:              {},        // canvas coordinate on mouseup   {x: x, y: y}
+ mouse_dragged:         false,     // if mouse moved between mousedown and mouseup, if mousedown==mouseup can be that user returned to the exact same position
+ nudge_opt:             20,        // microns to nudge tiles when using tile arrow nudge buttons or tile arrow keys
+ nudge:                 100,       // microns to nudge tiles when using tile arrow nudge buttons or tile arrow keys
+ nudge_shift:           200
 }
-tiles=               [];        // tile information [{fov: json, map: [[0 or 1]], original: {fov: fov stringified, map: map stringified}}]
-image=               '';        // reference to currently loaded image
+tiles=                  [];        // tile information [{fov: json, map: [[0 or 1]], original: {fov: fov stringified, map: map stringified}}]
+image=                  '';        // reference to currently loaded image
 images={
  optical:
- {name:              'Optical',
-  key:               'optical', // name of key in images[]
-  img:               null,      // img object
-  type:              '',        // coregistration type: automatic or manual or json
-  crop:              0,         // number of pixels to crop from left and right
-  coordinates:       [],        // coregistration coordinates, unscaled
-  scale:             0,         // multiplier for current zoom
-  transform:         {},        // coregistration coefficients, scaled
-  brightness:        1,
-  contrast:          1,
-  loaded:            false      // true if image loaded into context, false if not
+ {name:                 'Optical',
+  key:                  'optical', // name of key in images[]
+  img:                  null,      // img object
+  type:                 '',        // coregistration type: automatic or manual or json
+  crop:                 0,         // number of pixels to crop from left and right
+  coordinates:          [],        // coregistration coordinates, unscaled
+  scale:                0,         // multiplier for current zoom
+  transform:            {},        // coregistration coefficients, scaled
+  brightness:           1,
+  contrast:             1,
+  loaded:               false      // true if image loaded into context, false if not
  },
  sed:
- {name:              'SED',
-  key:               'sed',     // name of key in images[]
-  img:               null,      // img object
-  type:              'sed',     // coregistration type
-  crop:              0,         // number of pixels to crop from left and right
-  coordinates:       [],        // coregistration coordinates, unscaled
-  scale:             0,         // multiplier for current zoom
-  transform:         {},        // coregistration coefficients, scaled
-  brightness:        1,
-  contrast:          1,
-  loaded:            false      // true if image loaded into context, false if not
+ {name:                 'SED',
+  key:                  'sed',     // name of key in images[]
+  img:                  null,      // img object
+  type:                 'sed',     // coregistration type
+  crop:                 0,         // number of pixels to crop from left and right
+  coordinates:          [],        // coregistration coordinates, unscaled
+  scale:                0,         // multiplier for current zoom
+  transform:            {},        // coregistration coefficients, scaled
+  brightness:           1,
+  contrast:             1,
+  loaded:               false      // true if image loaded into context, false if not
  },
  import:
- {name:              'Import',
-  key:               'import',  // name of key in images[]
-  img:               null,      // img object
-  type:              'import',  // coregistration type
-  crop:              0,         // number of pixels to crop from left and right
-  coordinates:       [],        // coregistration coordinates, unscaled
-  scale:             0,         // multiplier for current zoom
-  transform:         {},        // coregistration coefficients, scaled
-  brightness:        1,
-  contrast:          1,
-  loaded:            false      // true if image loaded into context, false if not
+ {name:                 'Import',
+  key:                  'import',  // name of key in images[]
+  img:                  null,      // img object
+  type:                 'import',  // coregistration type
+  crop:                 0,         // number of pixels to crop from left and right
+  coordinates:          [],        // coregistration coordinates, unscaled
+  scale:                0,         // multiplier for current zoom
+  transform:            {},        // coregistration coefficients, scaled
+  brightness:           1,
+  contrast:             1,
+  loaded:               false      // true if image loaded into context, false if not
 }}
 canvas={
- draw:               null,      // main canvas draw layer
- draw_context:       null,      // main canvas draw layer context
- prerender:          null,      // prerender canvas draw
- prerender_context:  null,      // prerender canvas draw context/context before interactive drawing
- div:                null,      // div containing canvas and slide
- optical_crop:       250,       // number of pixels to crop from left and right of optical images, user editable
- optical_bounds:     {left: 380, right: 748, top: 0, bottom: 1132}, // rough slide boundaries in optical pixels, only used for warning user if possibly imaging outside these boundaries
- cursor_size:        27,        // default cursor size
- cursor_opacity:     0.8,       // default cursor opacity
- cursor_color:       '#fff',    // default cursor color
- slide_labels:       false,     // draw FOV labels onto slide image
- slide_labels_font:  'Source Sans Pro', // default tile label font
- slide_labels_size:  18,        // default tile label font size
- line_thickness:     2,         // default line thickness
- line_circle:        5,         // default detection radius for closing polygon and expanding tma
- line_color:         '#ffffff', // default line color
- line_colors:        [],        // list of background/line colors and accompanying text colors for tiles
- hover_line_opacity: 0.18,      // hovered tile line opacity
- hover_fill_opacity: 0.36,      // hovered tile line opacity
+ draw:                  null,      // main canvas draw layer
+ draw_context:          null,      // main canvas draw layer context
+ prerender:             null,      // prerender canvas draw
+ prerender_context:     null,      // prerender canvas draw context/context before interactive drawing
+ div:                   null,      // div containing canvas and slide
+ optical_crop:          250,       // number of pixels to crop from left and right of optical images, user editable
+ optical_bounds:        {left: 0.32, right: 0.68, top: 0.25, bottom: 1}, // rough slide boundaries in percentages, only used for warning user if possibly imaging outside these boundaries
+ cursor_size:           27,        // default cursor size
+ cursor_opacity:        0.8,       // default cursor opacity
+ cursor_color:          '#fff',    // default cursor color
+ slide_labels:          true,      // draw FOV labels onto slide image
+ slide_labels_font:     'Source Sans Pro', // default tile label font
+ slide_labels_size:     18,        // default tile label font size
+ slide_focus_circles:   false,     // draw autofocus circles
+ line_thickness:        2,         // default line thickness
+ line_circle:           5,         // default detection radius for closing polygon and expanding tma
+ line_color:            '#ffffff', // default line color
+ line_colors:           [],        // list of background/line colors and accompanying text colors for tiles
+ hover_line_opacity:    0.18,      // hovered tile line opacity
+ hover_fill_opacity:    0.36,      // hovered tile line opacity
 }
 tma={
- crosshair:          3.5,       // tma positioning crosshair arm length
- line_opacity:       0.7,       // tma line transparency
- labels:             [],        // label map
- rows:               1,         // number of tma rows
- columns:            1,         // number of tma columns
- row_start:          1,         // start index for row numbering
- column_start:       1,         // start index for coolumn numbering
- order:              'tl0',     // default tma build order
- orders:             {tl0: [0, 1, 2, 3], tl1: [0, 3, 2, 1], tr0: [1, 2, 3, 0], tr1: [1, 0, 3, 2], br0: [2, 3, 0, 1], br1: [2, 1, 0, 3], bl0: [3, 0, 1, 2], bl1: [3, 2, 1, 0]},
- points:             0,         // number of points in corners
- corners:            [0, 0, 0, 0, 0, 0, 0, 0], // tma corner points in pixels
- corner_adjust:      -1,        // index of corner being adjusted
- corner_start:       {},
- revert:             ''         // stringified json prior to tma build
+ crosshair:             3.5,       // tma positioning crosshair arm length
+ line_opacity:          0.7,       // tma line transparency
+ labels:                [],        // label map
+ rows:                  1,         // number of tma rows
+ columns:               1,         // number of tma columns
+ row_start:             1,         // start index for row numbering
+ column_start:          1,         // start index for coolumn numbering
+ order:                 'tl0',     // default tma build order
+ orders:                {tl0: [0, 1, 2, 3], tl1: [0, 3, 2, 1], tr0: [1, 2, 3, 0], tr1: [1, 0, 3, 2], br0: [2, 3, 0, 1], br1: [2, 1, 0, 3], bl0: [3, 0, 1, 2], bl1: [3, 2, 1, 0]},
+ points:                0,         // number of points in corners
+ corners:               [0, 0, 0, 0, 0, 0, 0, 0], // tma corner points in pixels
+ corner_adjust:         -1,        // index of corner being adjusted
+ corner_start:          {},
+ revert:                ''         // stringified json prior to tma build
 }
 scratch={
- tiles:              [],        // tile information for imported fovs, format same as tsai.tiles
- polygon:            [],        // array of coordinates for polygon [{x: x, y: y}]
- polygons:           [],        // coordinates for polygon import
- polygons_revert:    '',        // stringified json prior to polygon import
- corners:            {},        // coordinates of corners of tiled fovs
- shift:              {}         // json correction coefficients for mibi shift
+ tiles:                 [],        // tile information for imported fovs, format same as tsai.tiles
+ polygon:               [],        // array of coordinates for polygon [{x: x, y: y}]
+ polygons:              [],        // coordinates for polygon import
+ polygons_revert:       '',        // stringified json prior to polygon import
+ corners:               {},        // coordinates of corners of tiled fovs
+ shift:                 {}         // json correction coefficients for mibi shift
 }
 coordinates={
- optical:            [['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', '']], // optical coordinates for manual coregistration, four pairs
- import:             [['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', '']], // micron coordinates for json import, four pairs
- sed:                [['', ''], ['', '']], // micron coordinates for full sed mode, two pairs
- crosshair:          10,        // coordinates crosshair arm length
- line_color_default: '#ffffff', // default line color
- line_thickness:     3,         // coordinates line thickness
- line_opacity:       0.8,       // coordinates line opacity
- line_colors:        []         // list of background/line colors and accompanying text colors for coordinate boxes
+ optical:               [['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', '']], // optical coordinates for manual coregistration, four pairs
+ import:                [['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', '']], // micron coordinates for json import, four pairs
+ sed:                   [['', ''], ['', '']], // micron coordinates for full sed mode, two pairs
+ crosshair:             10,        // coordinates crosshair arm length
+ line_color_default:    '#ffffff', // default line color
+ line_thickness:        3,         // coordinates line thickness
+ line_opacity:          0.8,       // coordinates line opacity
+ line_colors:           []         // list of background/line colors and accompanying text colors for coordinate boxes
 }
 
 /* ##########  USER FUNCTIONS  ########## */
+version(version)
+{if(!(tsai.mibi.version_latest in tsai.mibi.presets)) tsai.mibi.presets[tsai.mibi.version_latest]={};
+ if(!(tsai.mibi.version_prior  in tsai.mibi.presets)) tsai.mibi.presets[tsai.mibi.version_prior ]={};
+ var version=parseFloat(version);
+ tsai.mibi.version=(!isNaN(version) && version>=parseFloat(tsai.mibi.version_latest)?tsai.mibi.version_latest:tsai.mibi.version_prior);
+ var version_latest=(tsai.mibi.version==tsai.mibi.version_latest);
+ if(document.getElementById('slide_focus_circles_tab' )) document.getElementById('slide_focus_circles_tab' ).style.display=(version_latest?'':'none');
+ if(document.getElementById('json_group_autofocus_row')) document.getElementById('json_group_autofocus_row').style.display=(version_latest?'':'none');
+ tsai.json_lists(true, true);
+}
 url_standalone(            bool         ) {tsai.url.standalone=!(bool==false || bool==0);}
 url_tsai(                  href         ) {tsai.url.tsai=href;}
 url_run_log(               href         ) {tsai.url.run_log=href;}
@@ -239,10 +263,12 @@ url_mibi_service(          href         ) {tsai.url.mibi_service=href;}
 url_mibi_settings(         href         ) {tsai.url.mibi_settings=href;}
 coregistration_cookie(     name         ) {tsai.coregistration.cookie=name;}
 coregistration_default(    coordinates  ) {tsai.coregistration.default=coordinates;}
-fov_add(                   fov          ) {tsai.mibi.fovs   .push(fov   );}
-raster_add(                raster       ) {tsai.mibi.rasters.push(raster);}
-dwell_add(                 dwell, timing) {tsai.mibi.dwells .push([dwell, timing]);}
-preset_add(                name , json  ) {tsai.mibi.presets[name]=json;}
+focus_site_add(            site         ) {if(!tsai.mibi.focus_sites.includes(site  )) tsai.mibi.focus_sites.push(site  );}
+focus_only_add(            only         ) {if(!tsai.mibi.focus_onlys.includes(only  )) tsai.mibi.focus_onlys.push(only  );}
+fov_add(                   fov          ) {if(!tsai.mibi.fovs       .includes(fov   )) tsai.mibi.fovs       .push(fov   );}
+raster_add(                raster       ) {if(!tsai.mibi.rasters    .includes(raster)) tsai.mibi.rasters    .push(raster);}
+dwell_add(                 dwell, timing) {tsai.mibi.dwells.forEach((pair)=>{if(pair[0]==dwell && pair[1]==timing) return;}); tsai.mibi.dwells.push([dwell, timing]);}
+preset_add(                name , json  ) {tsai.mibi.presets['focusSite' in json?tsai.mibi.version_latest:tsai.mibi.version_prior][name]=json;}
 preset_recommended(        key, values  ) {tsai.mibi.recommended[key]=values;}
 optical_crop(              pixels       ) {tsai.canvas.optical_crop=pixels;}
 optical_bounds(            bounds       ) {tsai.canvas.optical_bounds=bounds;}
@@ -309,8 +335,7 @@ onload()
  document        .addEventListener('dragenter', function(event) {event.stopPropagation(); event.preventDefault();}, false);
  document        .addEventListener('dragover' , function(event) {event.stopPropagation(); event.preventDefault();}, false);
  // miscellaneous cosmetic setup
- tsai.tiles=tsai.json_load('{"exportDateTime": "'+tsai.time_format().json+'", "fovFormatVersion": "1.5", "fovs": []}');
- document.getElementById('json_time'           ).value=tsai.time_format().json;
+ tsai.tiles=tsai.json_load('{"exportDateTime": "'+tsai.time_format().json+'", "fovFormatVersion": "'+tsai.mibi.version+'", "fovs": []}');
  document.getElementById('labels_table'        ).style.width=(parseFloat(document.getElementById('tiles_scroll').getBoundingClientRect().right)-80)+'px';
  document.getElementById('slide_cursor_size'   ).value=tsai.canvas.cursor_size;
  document.getElementById('slide_cursor_opacity').value=tsai.canvas.cursor_opacity;
@@ -318,7 +343,7 @@ onload()
  document.getElementById('slide_tma_crosshair' ).value=tsai.tma.crosshair;
  document.getElementById('slide_labels'        ).checked=tsai.canvas.slide_labels;
  document.getElementById('slide_labels_size'   ).value=tsai.canvas.slide_labels_size;
- tsai.json_resume_write();
+ tsai.version(tsai.mibi.version);
  tsai.draw_cursor();
  for(var index=0; index<4; index++)
  {for(var system=0; system<2; system++)
@@ -355,12 +380,44 @@ cookie_set(x,y) {document.cookie=x+'='+y+'; expires='+(new Date(2888,1,1,0,0,0))
 cookie_get(x) {var x=document.cookie.match('(^|;) ?'+x+'=([^;]*)(;|$)'); return (x?x[2]:null);}
 
 /* ##########  ARRAY  ########## */
-// JavaScript requires an array_copy function rather than just assignment operator because array variables are passed by reference.
-array_copy(array_from)
+// JavaScript requires an copy_array function rather than just assignment operator because array variables are passed by reference.
+copy_array(array_from)
 {var array_to=[];
  for(var index=0; index<array_from.length; index++)
- {if(Array.isArray(array_from[index])) array_to[index]=tsai.array_copy(array_from[index]);
+ {if(Array.isArray(array_from[index])) array_to[index]=tsai.copy_array(array_from[index]);
   else array_to[index]=array_from[index];
+ }
+ return array_to;
+}
+
+/* ########## OBJECT  ########## */
+// A more general case of copy_array
+copy_object(object_from)
+{if(typeof object_from==='object')
+ {if(Array.isArray(object_from))
+  {var object_to=[];
+   for(var index=0; index<object_from.length; index++) object_to[index]=tsai.copy_object(object_from[index]);
+   return object_to;
+  }
+  else
+  {var object_to={};
+   var keys=Object.keys(object_from);
+   for(var key=0; key<keys.length; key++) object_to[keys[key]]=tsai.copy_object(object_from[keys[key]]);
+   return object_to;
+ }}
+ if(object_from===null) return false;
+ // if(typeof object_from==='function') return object_from;
+ return object_from;
+}
+
+/* ##########  FOVS BUILD ARRAY  ########## */
+// array of {fov:reference to fov, tile:tile_index, focus_x:x, focus_y:y, time:seconds}
+copy_fovs_build(array_from)
+{var array_to=[];
+ for(var index=0; index<array_from.length; index++)
+ {array_to[index]={};
+  var keys=Object.keys(array_from[index]);
+  for(var key=0; key<keys.length; key++) array_to[index][keys[key]]=array_from[index][keys[key]];
  }
  return array_to;
 }
@@ -377,6 +434,7 @@ time_format(time) // time is formatted to a Date object
   h12: time.getHours()%12==0?12:time.getHours()%12,
   m: tsai.time_pad(time.getMinutes()),
   s: tsai.time_pad(time.getSeconds()),
+  ms: tsai.time_pad(time.getMilliseconds()),
   json: time.toJSON().substring(0, 19),
   ampm: (time.getHours()>=12?' PM':' AM')
  };
@@ -386,7 +444,8 @@ time_format(time) // time is formatted to a Date object
   // hm24c: extract.h24+':'+extract.m,
   // json: extract.ymd+'T'+extract.h24+':'+extract.m+':'+extract.json.substring(17,19),
   ymd: extract.ymd,
-  ymdhms24: extract.ymd+'-'+extract.h24+extract.m+extract.s,
+  ymdhmsm: extract.ymd+'-'+extract.h24+extract.m+extract.s+extract.ms,
+  ymdhms: extract.ymd+'-'+extract.h24+extract.m+extract.s,
   hms24: extract.h24+extract.m+extract.s,
   hms24c: extract.h24+':'+extract.m+':'+extract.s,
   hm12c: extract.h12+':'+extract.m+extract.ampm,
@@ -409,7 +468,7 @@ element_position(element)
 
 /* ##########  TOGGLE  ########## */
 element_toggle(element)
-{if((typeof element=='object'?element:document.getElementById(element)).innerHTML.replace(/<.+?>/g, '').indexOf('[+]')!=-1) tsai.element_toggle_on(element);
+{if((typeof element=='object'?element:document.getElementById(element)).innerHTML.replace(/<.+?>/g, '').includes('[+]')) tsai.element_toggle_on(element);
  else tsai.element_toggle_off(element);
 }
 
@@ -451,10 +510,11 @@ menus_close(except)
    tsai.matrix_perspective_reverse(  coefficients, into) returns the transformation into -> from
 */
 matrix_diagonal(vector)
-{var diagonal=[];
- for(var row=0; row<vector.length; row++)
+{var vector_length=vector.length;
+ var diagonal=[];
+ for(var row=0; row<vector_length; row++)
  {var index=diagonal.push([])-1;
-  for(var column=0; column<vector.length; column++) diagonal[index].push(row==column?0:vector[index]);
+  for(var column=0; column<vector_length; column++) diagonal[index].push(row==column?0:vector[index]);
  }
  return diagonal;
 }
@@ -472,7 +532,7 @@ matrix_inverse(matrix)
 {// A[0...m][0...n]
  var m=matrix.length;
  var n=matrix[0].length;
- var A=tsai.array_copy(matrix)
+ var A=tsai.copy_array(matrix)
  var inverse=tsai.matrix_identity(m);
  for(var j=0; j<n; j++)
  {var i0=-1;
@@ -604,7 +664,10 @@ action_position(event)
 action_event(type, event)
 {var position=tsai.action_position(event);
  switch(type)
- {case 'mousedown':
+ {case 'keydown':
+   tsai.draw_key(type, event, position);
+   break;
+  case 'mousedown':
    tsai.action.mouse_down=position;
    tsai.action.mouse_dragged=false;
    break;
@@ -646,7 +709,8 @@ action_clear(radios)
  tsai.action.item=null;
  if(radios)
  {var radios=document.getElementsByName('action_radio');
-  for(var radio=0; radio<radios.length; radio++) radios[radio].checked=false;
+  var radios_length=radios.length;
+  for(var radio=0; radio<radios_length; radio++) radios[radio].checked=false;
 }}
 
 /* ##########  PRERENDER  ########## */
@@ -724,8 +788,7 @@ files_sort(file)
 files_append(file)
 {var extension=file.name.substring(file.name.lastIndexOf('.'));
  if(extension=='.json')
- {if(!('fovs' in tsai.json.original) && !confirm('A prior .json has not beed loaded. The coregistration may not be correct and tile structure may not be rebuilt correctly. Are you sure you want to continue?')) return;
-  document.getElementById('files_appended').innerHTML+=(document.getElementById('files_appended').innerHTML.trim()==''?'':'<br/>')+file.name;
+ {document.getElementById('files_appended').innerHTML+=(document.getElementById('files_appended').innerHTML.trim()==''?'':'<br/>')+file.name;
   document.getElementById('files_appended').style.display='';
   tsai.json_append(file);
 }}
@@ -831,8 +894,8 @@ image_load(key, file, crop)
    tsai.images[key].brightness=1;
    tsai.images[key].contrast=1;
    if(key=='sed') tsai.coregistration_set('sed', file.name, tsai.time_format(file.name.match(/(\d\d\d\d)\-(\d\d)\-(\d\d)\-(\d\d)(\d\d)(\d\d)/)).readable);
-   tsai.images[key].loaded=true; // must be AFTER coregistration_set('sed'
-   // tsai.image_tab(key, 2); // loading first at 2x size prevents screen tearing when going from 1x to 2x
+   tsai.images[key].loaded=true; // must be AFTER coregistration_set('sed' ...
+   document.getElementById('json_image_save').style.display='';
    tsai.image_tab(key, (tsai.images[key].img.naturalWidth>1500 || tsai.images[key].img.naturalHeight>1500)?0.5:1);
    setTimeout(()=>{tsai.draw_reset();}, 100); // I have no idea why I have to do this but otherwise tiles are drawn a few pixels off
 }}}
@@ -885,7 +948,7 @@ image_tab_reset(key)
 /* ##########  IMAGE SAVE  ########## */
 image_save(tiles)
 {if(!tsai.menus_close('labels')) return;
- if(!tsai.image.loaded) return;
+ // if(!tsai.image.loaded) return;
  var canvas=document.createElement('canvas');
  var context=canvas.getContext('2d');
  canvas.style='display:none;';
@@ -901,7 +964,7 @@ image_save(tiles)
   {let url=window.URL || window.webkitURL;
   let anchor=document.createElement('a');
   anchor.href=url.createObjectURL(blob);
-  anchor.download=tsai.json.name+'_'+tsai.time_format().ymdhms24+'.png';
+  anchor.download=tsai.json.name+'_'+tsai.time_format().ymdhms+'.png';
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
@@ -922,7 +985,8 @@ json_equal(json0, json1)
  var keys0=(json0==null?[]:Object.keys(json0));
  var keys1=(json1==null?[]:Object.keys(json1));
  // if(keys0.length!=keys1.length) return false;
- for(var key=0; key<keys0.length; key++)
+ var keys0_length=keys0.length;
+ for(var key=0; key<keys0_length; key++)
  {if(keys0[key]=='notes') continue;
   if(!keys1.includes(keys0[key])) return false;
   if(keys0[key]=='x' || keys0[key]=='y')
@@ -939,6 +1003,42 @@ json_equal(json0, json1)
  return true;
 }
 
+json_equal_strict(json0, json1)
+{// return JSON.stringify(json0)==JSON.stringify(json1);
+ var keys0=(json0==null?[]:Object.keys(json0));
+ var keys1=(json1==null?[]:Object.keys(json1));
+ if(keys0.length!=keys1.length) return false;
+ var keys0_length=keys0.length;
+ for(var key=0; key<keys0_length; key++)
+ {if(keys0[key]=='notes') continue;
+  if(!keys1.includes(keys0[key])) return false;
+  if(keys0[key]=='x' || keys0[key]=='y')
+  {if(Math.abs(json0[keys0[key]]!=json1[keys0[key]])) return false; // sets threshold for json_load _R#C# tiling to 5 microns
+  }
+  else if(typeof json0[keys0[key]]=='object')
+  {if(typeof json1[keys0[key]]=='object')
+   {if(!tsai.json_equal(json0[keys0[key]], json1[keys0[key]])) return false;
+   }
+   else return false;
+  }
+  else {if(json0[keys0[key]]!=json1[keys0[key]]) return false;}
+ }
+ return true;
+}
+
+array_equal(array0, array1)
+{var length=array0.length;
+ if(length!=array1.length) return false;
+ for(var index=0; index<length; index++)
+ {if(Array.isArray(array0[index]))
+  {if(!Array.isArray(array1[index])) return false;
+   if(!tsai.array_equal(array0[index], array1[index])) return false;
+  }
+  else if(array0[index]!=array1[index]) return false;
+ }
+ return true;
+}
+
 json_parse_id(tile, key)
 {if(!(key in tile.fov)) return 0;
  var value=parseInt(tile.fov[key]);
@@ -948,22 +1048,25 @@ json_parse_id(tile, key)
 
 json_parse_preset(tile, warnings)
 {var preset=tile.fov.imagingPreset;
- var keys=Object.keys(tsai.mibi.presets);
+ var keys=Object.keys(tsai.mibi.presets[tsai.mibi.version]);
  for(var key=0; key<keys.length; key++)
- {if(tsai.json_equal(preset, tsai.mibi.presets[keys[key]].imagingPreset)) return;
+ {if(tsai.json_equal(preset, tsai.mibi.presets[tsai.mibi.version][keys[key]].imagingPreset)) return;
  }
  var name=tile.fov.name+' '+preset.displayName;
- tsai.mibi.presets[name]=JSON.parse(JSON.stringify(tile.fov));
+ tsai.mibi.presets[tsai.mibi.version][name]=JSON.parse(JSON.stringify(tile.fov));
  warnings('<li>'+(tile.fov.name.trim()!=''?tile.fov.name:'Tile '+(tile+1))+' settings not in presets, added as '+name+'</li>');
 }
 
 /* ##########  WARNINGS  ########## */
 json_warnings(warnings)
 {if(warnings=='') return false;
- var innerhtml=document.getElementById('json_warnings').innerHTML;
- var index=innerhtml.lastIndexOf('</li>');
- if(index==-1) document.getElementById('json_warnings').innerHTML='\n<div class="_layout_warnings">\n<h2>Warnings</h2>\n<ul>'+warnings.trim()+'</ul>\n<p><a href="javascript:tsai.json_warnings_clear();">Clear warnings\n</a>\n</p>\n</div>\n';
- else document.getElementById('json_warnings').innerHTML=innerhtml.substring(0, index)+'\n'+warnings.trim()+innerhtml.substring(index);
+ var div=document.getElementById('json_warnings');
+ warnings.split('<li>').filter((warning)=>(warning.trim()!='' && !div.innerHTML.includes('<li>'+warning))).forEach((warning)=>
+ {var innerhtml=div.innerHTML;
+  var index=innerhtml.lastIndexOf('</li>');
+  if(index==-1) div.innerHTML='\n<div class="_layout_warnings">\n<h2>Warnings</h2>\n<ul><li>'+warning+'</ul>\n<p><a href="javascript:tsai.json_warnings_clear();">Clear warnings\n</a>\n</p>\n</div>\n';
+  else div.innerHTML=innerhtml.substring(0, index+5)+'<li>'+warning+innerhtml.substring(index+5);
+ });
  return true;
 }
 
@@ -973,62 +1076,72 @@ json_warnings_clear()
 
 /* ##########################################
    ##########  JSON READ AND LOAD  ##########
-   ########################################## */
+   ##########################################
+   json_read (understand as read_json_file) opens .json files and handles overhead such as coregistration, slideId, and sectionId
+   json_load (understand as load_json_fovs) builds fovs into tiles and is also used by append and import
+*/
 json_read(file)
 {(async () =>
   {const file_text=await file.text();
-   tsai.json.name=file.name.replace(/\.json$/, '').replace(/_?\d\d\d\d\-\d\d\-\d\d\-\d\d\d\d\d\d(_sequential|_random_together|_random_mixed)*/, '');
-   tsai.json.original=JSON.parse(file_text);
-   var empty=JSON.parse(file_text);
-   empty.fovs=[];
-   tsai.json.empty=JSON.stringify(empty);
    if(tsai.menus_close())
-   {document.getElementById('files_appended').innerHTML='';
+   {var warnings='';
+    tsai.json.name=file.name.replace(/\.json$/, '').replace(/_?\d\d\d\d\-\d\d\-\d\d\-\d\d\d\d\d\d(_sequential|_random_together|_random_mixed)*/, '');
+    var empty=JSON.parse(file_text);
+    if(!('fovs' in empty) || empty.fovs.length==0) return;
+    empty.fovs=[];
+    tsai.json.empty=JSON.stringify(empty);
+    var json=JSON.parse(file_text);
+    document.getElementById('files_appended').innerHTML='';
     document.getElementById('files_appended').style.display='none';
+    tsai.version('fovFormatVersion' in json?json.fovFormatVersion:tsai.mibi.version_prior);
     tsai.json.slide_id=0;
     tsai.json.section_ids=[];
-    tsai.json_warnings_clear();
+    tsai.coregistration.json='';
     tsai.navigation_errors_clear();
     document.getElementById('navigation_adjustments').value='';
     document.getElementById('navigation_adjustments_output').innerHTML='';
-    if(('fovs' in tsai.json.original) && tsai.json.original.fovs.length>0)
-    {if(('notes' in tsai.json.original.fovs[0]) && tsai.json.original.fovs[0].notes!=null && tsai.json.original.fovs[0].notes.replace(/[^d]/g, '')!='') // new json has possible coregistration in notes section
-     {if(tsai.coregistration_set('json', tsai.optical_from_base64(tsai.json.original.fovs[0].notes), '')) // coregistration_set will place shift into scratch.shift
+    if(('fovs' in json) && json.fovs.length>0)
+    {if(('notes' in json.fovs[0]) && json.fovs[0].notes!=null && json.fovs[0].notes.replace(/[^d]/g, '')!='') // new json has possible coregistration in notes section
+     {if(tsai.coregistration_set('json', tsai.optical_from_base64(json.fovs[0].notes), '')) // coregistration_set will place shift into scratch.shift
       {if(!tsai.images.sed.loaded) tsai.coregistration.shift={x_x: tsai.scratch.shift.x_x, x_y: tsai.scratch.shift.x_y, y_x: tsai.scratch.shift.y_x, y_y: tsai.scratch.shift.y_y}; // sed image shift supercedes json shift
        for(var index=0; index<2; index++) // fill shift inputs
        {for(var axis=0; axis<2; axis++) document.getElementById('sed_shift_'+['x', 'y'][index]+'_'+['x', 'y'][axis]).value=tsai.coregistration.shift[['x', 'y'][index]+'_'+['x', 'y'][axis]];
        }
-       tsai.json.original.fovs[0].notes=null;
+       json.fovs[0].notes=null;
       }
       else
       {tsai.coregistration_load(); // if no coregistration_set, use last coregistration settings and load scratch.shift from tsai.coregistration.shift
        tsai.scratch.shift={x_x: tsai.coregistration.shift.x_x, x_y: tsai.coregistration.shift.x_y, y_x: tsai.coregistration.shift.y_x, y_y: tsai.coregistration.shift.y_y};
      }}
-     for(var index=0; index<tsai.json.original.fovs.length; index++) // must set tsai.json.slide_id before tsai.json_load()
-     {var slide_id=Math.abs(parseInt(tsai.json.original.fovs[index].slideId));
-      if(tsai.json.slide_id==0 && !isNaN(slide_id)) tsai.json.slide_id=slide_id;
-      else if(tsai.json.slide_id==0 || tsai.json.slide_id!=slide_id) tsai.json_warnings('<li>'+tsai.json.original.fovs[index].name+' invalid or mismatched slideId '+tsai.json.original.fovs[index].slideId+'</li>');
-      var section_id=Math.abs(parseInt(tsai.json.original.fovs[index].sectionId));
-      if(isNaN(section_id))
-      {tsai.json_warnings('<li>'+tsai.json.original.fovs[index].name+' invalid sectionId '+tsai.json.original.fovs[index].sectionId+'</li>');
-       if(tsai.json.section_ids.length>0) tsai.json.original.fovs[index].sectionId=tsai.json.section_ids[0];
-      }
-      else if(!tsai.json.section_ids.includes(section_id)) tsai.json.section_ids.push(section_id);
-    }}
+     var fovs=json.fovs.length;
+     for(var index=0; index<fovs; index++) // must set tsai.json.slide_id before tsai.json_load()
+     {var fov=json.fovs[index];
+      if(!('standardTarget' in fov) || fov.standardTarget!='Molybdenum Foil') // ignore slideId and sectionId for molybdenum foil
+      {if(tsai.mibi.version!=tsai.mibi.version_latest && 'focusSite' in fov) tsai.version(tsai.mibi.version_latest);
+       var slide_id=Math.abs(parseInt(fov.slideId));
+       if(tsai.json.slide_id==0 && !isNaN(slide_id)) tsai.json.slide_id=slide_id;
+       else if(tsai.json.slide_id==0 || tsai.json.slide_id!=slide_id) warnings+='\n<li>'+fov.name+' invalid or mismatched slideId '+fov.slideId+'</li>';
+       var section_id=Math.abs(parseInt(fov.sectionId));
+       if(isNaN(section_id))
+       {warnings+='\n<li>'+fov.name+' invalid sectionId '+fov.sectionId+'</li>';
+        if(tsai.json.section_ids.length>0) fov.sectionId=tsai.json.section_ids[0];
+       }
+       else if(!tsai.json.section_ids.includes(section_id)) tsai.json.section_ids.push(section_id);
+    }}}
     else if(tsai.images.optical.type=='json') // some prior json is loaded, but new json does not have coregistration -> do NOT use prior json coregistration or scratch.shift for current JSON
     {tsai.coregistration_load();
      tsai.scratch.shift={};
     }
+    tsai.json_warnings_clear();
+    if(warnings!='') tsai.json_warnings(warnings);
     if(tsai.image.loaded) tsai.image_tab(tsai.image.key, tsai.image.scale);
-    tsai.tiles=tsai.json_load(file_text, tsai.json_warnings);
-    // tsai.tiles=tsai.tiles.append(tsai.json_load(file_text, tsai.json_warnings)); // appends tiles from the new json rather than replacing them all
+    tsai.tiles=tsai.json_load(JSON.stringify(json), tsai.json_warnings);
     tsai.scratch.shift={}; // clear scratch.shift so not used in import_action
-    if(tsai.tiles.length>0)
-    {tsai.tiles_write(0);
-     tsai.action_clear(true);
-     tsai.json_time(false);
-     tsai.json_resume_write();
-    }
+    tsai.json.original=json;
+    tsai.tiles_write(0);
+    tsai.action_clear(true);
+    tsai.json_summary(false);
+    tsai.json_lists(true, true);
     tsai.tiles_builder();
     document.getElementById('tile_builder_div').style.display='';
  }}) ();
@@ -1037,41 +1150,40 @@ json_read(file)
 json_append(file)
 {(async () =>
   {const file_text=await file.text();
-   var append=JSON.parse(file_text);
-   if('fovs' in tsai.json.original) tsai.json.original.fovs=tsai.json.original.fovs.concat(append.fovs);
-   else tsai.json.original=append;
    if(tsai.menus_close())
-   {if(('fovs' in append) && append.fovs.length>0)
-    {for(var index=0; index<append.fovs.length; index++) // check tsai.json.slide_id
-     {var slide_id=Math.abs(parseInt(append.fovs[index].slideId));
-      if(tsai.json.slide_id==0 && !isNaN(slide_id)) tsai.json.slide_id=slide_id;
-      else append.fovs[index].slideId=tsai.json.slide_id;
-      var section_id=Math.abs(parseInt(append.fovs[index].sectionId));
-      if(isNaN(section_id))
-      {tsai.json_warnings('<li>'+append.fovs[index].name+' invalid sectionId '+append.fovs[index].sectionId+'</li>');
-       if(tsai.json.section_ids.length>0) append.fovs[index].sectionId=tsai.json.section_ids[0];
-      }
-      else if(!tsai.json.section_ids.includes(section_id)) tsai.json.section_ids.push(section_id);
-    }}
+   {var append=JSON.parse(file_text);
+    if(!('fovs' in append) || append.fovs.length==0) return;
+    tsai.json.original.fovs=tsai.json.original.fovs.concat(append.fovs);
+    var append_fovs_length=append.fovs.length;
+    for(var index=0; index<append_fovs_length; index++) // check tsai.json.slide_id
+    {var slide_id=Math.abs(parseInt(append.fovs[index].slideId));
+     if(tsai.json.slide_id==0 && !isNaN(slide_id)) tsai.json.slide_id=slide_id;
+     else append.fovs[index].slideId=tsai.json.slide_id;
+     var section_id=Math.abs(parseInt(append.fovs[index].sectionId));
+     if(isNaN(section_id))
+     {tsai.json_warnings('<li>'+append.fovs[index].name+' invalid sectionId '+append.fovs[index].sectionId+'</li>');
+      if(tsai.json.section_ids.length>0) append.fovs[index].sectionId=tsai.json.section_ids[0];
+     }
+     else if(!tsai.json.section_ids.includes(section_id)) tsai.json.section_ids.push(section_id);
+    }
     tsai.scratch.shift={x_x: tsai.coregistration.shift.x_x, x_y: tsai.coregistration.shift.x_y, y_x: tsai.coregistration.shift.y_x, y_y: tsai.coregistration.shift.y_y}
     tsai.tiles=tsai.tiles.concat(tsai.json_load(file_text, tsai.json_warnings)); // appends tiles from the new json rather than replacing them all
     tsai.scratch.shift={}; // clear scratch.shift so not used in import_action
-    if(tsai.tiles.length>0)
-    {tsai.tiles_write(0);
-     tsai.action_clear(true);
-     tsai.json_time(false);
-     tsai.json_resume_write();
-    }
+    tsai.tiles_write(0);
+    tsai.action_clear(true);
+    tsai.json_summary(false);
+    tsai.json_lists(true, true);
     tsai.tiles_builder();
     document.getElementById('tile_builder_div').style.display='';
  }}) ();
 }
 
 json_load(json_input, warnings) // if(main==true) coregisters and loads into tile pane
-{if(json_input.match(/\"fovs\"\s*:\s*\[/)==null) {warnings('\n<li>Invalid file, "fovs":[ not found.</li>'); return [];}
+{if(json_input.match(/\"fovs\"\s*:\s*\[/)==null) {warnings('\n<li>Invalid file, "fovs":[ not found</li>'); return [];}
  var tiles=[];
  var fovs=JSON.parse(json_input).fovs;
- for(var index=0; index<fovs.length; index++)
+ var fovs_length=fovs.length;
+ for(var index=0; index<fovs_length; index++)
  {var fov=JSON.parse(JSON.stringify(fovs[index])); // make a duplicate FOV for adjusting
   if(!('name' in fov)) fov.name='Tile_'+(index+1);
   var name_rows_columns=fov.name.match(/^(.*)_R(\d+)C(\d+)$/);
@@ -1084,7 +1196,7 @@ json_load(json_input, warnings) // if(main==true) coregisters and loads into til
    var fov_size=('fovSizeMicrons' in fov?parseInt(fov.fovSizeMicrons):800);
    if(isNaN(fov_size)) fov_size=800;
    else if(!tsai.mibi.fovs.includes(fov_size))
-   {warnings('<li>'+fov.name+' FOV size not in presets, added as '+fov_size+'.</li>');
+   {warnings('<li>'+fov.name+' FOV size not in presets, added as '+fov_size+'</li>');
     tsai.mibi.fovs.push(fov_size);
    }
    fov.fovSizeMicrons=fov_size;
@@ -1096,7 +1208,8 @@ json_load(json_input, warnings) // if(main==true) coregisters and loads into til
    {fov.centerPointMicrons.x=Math.round(fov.centerPointMicrons.x-fov_size*(column-1));
     fov.centerPointMicrons.y=Math.round(fov.centerPointMicrons.y+fov_size*(row   -1));
    }
-   for(var tile_search=0; tile_search<tiles.length; tile_search++) // search tiles for tile matching all parameters
+   var tiles_length=tiles.length;
+   for(var tile_search=0; tile_search<tiles_length; tile_search++) // search tiles for tile matching all parameters
    {tile=tile_search;
     if(tsai.json_equal(fov, tiles[tile].fov)) break;
     else tile=-1;
@@ -1115,265 +1228,39 @@ json_load(json_input, warnings) // if(main==true) coregisters and loads into til
     while(tiles[tile].map[row-1].length<column) tiles[tile].map[row-1].push(0);
     tiles[tile].map[row-1][column-1]=1;
  }}}
- for(var tile=0; tile<tiles.length; tile++) // equalize columns across all rows
+ var tiles_length=tiles.length;
+ for(var tile=0; tile<tiles_length; tile++) // equalize columns across all rows
  {tiles[tile].fov.slideId=tsai.json.slide_id;
   tiles[tile].fov.frameSizePixels.width=parseInt(tiles[tile].fov.frameSizePixels.width);
   tiles[tile].fov.frameSizePixels.height=parseInt(tiles[tile].fov.frameSizePixels.height);
   tsai.json_parse_preset(tiles[tile], warnings);
   var columns=0;
-  for(var row=0; row<tiles[tile].map.length; row++)
+  var rows=tiles[tile].map.length;
+  for(var row=0; row<rows; row++)
   {if(tiles[tile].map[row].length>columns) columns=tiles[tile].map[row].length;
   }
-  for(var row=0; row<tiles[tile].map.length; row++)
+  for(var row=0; row<rows; row++)
   {while(tiles[tile].map[row].length<columns) tiles[tile].map[row].push(0);
   }
-  tiles[tile].original={fov: JSON.stringify(tiles[tile].fov), map: JSON.stringify(tiles[tile].map)};
+  if('focusSite' in tiles[tile].fov && tiles[tile].fov.focusSite!='None' && (tiles[tile].map.length>1 || tiles[tile].map[0].length>1))
+  {warnings('<li>'+tiles[tile].fov.name+' focus site '+tiles[tile].fov.focusSite+' disabled for multi-FOV tile</li>');
+   tiles[tile].fov.focusOnly=0;
+   tiles[tile].fov.focusSite='None';
+  }
+  tiles[tile].active=true;
+  tiles[tile].original={fov: JSON.stringify(tiles[tile].fov), map: JSON.stringify(tiles[tile].map), active: true};
  }
  return tiles;
 }
 
-/* #############################################
-   ##########  JSON RESUME AND SPLIT  ##########
-   ############################################# */
-json_changed()
-{if(!('fovs' in tsai.json.original) || tsai.json.original.fovs.length!=tsai.tiles.length) return true;
- else
- {for(var tile=0; tile<tsai.tiles.length; tile++)
-  {if(document.getElementById('tile_'+tile+'_active').checked==false
-   || !('fov' in tsai.tiles[tile].original)
-   || !('map' in tsai.tiles[tile].original)
-   || tsai.tiles[tile].original.fov!=JSON.stringify(tsai.tiles[tile].fov)
-   || tsai.tiles[tile].original.map!=JSON.stringify(tsai.tiles[tile].map)
-   ) {return true;}
- }}
- return false;
-}
-
-json_resume_write()
-{if(!('fovs' in tsai.json.original) || tsai.json.original.fovs.length==0) document.getElementById('json_resume').innerHTML='<h3>Resume</h3><p>No FOVs loaded for resuming</p>';
- else
- {var options='\n<option value="-1">Do not resume, use tiles/FOVs above</option>';
-  for(var index=0; index<tsai.json.original.fovs.length; index++) options+='\n<option value="'+index+'">'+(index+1)+': &nbsp; '+tsai.json.original.fovs[index].name+'</option>';
-  document.getElementById('json_resume').innerHTML='<h3>Resume starting from</h3><p><select id="json_resume_select">'+options+'</select></p>';
-}}
-
-json_split_select(id) // clicking in text box selects the corresponding radio button
-{var radios=document.getElementsByTagName('json_split');
- for(var radio=0; radio<radios.length; radio++) radios[radio].checked=false;
- document.getElementById(id).checked=true;
-}
-
-json_seconds_to_hours_minutes(seconds)
-{var hours=Math.floor(seconds/3600);
- var minutes=Math.ceil((seconds-(hours*3600))/60);
- if(minutes==60) minutes=59;
- return (hours>0?hours+(hours==1?' hour ':' hours '):'')+minutes+(minutes==1?' minute':' minutes');
-}
-
-/* ########################################
-   ##########  RESUME AND SPLIT  ##########
-   ######################################## */
-json_resume_split_write(random) // random 0: no randomization, 1: randomize but keep tiles together, 2: randomize intermixing tiles
-{tsai.json.split=[]; // tsai.json.split[]={button, suffix with fovs, fovs}
- var time=(tsai.time_format()).ymdhms24;
- var no_buttons=false;
- var tiles={}; // tsai.tiles, subtracting completed tiles
- var resume=parseInt(document.getElementById('json_resume_select').value); // FOV index to resume from
- if(resume>0) // if resume, slice json
- {if(tsai.json_changed()) no_buttons=no_buttons || tsai.json_warnings('<li>Tiles/FOVs above have changed since loading and cannot be resumed. To resume, reload the interrupted JSON file.</li>');
-  else if(isNaN(resume)) no_buttons=no_buttons || tsai.json_warnings('<li>Resume index could not be read.</li>');
-  else
-  {if(resume in tsai.json.original.fovs)
-   {var json=JSON.parse(JSON.stringify(tsai.json.original)); // create copy of tsai.json.original, then slice out any completed fovs
-    var fovs_string=(resume==1?'1':'1-'+resume);
-    tsai.json.split.push({button: 'FOVs '+fovs_string+' Completed Sequential', suffix: '_'+time+'_'+fovs_string+'_completed', fovs: JSON.parse(JSON.stringify(json.fovs.slice(0, resume)))});
-    json.fovs=json.fovs.slice(resume);
-    tiles=tsai.json_load(JSON.stringify(json), tsai.json_warnings); // load sliced json into tiles
-    if(!document.getElementById('json_split_fovs').checked && !document.getElementById('json_split_time').checked) // not splitting so resume in sequential or random order
-    {if(random>0) json=JSON.parse(tsai.json_build(tiles, random));
-     var fovs_range=[resume+1, resume+json.fovs.length];
-     var fovs_string=fovs_range[0]+(fovs_range[0]==fovs_range[1]?'':'-'+fovs_range[1]);
-     tsai.json.split.push(
-     {button: 'FOVs '+(fovs_string)+' Resumed'+[' Sequential', ' Random Together', ' Random Mixed'][random],
-      suffix: '_'+time+'_'+fovs_string+'_resumed'+['_sequential', '_random_together', '_random_mixed'][random],
-      fovs: JSON.parse(JSON.stringify(json.fovs))
-     });
- }}}}
- else tiles=JSON.parse(JSON.stringify(tsai.tiles)); // otherwise copy current tiles to tiles
- // tiles is now tsai.tiles minus any completed fovs
- var json=JSON.parse(tsai.json_build(tiles, random)); // rebuild json minus any completed fovs
- if(document.getElementById('json_split_fovs').checked)
- {var number=parseInt(document.getElementById('json_split_number').value);
-  if(isNaN(number)) no_buttons=no_buttons || tsai.json_warnings('<li>Split FOV number could not be read.</li>');
-  else
-  {for(var index=0; index<json.fovs.length; index+=number)
-   {var fovs_range=[resume+index+1, Math.min(resume+index+number, resume+json.fovs.length)];
-    var fovs_string=fovs_range[0]+(fovs_range[0]==fovs_range[1]?'':'-'+fovs_range[1]);
-    tsai.json.split.push(
-    {button: 'FOVs '+fovs_string+(resume>0?' Resumed':'')+[' Sequential', ' Random Together', ' Random Mixed'][random],
-     suffix: '_'+time+'_'+fovs_string+(resume>0?'_resumed':'')+['_sequential', '_random_together', '_random_mixed'][random],
-     fovs: json.fovs.slice(index, Math.min(index+number, json.fovs.length))
-    });
- }}}
- else if(document.getElementById('json_split_time').checked)
- {var hours=parseInt(document.getElementById('json_split_hours').value);
-  var minutes=parseInt(document.getElementById('json_split_minutes').value);
-  var seconds=((60*(isNaN(hours)?0:hours))+(isNaN(minutes)?0:minutes))*60;
-  if(isNaN(seconds) || seconds==0) no_buttons=no_buttons || tsai.json_warnings('<li>Split time either set to 0 seconds or could not be read.</li>');
-  else
-  {var elapsed=0;
-   var index_jump=0;
-   for(var index=0; index<json.fovs.length; index++)
-   {var raster=parseInt(json.fovs[index].frameSizePixels.width);
-    if(isNaN(raster    )) {tsai.json_warnings('<li>Raster size could not be read for FOV '+(index+1)+', assumed 1024&times;1024</li>'); raster=1024;}
-    var dwell_time=parseFloat(json.fovs[index].timingDescription);
-    if(isNaN(dwell_time)) {tsai.json_warnings('<li>Dwell time could not be read for FOV ' +(index+1)+', assumed 1 ms</li>'); dwell_time=1;}
-    var depth=parseInt(json.fovs[index].scanCount);
-    if(isNaN(depth     )) {tsai.json_warnings('<li>Depth could not be read for FOV '      +(index+1)+', assumed 1 depth</li>'); depth=1;}
-    var elapsed_add=Math.pow(raster, 2)*dwell_time*depth*0.001;
-    if(index<json.fovs.length-1 && elapsed+elapsed_add<seconds) elapsed+=elapsed_add;
-    else
-    {if(index_jump==index || index==json.fovs.length-1) elapsed+=elapsed_add;
-     else index--;
-     var fovs_range=[resume+index_jump+1, Math.min(resume+index, resume+json.fovs.length)+1];
-     var fovs_string=fovs_range[0]+(fovs_range[0]==fovs_range[1]?'':'-'+fovs_range[1]);
-     tsai.json.split.push(
-     {button: 'FOVs '+fovs_string+(resume>0?' Resumed ':'')+[' Sequential', ' Random Together', ' Random Mixed'][random]+', '+tsai.json_seconds_to_hours_minutes(elapsed),
-      suffix: '_'+time+'_'+fovs_string+(resume>0?'_resumed':'')+['_sequential', '_random_together', '_random_mixed'][random],
-      fovs: json.fovs.slice(index_jump, index+1)
-     });
-     index_jump=index+1;
-     elapsed=0;
- }}}}
- if(no_buttons)
- {document.getElementById('json_resume_split_buttons').innerHTML='';
-  return;
- }
- if(tsai.json.split.length==0) document.getElementById('json_resume_split_buttons').innerHTML='<h3>No resume or split options selected.</h3>';
- else
- {var b='<h3>FOV set '+time+'</h3>\n<p>';
-  for(var index=0; index<tsai.json.split.length; index++)
-  {b+='<input type="button" value="Create JSON '+tsai.json.split[index].button+'" onclick="tsai.json_resume_split_download('+index+');" class="_layout_blue"/>\n<br/>';
-  }
-  b+='</p>';
-  document.getElementById('json_resume_split_buttons').innerHTML=b;
-}}
-
-json_resume_split_download(index)
-{var json=JSON.parse(tsai.json.empty);
- json.fovs=tsai.json.split[index].fovs;
- var shift='|'+tsai.coregistration.shift.x_x+','+tsai.coregistration.shift.x_y+','+tsai.coregistration.shift.y_x+','+tsai.coregistration.shift.y_y;
- if(['automatic', 'manual'].includes(tsai.coregistration.last)) json.fovs[0].notes=tsai.optical_to_base64(tsai.coregistration[tsai.coregistration.last+'_coordinates']+shift);
- tsai.json_export(JSON.stringify(json, null, '  '), tsai.json.split[index].suffix);
-}
-
-/* ########################################
-   ##########  BUILD AND EXPORT  ##########
-   ######################################## */
-json_random(elements)
-{var index_current=elements.length, index_random;
- while(index_current!=0)
- {index_random=Math.floor(Math.random()*index_current);
-  index_current--;
-  [elements[index_current], elements[index_random]]=[elements[index_random], elements[index_current]];
- }
- return elements;
-}
-
-json_build(tiles, random) // random 0: no randomization, 1: randomize but keep tiles together, 2: randomize intermixing tiles
-{var warnings=false;
- var fovs=[]; // fovs[tile][fov]
- var fov_areas=[];
- var tile_names={};
- var slide_ids=[];
- for(var tile=0; tile<tiles.length; tile++)
- {if(document.getElementById('tile_'+tile+'_active').checked)
-  {var fovs_index=fovs.push([])-1; // fovs tile index
-   if(tiles[tile].fov.name=='')
-   {tiles[tile].fov.name='Tile_'+(tile+1);
-    document.getElementById('tile_'+tile+'_name').value='Tile_'+(tile+1);
-    warnings=warnings || tsai.json_warnings('\n<li>Tile '+(tile+1)+' no name provided, renamed to Tile_'+(tile+1)+'</li>');
-   }
-   var tile_name=tiles[tile].fov.name.replace(/\s/g, '').toUpperCase();
-   if(!(tile_name in tile_names)) tile_names[tile_name]=tiles[tile].fov.name;
-   else warnings=warnings || tsai.json_warnings('<li>Duplicate tile name (space- and case-insensitive): '+tiles[tile].fov.name+'</li>');
-   for(var dwell=0; dwell<tsai.mibi.dwells.length; dwell++)
-   {if(tsai.mibi.dwells[dwell][1].toString()==tiles[tile].fov.timingChoice.toString())
-    {if(tsai.mibi.dwells[dwell][0]==tiles[tile].fov.timingDescription) break;
-     else warnings=warnings || tsai.json_warnings('<li>'+tiles[tile].fov.name+' possible mismatch between <span class="code">timingDescription</span> and <span class="code">timingChoice</span>.</li>');
-   }}
-   if(!(slide_ids.includes(tiles[tile].fov.slideId))) slide_ids.push(tiles[tile].fov.slideId);
-   var warnings_bounds=false;
-   var fov=tiles[tile].fov.fovSizeMicrons;
-   var fov_half=fov*0.5;
-   var x=Math.round(tiles[tile].fov.centerPointMicrons.x);
-   var y=Math.round(tiles[tile].fov.centerPointMicrons.y);
-   for(var row=0; row<tiles[tile].map.length; row++)
-   {var x_row=x;
-    for(var column=0; column<tiles[tile].map[row].length; column++)
-    {if(tiles[tile].map[row][column]==1)
-     {var fov_index=fovs[fovs_index].push(JSON.parse(JSON.stringify(tiles[tile].fov)))-1;
-      fovs[fovs_index][fov_index].name=tiles[tile].fov.name;
-      if(tiles[tile].map.length>1 || tiles[tile].map[0].length>1) fovs[fovs_index][fov_index].name+='_R'+(row+1)+'C'+(column+1);
-      fovs[fovs_index][fov_index].centerPointMicrons.x=Math.round(x_row+fov*((row   *tsai.coregistration.shift.x_y)+(column*tsai.coregistration.shift.x_x)));
-      fovs[fovs_index][fov_index].centerPointMicrons.y=Math.round(y    -fov*((column*tsai.coregistration.shift.y_x)+(row   *tsai.coregistration.shift.y_y)));
-      for(var area=0; area<fov_areas.length; area++)
-      {if(tile==fov_areas[0] || x_row+fov_half<=fov_areas[area][2] || x_row-fov_half>=fov_areas[area][4] || y+fov_half<=fov_areas[area][3] || y-fov_half>=fov_areas[area][5]) continue; // fov is to the left, right, top, or bottom of fov_areas[area]
-       warnings=warnings || tsai.json_warnings('<li>'+fovs[fovs_index][fov_index].name+' overlaps with '+fov_areas[area][1]+'.</li>');
-      }
-      fov_areas.push([tile, fovs[fovs_index][fov_index].name, x_row-fov_half, y-fov_half, x_row+fov_half, y+fov_half]);
-      if(!warnings_bounds && 'transform' in tsai.images.optical.transform)
-      {var optical=tsai.coregistration_from_micron(tsai.images.optical.transform, {x: x_row, y: y});
-       if(optical.x<tsai.canvas.optical_bounds.left || optical.y<tsai.canvas.optical_bounds.top || optical.x>tsai.canvas.optical_bounds.right || optical.y>tsai.canvas.optical_bounds.bottom)
-       {warnings=warnings || tsai.json_warnings('<li>'+fovs[fovs_index][fov_index].name+' may extend beyond slide area ('+(Math.round(optical.x*100)/100)+', '+(Math.round(optical.y*100)/100)+').</li>');
-        warnings_bounds=true;
-     }}}
-     x_row+=fov;
-    }
-    y-=fov;
- }}}
- if(fovs.length==0) warnings=warnings || tsai.json_warnings('<li>No tiles or FOVs selected.</li>');
- else
- {if(slide_ids.length>1) warnings=warnings || tsai.json_warnings('<li>'+slide_ids.length+' slideIds present.</li>');
-  else if(slide_ids.length==1 && slide_ids[0]==0) warnings=warnings || tsai.json_warnings('<li>slideId set as 0.</li>');
-  var json=JSON.parse(tsai.json.empty);
-  if(random==1) fovs=tsai.json_random(fovs);
-  for(var fovs_index=0; fovs_index<fovs.length; fovs_index++)
-  {if(random==1) fovs[fovs_index]=tsai.json_random(fovs[fovs_index]);
-   for(var fov_index=0; fov_index<fovs[fovs_index].length; fov_index++) json.fovs.push(fovs[fovs_index][fov_index]);
-  }
-  if(random==2) json.fovs=tsai.json_random(json.fovs);
-  var shift='|'+tsai.coregistration.shift.x_x+','+tsai.coregistration.shift.x_y+','+tsai.coregistration.shift.y_x+','+tsai.coregistration.shift.y_y;
-  switch(tsai.coregistration.last)
-  {case 'automatic': json.fovs[0].notes=tsai.optical_to_base64(tsai.coregistration.automatic_coordinates+shift); break;
-   case 'manual'   : json.fovs[0].notes=tsai.optical_to_base64(tsai.coregistration.manual_coordinates   +shift); break;
-  }
-  if(warnings) document.getElementById('json_time').scrollIntoView();
-  // if(warnings) window.scrollTo(0, document.getElementById('json_time').getBoundingClientRect().top+window.scrollY);
-  return JSON.stringify(json, null, '  ');
-}}
-
-json_export(json_string, file_suffix)
-{var url=window.URL || window.webkitURL;
- var anchor=document.createElement('a');
- anchor.href=url.createObjectURL(new Blob([json_string], {type: 'octet/stream'}));
- anchor.download=tsai.json.name+'_'+(typeof file_suffix=='undefined' || file_suffix==''?tsai.time_format().ymdhms24:file_suffix)+'.json';
- document.body.appendChild(anchor);
- anchor.click();
- document.body.removeChild(anchor);
-}
-
-json_build_download(random)
-{tsai.json_export(tsai.json_build(tsai.tiles, random), '_'+tsai.time_format().ymdhms24+['_sequential', '_random_together', '_random_mixed'][random]);
-}
-
-/* #####################################
-   ##########  TIME ESTIMATE  ##########
-   ##################################### */
-json_time(return_minutes)
+/* ####################################
+   ##########  JSON SUMMARY  ##########
+   #################################### */
+json_summary(return_minutes)
 {var tile_names={};
- for(var tile=0; tile<tsai.tiles.length; tile++)
- {if(document.getElementById('tile_'+tile+'_active').checked)
+ var tiles_length=tsai.tiles.length;
+ for(var tile=0; tile<tiles_length; tile++)
+ {if(tsai.tiles[tile].active)
   {var tile_name=tsai.tiles[tile].fov.name.replace(/\s/g, '').toUpperCase();
    if(!(tile_name in tile_names)) tile_names[tile_name]=1;
    else tile_names[tile_name]++;
@@ -1383,48 +1270,64 @@ json_time(return_minutes)
  var total_fovs=0;
  var total_area=0;
  var total_time=0; // time in ms
- for(var tile=0; tile<tsai.tiles.length; tile++)
- {if(document.getElementById('tile_'+tile+'_active').checked)
-  {var fovs=0;
-   var calculation_tile='';
-   for(var row=0; row<tsai.tiles[tile].map.length; row++)
-   {for(var column=0; column<tsai.tiles[tile].map[row].length; column++)
-    {if(tsai.tiles[tile].map[row][column]!=0) fovs++;
-   }}
-   var fov=tsai.tiles[tile].fov.fovSizeMicrons/1000; // in mm
-   var raster=tsai.tiles[tile].fov.frameSizePixels.width;
-   var dwell_time=parseFloat(tsai.tiles[tile].fov.timingDescription);
-   var depth=parseInt(tsai.tiles[tile].fov.scanCount);
-   calculation_tile+='\n <tr>';
-   if(tile_names[tsai.tiles[tile].fov.name.replace(/\s/g, '').toUpperCase()]>1) 
-   {calculation_tile+='<td><span class="duplicate">'+tsai.tiles[tile].fov.name+'</span></td>';
+ for(var tile=0; tile<tiles_length; tile++)
+ {if(tsai.tiles[tile].active)
+  {if('focusOnly' in tsai.tiles[tile].fov && tsai.tiles[tile].fov.focusOnly==1)
+   {var calculation_tile='\n <tr>';
+    if(tile_names[tsai.tiles[tile].fov.name.replace(/\s/g, '').toUpperCase()]>1) 
+    {calculation_tile+='<td><span class="duplicate">'+tsai.tiles[tile].fov.name+'</span></td>';
+    }
+    else calculation_tile+='<td>'+tsai.tiles[tile].fov.name+'</td>';
+    calculation_tile+='<td>&nbsp;</td><td colspan="7">focus '+tsai.tiles[tile].fov.focusSite+' only</td></tr>';
+    calculation+=calculation_tile;
+    total_time+=240;
    }
-   else calculation_tile+='<td>'+tsai.tiles[tile].fov.name+'</td>';
-   calculation_tile+=''
-    +'<td>'+tsai.tiles[tile].fov.fovSizeMicrons+' &microm</td>'
-    +'<td>'+(raster.toString().replace(/\.0*$/, ''))+' pixels<sup>2</sup></td>'
-    +'<td>&times</td>'
-    +'<td>'+dwell_time+' ms'+('displayName' in tsai.tiles[tile].fov.imagingPreset?' ('+tsai.tiles[tile].fov.imagingPreset.displayName+')':'')+'</td>'
-    +'<td>&times</td>'
-    +'<td>'+depth+' depth'+(depth>1?'s':'')+'</td>'
-    +'<td>&times</td>'
-    +'<td>'+fovs+' FOV'+(fovs>1?'s':'')+'</td></tr>';
-   if(fovs>0)
-   {calculation+=calculation_tile;
-    total_area+=Math.pow(fov, 2)*fovs;
-    total_time+=Math.pow(raster, 2)*dwell_time*depth*fovs;
-    total_fovs+=fovs;
-    total_tiles++;
- }}}
- if(return_minutes) return Math.ceil(total_time/1000/60);
+   else
+   {var fovs=0;
+    var calculation_tile='';
+    var rows=tsai.tiles[tile].map.length;
+    var columns=tsai.tiles[tile].map[0].length;
+    for(var row=0; row<rows; row++)
+    {for(var column=0; column<columns; column++)
+     {if(tsai.tiles[tile].map[row][column]!=0) fovs++;
+    }}
+    var fov=tsai.tiles[tile].fov.fovSizeMicrons/1000; // in mm
+    var raster=tsai.tiles[tile].fov.frameSizePixels.width;
+    var dwell_time=parseFloat(tsai.tiles[tile].fov.timingDescription);
+    var depth=parseInt(tsai.tiles[tile].fov.scanCount);
+    calculation_tile+='\n <tr>';
+    if(tile_names[tsai.tiles[tile].fov.name.replace(/\s/g, '').toUpperCase()]>1) 
+    {calculation_tile+='<td><span class="duplicate">'+tsai.tiles[tile].fov.name+'</span></td>';
+    }
+    else calculation_tile+='<td>'+tsai.tiles[tile].fov.name+'</td>';
+    if('focusSite' in tsai.tiles[tile].fov && tsai.tiles[tile].fov.focusSite!='None')
+    {calculation_tile+='<td>&nbsp;</td><td colspan="7">focus '+tsai.tiles[tile].fov.focusSite+'</td></tr>'+calculation_tile;
+     total_time+=240;
+    }
+    calculation_tile+=''
+     +'<td>'+tsai.tiles[tile].fov.fovSizeMicrons+' &microm</td>'
+     +'<td>'+(raster.toString().replace(/\.0*$/, ''))+' pixels<sup>2</sup></td>'
+     +'<td>&times</td>'
+     +'<td>'+dwell_time+' ms'+('displayName' in tsai.tiles[tile].fov.imagingPreset?' ('+tsai.tiles[tile].fov.imagingPreset.displayName+')':'')+'</td>'
+     +'<td>&times</td>'
+     +'<td>'+depth+' depth'+(depth>1?'s':'')+'</td>'
+     +'<td>&times</td>'
+     +'<td>'+fovs+' FOV'+(fovs>1?'s':'')+'</td></tr>';
+    if(fovs>0)
+    {calculation+=calculation_tile;
+     total_area+=Math.pow(fov, 2)*fovs;
+     total_time+=Math.pow(raster, 2)*dwell_time*depth*fovs;
+     total_fovs+=fovs;
+     total_tiles++;
+ }}}}
+ if(return_minutes) return Math.ceil(total_time/60000);
  if(total_time==0) return;
  var time_run=total_time/1000; // time in s
  var time_days=Math.floor(time_run/86400);
  var time_hours=Math.floor((time_run-(time_days*86400))/3600);
  var time_minutes=Math.floor((time_run-(time_days*86400)-(time_hours*3600))/60);
  var time_seconds=Math.round((time_run-(time_days*86400)-(time_hours*3600)-(time_minutes*60))/60);
- try {var time_start=new Date(document.getElementById('json_time').value);}
- catch(error) {var time_start=new Date();}
+ var time_start=(document.getElementById('json_time_start')?new Date(document.getElementById('json_time_start').value):new Date());
  var time_readable=(time_days>0?                            time_days   +' day'   +(time_days   >1?'s':''):'');
  time_readable+=(time_hours  >0?(time_readable!=''?', ':'')+time_hours  +' hour'  +(time_hours  >1?'s':''):'');
  time_readable+=(time_minutes>0?(time_readable!=''?', ':'')+time_minutes+' minute'+(time_minutes>1?'s':''):'');
@@ -1439,10 +1342,546 @@ json_time(return_minutes)
   +'\n <tr><td colspan="9">&nbsp;</td></tr>'
   +'\n <tr><td colspan="9">'+total_tiles+' tile'+(total_tiles>1?'s':'')+', '+total_fovs+' FOV'+(total_fovs>1?'s':'')+'</td></tr>'
   +'\n <tr><td colspan="2">Estimated area  </td><td colspan="7">'+(Math.round(total_area*100)/100)+' mm<sup>2</sup></td></tr>'
-  +'\n <tr><td colspan="2">Start time      </td><td colspan="7">'+tsai.time_format(time_start).readable+'</td></tr>'
-  +'\n <tr><td colspan="2">Estimated finish</td><td colspan="7">'+tsai.time_format(new Date(time_start.getTime()+(time_run*1000))).readable+'</td></tr>'
+  +'\n <tr><td colspan="2">Start time      </td><td colspan="7"><input id="json_time_start" type="datetime-local" value="'+tsai.time_format(time_start).json+'" onchange="tsai.json_summary(false);"/></td></tr>'
+  +'\n <tr><td colspan="2">Estimated finish</td><td colspan="7"><input id="json_time_end"   type="datetime-local" value="'+tsai.time_format(new Date(time_start.getTime()+(time_run*1000))).json+'" onfocus="this.blur();" readonly/></td></tr>'
   +'\n</table>';
  document.getElementById('json_summary').innerHTML=b;
+}
+
+json_radio(id) // clicking in text box selects the corresponding radio button
+{var radios=document.getElementsByTagName(document.getElementById(id).name);
+ for(var radio=0; radio<radios.length; radio++) radios[radio].checked=false;
+ document.getElementById(id).checked=true;
+ tsai.json_lists(true, false);
+}
+
+/* #######################################
+   ##########  JSON BUILD FOVS  ##########
+   ####################################### */
+json_fovs()
+{var warnings=false;
+ var tiles=tsai.tiles;
+ var fovs=[]; // fovs[index]={fov:fov, tile:tile_index, group:(tile_index or -1 for molybdenum foil), focus_x:x, focus_y:y, time:seconds}
+ var fov_areas=[];
+ var tile_names={};
+ var slide_ids=[];
+ var dwells=tsai.mibi.dwells;
+ var dwells_length=tsai.mibi.dwells.length;
+ var tiles_length=tiles.length;
+ for(var tile_index=0; tile_index<tiles_length; tile_index++)
+ {var tile=tiles[tile_index];
+  if(tile.active)
+  {// check tile name, slideId, sectionId
+   if(tile.fov.name=='')
+   {tile.fov.name='Tile_'+(tile+1);
+    document.getElementById('tile_'+tile+'_name').value='Tile_'+(tile+1);
+    warnings=warnings || tsai.json_warnings('\n<li>Tile '+(tile+1)+' no name provided, renamed to Tile_'+(tile+1)+'</li>');
+   }
+   var tile_name=tile.fov.name.replace(/\s/g, '').toUpperCase();
+   if(!(tile_name in tile_names)) tile_names[tile_name]=tile.fov.name;
+   else warnings=warnings || tsai.json_warnings('<li>Duplicate tile name (space- and case-insensitive): '+tile.fov.name+'</li>');
+   for(var dwell=0; dwell<dwells_length; dwell++)
+   {if(dwells[dwell][1].toString()==tile.fov.timingChoice.toString())
+    {if(dwells[dwell][0]==tile.fov.timingDescription) break;
+     else warnings=warnings || tsai.json_warnings('<li>'+tile.fov.name+' possible mismatch between <span class="code">timingDescription</span> and <span class="code">timingChoice</span></li>');
+   }}
+   if(!(slide_ids.includes(tile.fov.slideId))) slide_ids.push(tile.fov.slideId);
+   // build fovs, check bounds and overlaps
+   var molybdenum=('standardTarget' in tile.fov && tile.fov.standardTarget=='Molybdenum Foil');
+   var bounds_skip=(!tsai.images.optical.loaded || !('transform' in tsai.images.optical.transform) || molybdenum); // flag for skipping bounds check
+   var bounds=false; // flag for optical bounds error
+   var bounds_left  =tsai.images.optical.img.width *tsai.canvas.optical_bounds.left;
+   var bounds_right =tsai.images.optical.img.width *tsai.canvas.optical_bounds.right;
+   var bounds_top   =tsai.images.optical.img.height*tsai.canvas.optical_bounds.top;
+   var bounds_bottom=tsai.images.optical.img.height*tsai.canvas.optical_bounds.bottom;
+   var fov_size=tile.fov.fovSizeMicrons;
+   var fov_half=fov_size/2;
+   var x=Math.round(tile.fov.centerPointMicrons.x);
+   var y=Math.round(tile.fov.centerPointMicrons.y);
+   var rows=tile.map.length;
+   var columns=tile.map[0].length;
+   var time=Math.pow(tile.fov.frameSizePixels.width, 2)*parseFloat(tile.fov.timingDescription)*parseInt(tile.fov.scanCount)/1000;
+   for(var row=0; row<rows; row++)
+   {for(var column=0; column<columns; column++)
+    {if(tile.map[row][column]==1)
+     {var index=fovs.push({fov: JSON.parse(JSON.stringify(tile.fov)), tile: tile_index, group: molybdenum?-1:tile_index, time: time, focus_x:null, focus_y:null})-1;
+      var fov=fovs[index].fov;
+      if('focusSite' in fov && ['FOV', 'NW', 'N', 'NE', 'W', 'E', 'SW', 'S', 'SE'].includes(fov.focusSite))
+      {if(row==0 && column==0)
+       {var fov_shift=fov_half+60;
+        switch(fov.focusSite)
+        {case 'FOV': fovs[index].focus_x=x          ; fovs[index].focus_y=y          ; break;
+         case 'NW' : fovs[index].focus_x=x-fov_shift; fovs[index].focus_y=y+fov_shift; break;
+         case 'N'  : fovs[index].focus_x=x          ; fovs[index].focus_y=y+fov_shift; break;
+         case 'NE' : fovs[index].focus_x=x+fov_shift; fovs[index].focus_y=y+fov_shift; break;
+         case 'W'  : fovs[index].focus_x=x-fov_shift; fovs[index].focus_y=y          ; break;
+         case 'E'  : fovs[index].focus_x=x+fov_shift; fovs[index].focus_y=y          ; break;
+         case 'SW' : fovs[index].focus_x=x-fov_shift; fovs[index].focus_y=y-fov_shift; break;
+         case 'S'  : fovs[index].focus_x=x          ; fovs[index].focus_y=y-fov_shift; break;
+         case 'SE' : fovs[index].focus_x=x+fov_shift; fovs[index].focus_y=y-fov_shift; break;
+        }
+        if(fov.focusOnly==1) fovs[index].time=240;
+        else fovs[index].time+=240;
+       }
+       else
+       {tsai.json_warnings('<li>'+tile.fov.name+' is a multi-FOV tile, focus site '+fov.focusSite+' only enabled for R1C1 (if R1C1 is present)</li>');
+        fov.focusOnly=0;
+        fov.focusSite='None';
+      }}
+      fov.name=tile.fov.name;
+      if(rows>1 || columns>1) fov.name+='_R'+(row+1)+'C'+(column+1);
+      var fov_x=Math.round(x+fov_size*((column*(1+tsai.coregistration.shift.x_x))+(row   *tsai.coregistration.shift.x_y)));
+      var fov_y=Math.round(y-fov_size*((row   *(1+tsai.coregistration.shift.y_y))+(column*tsai.coregistration.shift.y_x)));
+      fov.centerPointMicrons.x=fov_x;
+      fov.centerPointMicrons.y=fov_y;
+      if(!('focusOnly' in tile.fov) || tile.fov.focusOnly==0)
+      {var fov_areas_length=fov_areas.length;
+       for(var area=0; area<fov_areas_length; area++)
+       {if(tile_index==fov_areas[area][0]) break;
+        if(fov_x+fov_half<=fov_areas[area][2] || fov_x-fov_half>=fov_areas[area][4] || fov_y+fov_half<=fov_areas[area][3] || fov_y-fov_half>=fov_areas[area][5]) continue; // fov is to the left, right, top, or bottom of fov_areas[area]
+        warnings=warnings || tsai.json_warnings('<li>'+fov.name+' overlaps with '+fov_areas[area][1]+'</li>');
+       }
+       fov_areas.push([tile_index, fov.name, fov_x-fov_half, fov_y-fov_half, fov_x+fov_half, fov_y+fov_half]);
+      }
+      if(!bounds && !bounds_skip)
+      {var optical=tsai.coregistration_from_micron(tsai.images.optical.transform, {x: fov_x, y: fov_y});
+       if(optical.x<bounds_left || optical.y<bounds_top || optical.x>bounds_right || optical.y>bounds_bottom)
+       {warnings=warnings || tsai.json_warnings('<li>'+fov.name+' may extend beyond slide area ('+(Math.round(optical.x*100)/100)+', '+(Math.round(optical.y*100)/100)+')</li>');
+        bounds=true;
+ }}}}}}}
+ var fovs_length=fovs.length;
+ if(fovs_length==0) warnings=warnings || tsai.json_warnings('<li>No tiles or FOVs selected</li>');
+ else
+ {if(slide_ids.length>1) warnings=warnings || tsai.json_warnings('<li>'+slide_ids.length+' slideIds present</li>');
+  else if(slide_ids.length==1 && slide_ids[0]==0) warnings=warnings || tsai.json_warnings('<li>slideId set as 0</li>');
+ }
+ // if(warnings) document.getElementById('json').scrollIntoView();
+ return fovs;
+}
+
+/* ########################################
+   ##########  JSON BUILD LISTS  ##########
+   ######################################## */
+json_empty()
+{if(!('fovs' in tsai.json.original) || tsai.json.original.fovs.length==0) // no fovs loaded
+ {if(document.getElementById('files_append_li')) document.getElementById('files_append_li').style.display='none';
+  if(document.getElementById('json_build'     )) document.getElementById('json_build').style.display='none';
+  return true;
+ }
+ else
+ {document.getElementById('json_build').style.display='';
+  return false;
+}}
+
+json_resume(reset)
+{var resume=-1;
+ var select=document.getElementById('json_resume_select');
+ if(select)
+ {resume=(select?parseInt(select.value):-1);
+  if(isNaN(resume) || !(resume in tsai.json.original.fovs)) {select.selectedIndex=0; resume=-1;}
+ }
+ var changed=false;
+ if(!reset)
+ {var tiles_length=tsai.tiles.length;
+  for(var tile=0; tile<tiles_length; tile++)
+  {if(!tsai.tiles[tile].active
+   || !('fov' in tsai.tiles[tile].original)
+   || !('map' in tsai.tiles[tile].original)
+   || !tsai.json_equal_strict(JSON.parse(tsai.tiles[tile].original.fov), tsai.tiles[tile].fov)
+   || !tsai.array_equal(JSON.parse(tsai.tiles[tile].original.map), tsai.tiles[tile].map)
+   ) {changed=true; break;}
+ }}
+ if(reset || (tsai.json.changed && !changed)) // reset or changed back to original
+ {var options='\n<option value="-1" selected>Use tiles/FOVs above</option>';
+  var fovs_length=tsai.json.original.fovs.length;
+  for(var index=0; index<fovs_length; index++) options+='\n<option value="'+index+'">'+(index+1)+': &nbsp; '+('name' in tsai.json.original.fovs[index]?tsai.json.original.fovs[index].name:'FOV_'+(index+1))+'</option>';
+  document.getElementById('json_resume').innerHTML=''
+   +'\n<h3>Start/resume from</h3>'
+   +'\n<p class="json">'
+   +'\n <select id="json_resume_select" onchange="tsai.json_lists(true, false);">'
+   +options
+   +'\n </select>'
+   +'\n</p>';
+  document.getElementById('json_resume').style.display='';
+  tsai.json.changed=false;
+  resume=-1;
+ }
+ else if(!tsai.json.changed && changed) // not previously changed and now changed
+ {var resume=parseInt(document.getElementById('json_resume_select').value);
+  if(!isNaN(resume) && resume>0) tsai.json_warnings('<li>Resume is disabled, as tiles/FOVs have changed. To resume an interrupted run, reload the original JSON</li>');
+  document.getElementById('json_resume').innerHTML='&nbsp;';
+  document.getElementById('json_resume').style.display='none';
+  tsai.json.changed=true;
+  document.getElementById('json_group_none').click();
+  resume=-1;
+ }
+ if(resume!=tsai.json.resume) {tsai.json.resume=resume; return true;}
+ else return false;
+}
+
+json_options(resume, autofocus)
+{var autofocus_remove=document.getElementById('json_autofocus_remove').checked;
+ document.getElementById('json_autofocus').style.display=(autofocus?'':'none');
+ if(resume!=-1)
+ {document.getElementById('json_group_none_row').style.display='';
+  document.getElementById('json_group_autofocus_row').style.display='none';  // if resume, do not allow regrouping by autofocus
+  if(document.getElementById('json_group_autofocus').checked) document.getElementById('json_group_none').click();
+  if(!autofocus || autofocus_remove) document.getElementById('json_group_tile_row').style.display=''; // if resume, allow regrouping by tile if no autofocus
+  else
+  {document.getElementById('json_group_none').click();
+   document.getElementById('json_group_tile_row').style.display='None';
+ }}
+ else
+ {if(!autofocus || autofocus_remove) // if no autofocus or if autofocus removed
+  {document.getElementById('json_group_none_row').style.display='';
+   document.getElementById('json_group_tile_row').style.display=''; // allow grouping by tile
+   document.getElementById('json_group_autofocus_row').style.display='none';
+   if(document.getElementById('json_group_autofocus').checked) document.getElementById('json_group_none').click(); // remove grouping by autofocus
+  }
+  else // autofocus present and not removed
+  {document.getElementById('json_group_none_row').style.display='none';
+   document.getElementById('json_group_tile_row').style.display='none';
+   document.getElementById('json_group_autofocus_row').style.display=''; // allow grouping by autofocus, not grouping fovs runs the autofocus points sequentially
+   if(!document.getElementById('json_group_autofocus').checked) document.getElementById('json_group_autofocus').click(); // remove grouping by tile as autofocus will not be in correct order
+}}}
+
+json_lists(build, reset)
+{if(tsai.json_empty()) return;
+ if(!tsai.json_resume(reset) // need to run json_resume regardless of build, must be first
+  && !build
+  && tsai.tiles.length==tsai.json.tiles.length
+  && tsai.json_equal_strict(tsai.tiles, tsai.json.tiles)
+ ) return; // do not rebuild if no changes
+ tsai.json.list.sequential=[]; // array of {fov:reference to fov, tile:tile_index, focus_x:x, focus_y:y, time:seconds}
+ tsai.json.split=[]; // array of {button, resume (true or false), build (time), suffix with fov range, fovs}
+ var resume=tsai.json.resume;
+ var list;
+ var autofocus=false; // flag for any autofocus sites, if true disables random ordering for resume unless autofocus_remove==true
+ var autofocus_remove=document.getElementById('json_autofocus_remove').checked;
+ var split=tsai.json.split;
+ var start;
+ var prefix;
+ var suffix;
+ if(resume!=-1) // if resume, build list from tsai.json.original.fovs
+ {// load {reference to original[fov], group, time} into tsai.json.list.sequential[], ignoring tile, focus_x, focus_y for resume
+  list=tsai.json.list.sequential;
+  var original=tsai.json.original.fovs;
+  for(var fov=0; fov<original.length; fov++)
+  {list.push({fov: original[fov], group: -1, time: Math.pow(original[fov].frameSizePixels.width, 2)*parseFloat(original[fov].timingDescription)*parseInt(original[fov].scanCount)/1000});
+   if(!autofocus && 'focusSite' in original[fov] && ['FOV', 'NW', 'N', 'NE', 'W', 'E', 'SW', 'S', 'SE'].includes(original[fov].focusSite)) autofocus=true;
+  }
+  if(resume>0)
+  {var string=(resume==1?'1':'1-'+resume);
+   split.push({button: 'FOV'+(resume>1?'s':'')+' '+string+' Completed', suffix: '_'+string+'_completed', fovs: list.slice(0, resume)});
+   tsai.json.list.sequential=list.slice(resume);
+   list=tsai.json.list.sequential;
+ }}
+ else // no resume, build list from tsai.tiles using tsai.json_fovs()
+ {tsai.json.list.sequential=tsai.json_fovs(); // build {fov, tile, focus_x, focus_y, time} into tsai.json.list.sequential[]
+  list=tsai.json.list.sequential;
+  for(var item=0; item<list.length; item++) {if(!autofocus && list[item].focus_x!==null) autofocus=true;}
+ }
+ tsai.json_options(resume, autofocus); // fix options based upon resume, autofocus, and autofocus_remove
+ // build list.sequential and list.random
+ if(resume!=-1 || !autofocus || autofocus_remove)
+ {tsai.json.list.random=(document.getElementById('json_group_none').checked?tsai.json_random(tsai.copy_fovs_build(list), 0, list.length) // randomize all fovs
+   :tsai.json.list.random=tsai.json_group_tile_random(list) // randomize tile order, sort by tile, randomize within tiles
+  );
+  start =(resume!=-1?resume:0);
+  prefix=(resume!=-1?' Resume ':' ');
+  suffix=(resume!=-1?'_resumed':'');
+ }
+ else // build split grouping by autofocus point
+ {[list, tsai.json.list.random]=tsai.json_group_autofocus(list);
+  start=0;
+  prefix=' Autofocus ';
+  suffix='_autofocus';
+ }
+ var b='<p><span class="optional">Optional</span> Rearranging FOVs is primarily intended for molybdenum foil FOVs. '
+  +'It is otherwise not recommended when autofocus FOVs are present (focus sites within parentheses). '
+  +'FOVs are colored by <span class="u">sorting group</span>, <span class="i">not</span> by tile. '
+  +'Autofocus/FOV order is not error-checked here.';
+ var colors=tsai.canvas.line_colors.length;
+ for(var order=0; order<2; order++)
+ {b+='<h4>'+['Sequential', 'Random'][order]+'</h4>\n<ul id="json_rearrange_'+(['sequential', 'random'][order])+'">';
+  var list=tsai.json.list[['sequential', 'random'][order]];
+  for(var item=0; item<list.length; item++)
+  {var fov=list[item];
+   var name=fov.fov.name.trim().replace(/_(R\d+C\d+)$/, '<br/>$1')
+   if(!autofocus_remove && 'focusSite' in fov.fov && ['FOV', 'NW', 'N', 'NE', 'W', 'E', 'SW', 'S', 'SE'].includes(fov.fov.focusSite)) name+=(name.indexOf('<br/>')==-1?'<br/>':' ')+'('+fov.fov.focusSite+')';
+   var group=Math.floor(fov.group);
+   var color=(isNaN(group) || group<0?('standardTarget' in fov.fov && fov.fov.standardTarget=='Molybdenum Foil'?['#000', '#ddd']:['#e6e3e0', '#000']):tsai.canvas.line_colors[group%colors]);
+   b+='<li draggable="true" ondragstart="tsai.json_dragstart(event);" ondragover="tsai.json_dragover(event);" ondrop="tsai.json_dragdrop(event, '+start+', \''+prefix+'\', \''+suffix+'\');" style="background-color:'+color[0]+'; color:'+color[1]+';">'
+    +'<input type="hidden" value="'+item+':'+order+':'+fov.group+'"/>'+name
+    +'</li>';
+  }
+  b+='</ul>';
+ }
+ document.getElementById('json_rearrange_lists').innerHTML=b+'</div>';
+ document.getElementById('json_rearrange').style.display='';
+ tsai.json_buttons(start, prefix, suffix);
+ tsai.json.tiles=JSON.parse(JSON.stringify(tsai.tiles));
+}
+
+json_sort(a, b)
+{if(a.group<b.group) return -1;
+ if(a.group>b.group) return 1;
+ return 0;
+}
+
+json_random(array, first, last)
+{// assumes first<last and last<array.length
+ var length=last-first;
+ while(length>0)
+ {var random=first+Math.floor(Math.random()*length);
+  length--;
+  [array[first+length], array[random]]=[array[random], array[first+length]];
+ }
+ return array;
+}
+
+json_group_tile_random(list)
+{var remap=[];
+ for(var tile=0; tile<tsai.tiles.length; tile++) remap.push(tile);
+ remap=tsai.json_random(remap, 0, remap.length); // randomize remap array
+ var random=tsai.copy_fovs_build(list);
+ for(var item=0; item<random.length; item++)
+ {if('standardTarget' in random[item].fov && random[item].fov.standardTarget=='Molybdenum Foil') random[item].group=-1;
+  else random[item].group=remap[random[item].tile]; // remap tiles to random groups
+ }
+ return tsai.json_random_groups(random.sort(tsai.json_sort)); // sort by groups, Array.sort is stable (preserves original order)
+}
+
+json_group_autofocus(list)
+{var autofoci=[]; // find autofocus points
+ for(var item=0; item<list.length; item++)
+ {if(list[item].focus_x!==null) autofoci.push({x: list[item].focus_x, y: list[item].focus_y, index: item, fovs: []});
+ }
+ // group by closest autofocus point
+ var autofoci_length=autofoci.length;
+ for(var item=0; item<list.length; item++)
+ {if(list[item].focus_x!==null) continue; // skip autofocus points
+  if('standardTarget' in list[item].fov && list[item].fov.standardTarget=='Molybdenum Foil') {list[item].group=-1; continue;}
+  var closest=0;
+  var closest_distance2;
+  var fov_half=50+(list[item].fov.fovSizeMicrons/2);
+  var fov_x=list[item].fov.centerPointMicrons.x;
+  var fov_y=list[item].fov.centerPointMicrons.y;
+  var overlap=false;
+  for(var autofocus=0; autofocus<autofoci_length; autofocus++)
+  {var autofocus_x=autofoci[autofocus].x;
+   var autofocus_y=autofoci[autofocus].y;
+   var distance2=Math.pow(autofocus_x-fov_x, 2)+Math.pow(autofocus_y-fov_y, 2);
+   if(fov_x+fov_half<=autofocus_x || fov_x-fov_half>=autofocus_x || fov_y+fov_half<=autofocus_y || fov_y-fov_half>=autofocus_y) // fov is to the left, right, top, or bottom of autofocus
+   {if(autofocus==0 || overlap===closest) {closest=autofocus; closest_distance2=distance2;}
+    else if(distance2<closest_distance2)  {closest=autofocus; closest_distance2=distance2;}
+   }
+   else
+   {overlap=autofocus; // overlaps with focus point
+    tsai.json_warnings('<li>'+list[autofoci[overlap].index].fov.name+' autofocus '+list[autofoci[overlap].index].fov.focusSite+' overlaps with '+list[item].fov.name+'</li>');
+  }}
+  autofoci[closest].fovs.push(item);
+  if(closest_distance2>25000000)
+  {tsai.json_warnings('<li>'+list[item].fov.name+' closest autofocus point '+(Math.round(Math.sqrt(closest_distance2)/100)/10)+' mm away ('+list[autofoci[closest].index].fov.name+' '+list[autofoci[closest].index].fov.focusSite+')</li>');
+  }
+  if(overlap!==false && overlap<closest) // overlapping autofocus point scanned before closest autofocus point, therefore before fov
+  {autofoci=autofoci.slice(0, overlap).concat(autofoci.slice(overlap+1, closest+1)).concat(autofoci.slice(overlap, overlap+1)).concat(autofoci.slice(closest+1));
+ }}
+ // assign fovs to groups, molybdenum foil previously assigned to group -1
+ for(var autofocus=0; autofocus<autofoci_length; autofocus++)
+ {list[autofoci[autofocus].index].group=autofocus;
+  var group=autofocus+0.5;
+  for(var fov=0; fov<autofoci[autofocus].fovs.length; fov++) list[autofoci[autofocus].fovs[fov]].group=group;
+ }
+ list=list.sort(tsai.json_sort); // sort by groups, Array.sort is stable (preserves original order)
+ // check whether autofoci are imaged before an overlying FOV
+ var reorder=false;
+ autofoci=[]; // list of focus_x and focus_y
+ for(var item=0; item<list.length; item++)
+ {if(list[item].focus_x!==null) autofoci.push({name:list[item].fov.name+' '+list[item].fov.focusSite, x: list[item].focus_x, y: list[item].focus_y});
+  else
+  {var fov_half=50+(list[item].fov.fovSizeMicrons/2);
+   var fov_x=list[item].fov.centerPointMicrons.x;
+   var fov_y=list[item].fov.centerPointMicrons.y;
+   for(var autofocus=0; autofocus<autofoci.length; autofocus++)
+   {var autofocus_x=autofoci[autofocus].x;
+    var autofocus_y=autofoci[autofocus].y;
+    if(fov_x+fov_half>autofocus_x && fov_x-fov_half<autofocus_x && fov_y+fov_half>autofocus_y && fov_y-fov_half<autofocus_y)
+    {tsai.json_warnings('<li>'+autofoci[autofocus].name+' autofocus performed before imaging overlapping FOV '+list[item].fov.name+'</li>');
+     reorder=true;
+ }}}}
+ if(reorder) tsai.json_warnings('<li>Consider moving autofocus points to non-imaged tissue and/or using focus-only FOVs.</li>');
+ return [list, tsai.json_random_groups(tsai.copy_fovs_build(list))];
+}
+
+json_random_groups(list)
+{var fovs=list.length;
+ var group=list[0].group;
+ var start=0;
+ for(var index=1; index<=fovs; index++) // randomize within groups
+ {if(index==fovs)                    list=tsai.json_random(list, start, index);
+  else if(list[index].group!=group) {list=tsai.json_random(list, start, index); start=index; group=list[index].group;}
+ }
+ return list;
+}
+
+json_buttons(start, prefix, suffix)
+{var time=(tsai.time_format()).ymdhmsm;
+ var split_fovs;
+ var split_time;
+ [split_fovs, split_time]=tsai.json_split();
+ if(tsai.json.resume!=-1) tsai.json.split.length=1;
+ else tsai.json.split=[];
+ var split=tsai.json.split;
+ var fovs=tsai.json.list.sequential;
+ tsai.json_split_fovs( split, fovs                 , start, time, prefix+'Sequential', suffix+'_sequential', fovs.length);
+ tsai.json_split_fovs( split, tsai.json.list.random, start, time, prefix+'Random'    , suffix+'_random'    , fovs.length);
+ if(split_fovs!==false && split_fovs<fovs.length)
+ {tsai.json_split_fovs(split, fovs                 , start, time, prefix+'Sequential', suffix+'_sequential', split_fovs);
+  tsai.json_split_fovs(split, tsai.json.list.random, start, time, prefix+'Random'    , suffix+'_random'    , split_fovs);
+ }
+ else if(split_time!==false)
+ {tsai.json_split_time(split, fovs                 , start, time, prefix+'Sequential', suffix+'_sequential', split_time);
+  tsai.json_split_time(split, tsai.json.list.random, start, time, prefix+'Random'    , suffix+'_random'    , split_time);
+ }
+ var b='<h3>Build '+time+'</h3>\n<p class="json">';
+ for(var index=0; index<split.length; index++)
+ {var color=(split[index].button.includes('Random')?'red':'green');
+  b+='\n'+(index==0?'':'<br/>')+'<input type="button" value="'+split[index].button+'" onclick="tsai.json_export('+index+');" class="_layout_'+color+'"/>';
+ }
+ document.getElementById('json_download').innerHTML=b+'</p>';
+ document.getElementById('json_download').style.display='';
+ document.getElementById('json_build').style.display='';
+ document.getElementById('files_append_li').style.display='';
+ console.log('Build '+time);
+}
+
+json_dragover(event)
+{if(event.target===tsai.json.rearrange) return;
+ if(event.target.parentNode!==tsai.json.rearrange.parentNode) return;
+ var from_values=tsai.json.rearrange.firstElementChild.value.split(':');
+ var into_values=event.target.firstElementChild.value.split(':');
+ // if(from_values[1]!=into_values[1]) return; // not the same list
+ // if(from_values[2]!=into_values[2] && from_values[2]!='-1') return; // prevent moving across groups, disable move onto molybdenum foil prevents misgrouping
+ var lists=tsai.json.list;
+ var order=(['sequential', 'random'][parseInt(from_values[1])]);
+ var list=lists[order];
+ var fovs=list.length;
+ var from=parseInt(from_values[0]);
+ var into=parseInt(into_values[0]);
+ if(tsai.json_dragbefore(tsai.json.rearrange, event.target)) // into before from
+ {event.target.parentNode.insertBefore(tsai.json.rearrange, event.target);
+  lists[order]=list.slice(0, into).concat(list.slice(from, from+1)).concat(list.slice(into, from)).concat(list.slice(from+1));
+ }
+ else
+ {event.target.parentNode.insertBefore(tsai.json.rearrange, event.target.nextSibling); // from before into
+  lists[order]=list.slice(0, from).concat(list.slice(from+1, into+1)).concat(list.slice(from, from+1)).concat(list.slice(into+1));
+ }
+ var iterator=document.getElementById('json_rearrange_'+order).firstElementChild;
+ for(var index=0; index<fovs; index++)
+ {var values=iterator.firstElementChild.value;
+  iterator.firstElementChild.value=''+index+values.substring(values.indexOf(':'));
+  if(iterator.nextElementSibling) iterator=iterator.nextElementSibling;
+}}
+
+json_dragdrop(event, start, prefix, suffix)
+{event.preventDefault();
+ tsai.json.rearrange=null;
+ tsai.json_buttons(start, prefix, suffix)
+}
+
+json_dragstart(event)
+{event.dataTransfer.effectAllowed='move';
+ event.dataTransfer.setData('text/html', null);
+ tsai.json.rearrange=event.target;
+}
+
+json_dragbefore(li0, li1)
+{if(li0.parentNode===li1.parentNode)
+ {for(var current=li0.previousSibling; current && current.nodeType!==Node.DOCUMENT_NODE; current=current.previousSibling)
+  {if(current===li1) return true;
+ }}
+ return false;
+}
+
+json_split()
+{var split=[false, false];
+ if(document.getElementById('json_split_fovs').checked)
+ {var number=parseInt(document.getElementById('json_split_number').value);
+  if(isNaN(number) || number<5) {document.getElementById('json_split_number').value=80; alert('Split FOV number is invalid, must be ≥5.');}
+  else split[0]=number;
+ }
+ else if(document.getElementById('json_split_time').checked)
+ {var hours=parseInt(document.getElementById('json_split_hours').value);
+  var minutes=parseInt(document.getElementById('json_split_minutes').value);
+  var seconds=((60*(isNaN(hours)?0:hours))+(isNaN(minutes)?0:minutes))*60;
+  if(isNaN(seconds) || seconds<2*60*60)
+  {document.getElementById('json_split_hours').value=6;
+   document.getElementById('json_split_minutes').value=0;
+   alert('Split time is invalid, must be number ≥60 minutes.');
+  }
+  else split[1]=seconds;
+ }
+ return split;
+}
+
+json_split_fovs(split, list, start, time, prefix, suffix, split_fovs)
+{var fovs=list.length;
+ for(var index=0; index<fovs; index+=split_fovs)
+ {var range=[start+index+1, Math.min(start+index+split_fovs, start+fovs)];
+  var string=range[0]+(range[0]==range[1]?'':'-'+range[1]);
+  var elapsed=0;
+  var end=Math.min(index+split_fovs, fovs);
+  for(var fov=index; fov<end; fov++) elapsed+=list[fov].time;
+  split.push({button: 'FOV'+(range[0]==range[1]?'':'s')+' '+string+prefix+', '+tsai.json_time(elapsed), suffix: '_'+time+'_'+string+suffix, fovs: list.slice(index, end)});
+}}
+
+json_split_time(split, list, start, time, prefix, suffix, split_time)
+{var elapsed=0;
+ var index_jump=0;
+ var fovs=list.length;
+ for(var index=0; index<fovs; index++)
+ {var fov_time=list[index].time;
+  if(index<fovs-1 && elapsed+fov_time<split_time) elapsed+=fov_time;
+  else
+  {if(index_jump==index || index==fovs-1) elapsed+=fov_time;
+   else index--;
+   var range=[start+index_jump+1, Math.min(start+index, start+fovs)+1];
+   var string=range[0]+(range[0]==range[1]?'':'-'+range[1]);
+   split.push({button: 'FOV'+(range[0]==range[1]?'':'s')+' '+string+prefix+', '+tsai.json_time(elapsed), suffix: '_'+time+'_'+string+suffix, fovs: list.slice(index_jump, index+1)});
+   index_jump=index+1;
+   elapsed=0;
+}}}
+
+json_time(seconds)
+{var hours=Math.floor(seconds/3600);
+ var minutes=Math.ceil((seconds-(hours*3600))/60);
+ if(minutes==60) minutes=59;
+ return (hours>0?hours+(hours==1?' hour ':' hours '):'')+minutes+(minutes==1?' minute':' minutes');
+}
+
+// split[button]={button, resume, build, suffix, fovs[{fov, tile, focus_x, focus_y, focus_site, time}]}
+json_export(button)
+{var json=JSON.parse(tsai.json.empty);
+ var split=tsai.json.split[button].fovs;
+ var autofocus_remove=document.getElementById('json_autofocus_remove').checked;
+ for(var fov=0; fov<split.length; fov++)
+ {var index=json.fovs.push(split[fov].fov)-1;
+  if(autofocus_remove && ('focusOnly' in json.fovs[index] || 'focusSite' in json.fovs[index]))
+  {json.fovs[index].focusOnly=0;
+   json.fovs[index].focusSite='None';
+ }}
+ var shift='|'+tsai.coregistration.shift.x_x+','+tsai.coregistration.shift.x_y+','+tsai.coregistration.shift.y_x+','+tsai.coregistration.shift.y_y;
+ if(tsai.coregistration.json!='') json.fovs[0].notes=tsai.optical_to_base64(tsai.coregistration.json+shift);
+ else if(['automatic', 'manual'].includes(tsai.coregistration.last)) json.fovs[0].notes=tsai.optical_to_base64(tsai.coregistration[tsai.coregistration.last+'_coordinates']+shift);
+ var url=window.URL || window.webkitURL;
+ var anchor=document.createElement('a');
+ anchor.href=url.createObjectURL(new Blob([JSON.stringify(json, null, '  ')], {type: 'octet/stream'}));
+ anchor.download=tsai.json.name+tsai.json.split[button].suffix+'.json';
+ document.body.appendChild(anchor);
+ anchor.click();
+ document.body.removeChild(anchor);
+ json.fovs[0].notes=null;
 }
 
 
@@ -1576,7 +2015,7 @@ draw_zoom()
  {document.getElementById('slide_zoom').value=Math.round(tsai.image.scale*1000)/1000;
   return;
  }
- var presets=[0.0625, 0.0625*Math.sqrt(2), 0.125, 0.125*Math.sqrt(2), 0.25, 0.25*Math.sqrt(2), 0.5, 0.5*Math.sqrt(2), 1, Math.sqrt(2), 2];
+ var presets=[0.0625, Math.sqrt(2)/16, 0.125, Math.sqrt(2)/8, 0.25, Math.sqrt(2)/4, 0.5, Math.sqrt(2)/2, 1, Math.sqrt(2), 2];
  if(scale<presets[0]) scale=presets[0];
  else if(scale>presets[presets.length-1]) scale=presets[presets.length-1];
  else
@@ -1617,9 +2056,23 @@ draw_filter()
 }
 
 draw_filter_crement(filter, increment)
-{document.getElementById('slide_'+filter).value=tsai.image[filter]+increment;
+{if(!tsai.image.loaded) return;
+ document.getElementById('slide_'+filter).value=tsai.image[filter]+increment;
  tsai.draw_filter();
 }
+
+draw_key(type, event, position)
+{if(document.activeElement==document.body || ('name' in document.activeElement && document.activeElement.name=='action_radio'))
+ {switch(event.code)
+  {case 'KeyI': tsai.draw_line_thickness_crement(      event.shiftKey?-0.5:0.5); break;
+   case 'KeyM': tsai.draw_tma_crosshair_crement(       event.shiftKey?-0.5:0.5); break;
+   case 'KeyF': tsai.draw_slide_labels_size_crement(   event.shiftKey?-0.5:0.5); break;
+   case 'KeyB': tsai.draw_filter_crement('brightness', event.shiftKey?-0.1:0.1); break;
+   case 'KeyC': tsai.draw_filter_crement('contrast'  , event.shiftKey?-0.1:0.1); break;
+   case 'KeyZ': tsai.draw_zoom_crement(                event.shiftKey?1/Math.sqrt(2):Math.sqrt(2)); break;
+   case 'KeyL': document.getElementById('slide_labels').click(); break;
+   case 'KeyO': document.getElementById('slide_focus_circles').click(); break;
+}}}
 
 draw_reset()
 {switch(tsai.action.type)
@@ -1654,16 +2107,34 @@ draw_reset()
    ########################################
    ######################################## */
 
-tile_corners_shifted(tile, x, y, action, action_options)
-{var fov=tsai.tiles[tile].fov.fovSizeMicrons;
- var fov_half=fov*0.5;
- for(var row=0; row<tsai.tiles[tile].map.length; row++)
- {var x_row=x;
+/*
+ tile_fov_corners notes:
+  // no start shift correction
+   var x_start=x_row-fov_half*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y);
+   var y_start=y    +fov_half*(1+tsai.coregistration.shift.y_x+tsai.coregistration.shift.y_y);
+
+  // no start or corner shift correction
   for(var column=0; column<tsai.tiles[tile].map[row].length; column++)
-  {var x_start=x_row-fov_half*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y)+fov*((row   *tsai.coregistration.shift.x_y)+(column*tsai.coregistration.shift.x_x)); // with shift correction
+  {action(action_options, row, column,
+    tsai.coregistration_from_micron(tsai.image.transform, {x: x_row-fov_half, y: y+fov_half}),
+    tsai.coregistration_from_micron(tsai.image.transform, {x: x_row+fov_half, y: y+fov_half}),
+    tsai.coregistration_from_micron(tsai.image.transform, {x: x_row+fov_half, y: y-fov_half}),
+    tsai.coregistration_from_micron(tsai.image.transform, {x: x_row-fov_half, y: y-fov_half})
+   );
+   x_row+=fov;
+  }
+*/
+
+tile_fov_corners(tile, x, y, action, action_options)
+{var fov=tsai.tiles[tile].fov.fovSizeMicrons;
+ var fov_half=fov/2;
+ var rows=tsai.tiles[tile].map.length;
+ var columns=tsai.tiles[tile].map[0].length;
+ for(var row=0; row<rows; row++)
+ {var x_row=x;
+  for(var column=0; column<columns; column++)
+  {var x_start=x_row-fov_half*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y)+fov*((row   *tsai.coregistration.shift.x_y)+(column*tsai.coregistration.shift.x_x)); // start shift correction
    var y_start=y    +fov_half*(1+tsai.coregistration.shift.y_x+tsai.coregistration.shift.y_y)-fov*((column*tsai.coregistration.shift.y_x)+(row   *tsai.coregistration.shift.y_y));
-   // var x_start=x_row-fov_half*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y); // without shift correction
-   // var y_start=y    +fov_half*(1+tsai.coregistration.shift.y_x+tsai.coregistration.shift.y_y);
    action(action_options, row, column,
     tsai.coregistration_from_micron(tsai.image.transform, {x: x_start, y: y_start}),
     tsai.coregistration_from_micron(tsai.image.transform, {x: x_start+fov*(1+tsai.coregistration.shift.x_x), y: y_start-fov*tsai.coregistration.shift.y_x}),
@@ -1675,24 +2146,7 @@ tile_corners_shifted(tile, x, y, action, action_options)
   y-=fov;
 }}
 
-tile_corners(tile, x, y, action, action_options)
-{var fov=tsai.tiles[tile].fov.fovSizeMicrons;
- var fov_half=fov*0.5;
- for(var row=0; row<tsai.tiles[tile].map.length; row++)
- {var x_row=x;
-  for(var column=0; column<tsai.tiles[tile].map[row].length; column++)
-  {action(action_options, row, column,
-    tsai.coregistration_from_micron(tsai.image.transform, {x: x_row-fov_half, y: y+fov_half}),
-    tsai.coregistration_from_micron(tsai.image.transform, {x: x_row+fov_half, y: y+fov_half}),
-    tsai.coregistration_from_micron(tsai.image.transform, {x: x_row+fov_half, y: y-fov_half}),
-    tsai.coregistration_from_micron(tsai.image.transform, {x: x_row-fov_half, y: y-fov_half})
-   );
-   x_row+=fov;
-  }
-  y-=fov;
-}}
-
-tile_corners_draw(options, row, column, tl, tr, br, bl)
+tile_draw_fov(options, row, column, tl, tr, br, bl)
 {if(tsai.tiles[options.tile].map[row][column]==0) return;
  options.context.beginPath();
  options.context.moveTo(tl.x-tsai.image.crop, tl.y);
@@ -1712,17 +2166,62 @@ tile_corners_draw(options, row, column, tl, tr, br, bl)
  options.context.stroke();
 }
 
+tile_draw_autofocus(tile, x, y, action, action_options)
+{var center=tsai.coregistration_from_micron(tsai.image.transform, {x: x, y: y});
+ var x_start=x-50*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y); // start shift correction
+ var y_start=y+50*(1+tsai.coregistration.shift.y_x+tsai.coregistration.shift.y_y);
+ var tl=tsai.coregistration_from_micron(tsai.image.transform, {x: x_start, y: y_start});
+ var br=tsai.coregistration_from_micron(tsai.image.transform, {x: x_start+100*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y), y: y_start-100*(1+tsai.coregistration.shift.y_x+tsai.coregistration.shift.y_y)});
+ action_options.context.globalAlpha=tsai.canvas.hover_fill_opacity;
+ action(action_options, 0, 0,
+  tl,
+  tsai.coregistration_from_micron(tsai.image.transform, {x: x_start+100*(1+tsai.coregistration.shift.x_x), y: y_start-100*tsai.coregistration.shift.y_x}),
+  br,
+  tsai.coregistration_from_micron(tsai.image.transform, {x: x_start+100*tsai.coregistration.shift.x_y, y: y_start-100*(1+tsai.coregistration.shift.y_y)})
+ );
+ action_options.context.globalAlpha=1;
+ if(tsai.canvas.slide_focus_circles)
+ {action_options.context.beginPath();
+  action_options.context.arc(center.x-tsai.image.crop, center.y, Math.abs(25*(tl.x-br.x+tl.y-br.y)), 0, 2*Math.PI); // 25*(100+100) microns = 5 mm
+  action_options.context.lineWidth=tsai.canvas.line_thickness;
+  action_options.context.lineCap='round';
+  action_options.context.strokeStyle=action_options.color;
+  action_options.context.setLineDash([5,5]);
+  action_options.context.stroke();
+  action_options.context.setLineDash([]);
+}}
+
 tiles_draw(context, except)
-{if(tsai.tiles.length==0) return;
+{var tiles_length=tsai.tiles.length;
+ if(tiles_length==0) return;
  tsai.draw_clear(context);
- for(var tile=0; tile<tsai.tiles.length; tile++)
- {if(document.getElementById('tile_'+tile+'_active').checked && !except.includes(tile)) tsai.tile_draw(context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, false);
+ for(var tile=0; tile<tiles_length; tile++)
+ {if(tsai.tiles[tile].active && !except.includes(tile)) tsai.tile_draw(context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, false);
 }}
 
 tile_draw(context, tile, x, y, fill)
 {var color=tsai.canvas.line_colors[tile%tsai.canvas.line_colors.length][0];
- if(tsai.image.type=='sed') tsai.tile_corners_shifted(tile, x, y, tsai.tile_corners_draw, {context: context, tile: tile, fill: fill, color: color});
- else                       tsai.tile_corners(        tile, x, y, tsai.tile_corners_draw, {context: context, tile: tile, fill: fill, color: color});
+ var focus_site=('focusSite' in tsai.tiles[tile].fov?tsai.tiles[tile].fov.focusSite.trim():'None');
+ var focus_only=('focusOnly' in tsai.tiles[tile].fov?tsai.tiles[tile].fov.focusOnly:0);
+ if(focus_site!='None')
+ {if(focus_only!=0) focus_site='FOV';
+  var focus_shift=(tsai.tiles[tile].fov.fovSizeMicrons/2)+60;
+  var focus_x=x;
+  var focus_y=y;
+  switch(focus_site)
+  {// case 'FOV': break; // no adjustments to focus_x or focus_y
+   case 'NW': focus_x-=focus_shift; focus_y+=focus_shift; break;
+   case 'N' :                       focus_y+=focus_shift; break;
+   case 'NE': focus_x+=focus_shift; focus_y+=focus_shift; break;
+   case 'W' : focus_x-=focus_shift;                       break;
+   case 'E' : focus_x+=focus_shift;                       break;
+   case 'SW': focus_x-=focus_shift; focus_y-=focus_shift; break;
+   case 'S' :                       focus_y-=focus_shift; break;
+   case 'SE': focus_x+=focus_shift; focus_y-=focus_shift; break;
+  }
+  tsai.tile_draw_autofocus(tile, focus_x, focus_y, tsai.tile_draw_fov, {context: context, tile: tile, fill: true, color: color});
+ }
+ if(focus_only==0) tsai.tile_fov_corners(tile, x, y, tsai.tile_draw_fov, {context: context, tile: tile, fill: fill, color: color}); // calls function tsai.tile_draw_fov
  context.globalAlpha=1;
  if(tsai.canvas.slide_labels)
  {var found=false;
@@ -1730,9 +2229,14 @@ tile_draw(context, tile, x, y, fill)
   var columns=tsai.tiles[tile].map[0].length;
   for(var row=0; row<rows; row++)
   {for(var column=0; column<columns; column++)
-   {if(tsai.tiles[tile].map[row][column]==1)
-    {var fov=tsai.tiles[tile].fov.fovSizeMicrons;
-     var top=tsai.coregistration_from_micron(tsai.image.transform, {x: x+((column-0.5)*fov), y: y-((row-0.5)*fov)});
+   {if(tsai.tiles[tile].map[row][column]==1 || (focus_only!=0 && row==0 && column==0))
+    {var fov=(focus_only!=0?100:tsai.tiles[tile].fov.fovSizeMicrons);
+     row-=0.5;
+     column-=0.5;
+     var top=tsai.coregistration_from_micron(tsai.image.transform,
+      {x: x+fov*((row*(  tsai.coregistration.shift.x_y))+(column*(1+tsai.coregistration.shift.x_x))),
+       y: y-fov*((row*(1+tsai.coregistration.shift.y_y))+(column*(  tsai.coregistration.shift.y_x)))+(focus_site!='None' && focus_site.charAt(0)=='N'?110:0
+     )});
      context.font='normal normal normal '+tsai.canvas.slide_labels_size+'px "'+tsai.canvas.slide_labels_font+'"';
      context.fillStyle=color;
      context.fillText(tsai.tiles[tile].fov.name, top.x-tsai.image.crop, top.y-(0.3*tsai.canvas.slide_labels_size));
@@ -1742,8 +2246,9 @@ tile_draw(context, tile, x, y, fill)
    if(found) break;
 }}}
 
-draw_slide_labels(checkbox)
-{if(tsai.canvas.slide_labels==checkbox.checked) return;
+draw_slide_labels()
+{var checkbox=document.getElementById('slide_labels');
+ if(tsai.canvas.slide_labels==checkbox.checked) return;
  else
  {tsai.canvas.slide_labels=checkbox.checked;
   tsai.tiles_draw(tsai.canvas.draw_context, []);
@@ -1764,12 +2269,20 @@ draw_slide_labels_size_crement(increment)
  tsai.draw_slide_labels_size();
 }
 
+draw_slide_focus_circles()
+{var checkbox=document.getElementById('slide_focus_circles');
+ if(tsai.canvas.slide_focus_circles==checkbox.checked) return;
+ else
+ {tsai.canvas.slide_focus_circles=checkbox.checked;
+  tsai.tiles_draw(tsai.canvas.draw_context, []);
+}}
+
 tile_hover(tile, mouse_over)
-{tsai.json_time(false);
+{tsai.json_summary(false);
  if(tsai.tiles.length==0 || !tsai.image.loaded || ['optical', 'import', 'sed'].includes(tsai.action.type)) return;
  if(tsai.action.type=='tma' && tsai.scratch.polygon.length>=4) return;
  tsai.tiles_draw(tsai.canvas.draw_context, [tile]);
- if(document.getElementById('tile_'+tile+'_active') && document.getElementById('tile_'+tile+'_active').checked)
+ if(tsai.tiles[tile].active)
  {tsai.tile_draw(tsai.canvas.draw_context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, (tsai.action.item==tile && ['move', 'click', 'erase'].includes(tsai.action.type)) || mouse_over);
   if(mouse_over)
   {var rows=tsai.tiles[tile].map.length;
@@ -1798,14 +2311,17 @@ tile_hover(tile, mouse_over)
 
 tile_hover_click(tile)
 {if(!tsai.menus_close('labels')) return;
- if(document.getElementById('tile_'+tile+'_active').checked)
+ if(document.getElementById('tile_'+tile+'_active') && document.getElementById('tile_'+tile+'_active').checked)
  {document.getElementById('tile_'+tile+'_move').checked=true;
+  tsai.tiles[tile].active=true;
   tsai.action.item=tile;
   tsai.action.type='move';
-  tsai.tile_hover(tile, true, true);
+  tsai.tile_hover(tile, true);
  }
- else tsai.tile_hover(tile, false, false);
-}
+ else
+ {tsai.tiles[tile].active=false;
+  tsai.tile_hover(tile, false);
+}}
 
 /* ###########################################
    ##########  TILE WRITE CONTROLS  ##########
@@ -1815,42 +2331,65 @@ tile_hover_click(tile)
 tiles_selects(prefix, tile)
 {var tile_set=(tile>=0);
  var section_ids='<select id="'+prefix+'_section_id"'+(tile_set?' onchange="tsai.tile_section_id('+tile+');"':'')+'>';
- for(var index=0; index<tsai.json.section_ids.length; index++)
+ var section_ids_length=tsai.json.section_ids.length;
+ for(var index=0; index<section_ids_length; index++)
  {section_ids+='<option value="'+tsai.json.section_ids[index]+'"'
    +((tile_set && tsai.json.section_ids[index]==tsai.tiles[tile].fov.sectionId) || (!tile_set && index==0)?' selected':'')
    +'>'+tsai.json.section_ids[index]+'</option>';
  }
  section_ids+='</select>';
  var fovs='<select id="'+prefix+'_fov"'+(tile_set?' onchange="tsai.tile_fov('+tile+');"':'')+'>';
- for(var index=0; index<tsai.mibi.fovs.length; index++)
+ var fovs_length=tsai.mibi.fovs.length;
+ for(var index=0; index<fovs_length; index++)
  {fovs+='<option value="'+tsai.mibi.fovs[index]+'"'
    +((tile_set && tsai.mibi.fovs[index]==tsai.tiles[tile].fov.fovSizeMicrons) || (!tile_set && tsai.mibi.fovs[index]==800)?' selected':'')
    +'>'+tsai.mibi.fovs[index]+'</option>';
  }
  fovs+='</select>';
  var rasters='<select id="'+prefix+'_raster"'+(tile_set?' onchange="tsai.tile_raster('+tile+');"':'')+'>';
- for(var index=0; index<tsai.mibi.rasters.length; index++)
+ var rasters_length=tsai.mibi.rasters.length;
+ for(var index=0; index<rasters_length; index++)
  {rasters+='<option value="'+tsai.mibi.rasters[index]+'"'
    +((tile_set && tsai.mibi.rasters[index]==tsai.tiles[tile].fov.frameSizePixels.width) || (!tile_set && tsai.mibi.rasters[index]==2048)?' selected':'')
    +'>'+tsai.mibi.rasters[index]+'</option>';
  }
  rasters+='</select>';
  var presets='<select id="'+prefix+'_preset"'+(tile_set?'onchange="tsai.tile_preset('+tile+');"':'')+'>';
- var keys=Object.keys(tsai.mibi.presets);
- for(var index=0; index<keys.length; index++)
+ var keys=Object.keys(tsai.mibi.presets[tsai.mibi.version]);
+ var keys_length=keys.length;
+ for(var index=0; index<keys_length; index++)
  {presets+='<option value="'+keys[index]+'"'
-   +((tile_set && tsai.json_equal(tsai.tiles[tile].fov.imagingPreset, tsai.mibi.presets[keys[index]].imagingPreset)) || (!tile_set && keys[index].substring(0, 4)=='Fine')?' selected':'')
+   +((tile_set && tsai.json_equal(tsai.tiles[tile].fov.imagingPreset, tsai.mibi.presets[tsai.mibi.version][keys[index]].imagingPreset)) || (!tile_set && keys[index].substring(0, 4)=='Fine')?' selected':'')
    +'>'+keys[index]+'</option>';
  }
  presets+='</select>';
  var dwells='<select id="'+prefix+'_dwell"'+(tile_set?' onchange="tsai.tile_dwell('+tile+');"':'')+'>';
- for(var index=0; index<tsai.mibi.dwells.length; index++)
+ var dwells_length=tsai.mibi.dwells.length;
+ for(var index=0; index<dwells_length; index++)
  {dwells+='<option value="'+tsai.mibi.dwells[index][0]+':'+tsai.mibi.dwells[index][1]+'"'
    +((tile_set && tsai.mibi.dwells[index][0]==tsai.tiles[tile].fov.timingDescription.trim()) || (!tile_set && tsai.mibi.dwells[index][0]=='1 ms')?' selected':'')
    +'>'+tsai.mibi.dwells[index][0]+'</option>';
  }
  dwells+='</select>';
- return {section_ids: section_ids, fovs: fovs, rasters: rasters, presets: presets, dwells: dwells};
+ var focus_onlys='';
+ var focus_sites='';
+ if(parseFloat(tsai.mibi.version)>=parseFloat(tsai.mibi.version_latest))
+ {focus_onlys='<select id="'+prefix+'_focus_only"'+(tile_set?' onchange="tsai.tile_focus_only('+tile+');"':'')+'>';
+  for(var index=0; index<tsai.mibi.focus_onlys.length; index++)
+  {focus_onlys+='<option value="'+tsai.mibi.focus_onlys[index]+'"'
+    +((tile_set && tsai.mibi.focus_onlys[index]==tsai.tiles[tile].fov.focusOnly) || (!tile_set && tsai.mibi.focus_onlys[index]==0)?' selected':'')
+    +'>'+tsai.mibi.focus_onlys[index]+'</option>';
+  }
+  focus_onlys+='</select>';
+  focus_sites='<select id="'+prefix+'_focus_site"'+(tile_set?' onchange="tsai.tile_focus_site('+tile+');"':'')+'>';
+  for(var index=0; index<tsai.mibi.focus_sites.length; index++)
+  {focus_sites+='<option value="'+tsai.mibi.focus_sites[index]+'"'
+    +((tile_set && tsai.mibi.focus_sites[index]==tsai.tiles[tile].fov.focusSite) || (!tile_set && tsai.mibi.focus_sites[index]=='None')?' selected':'')
+    +'>'+tsai.mibi.focus_sites[index]+'</option>';
+  }
+  focus_sites+='</select>';
+ }
+ return {section_ids: section_ids, fovs: fovs, rasters: rasters, presets: presets, dwells: dwells, focus_onlys: focus_onlys, focus_sites: focus_sites};
 }
 
 tiles_builder()
@@ -1878,17 +2417,17 @@ tiles_build()
  var fov   =parseInt(document.getElementById('tiles_build_fov').value);
  var raster=parseInt(document.getElementById('tiles_build_raster').value);
  var warnings=false;
- if(!(preset in tsai.mibi.presets))      {tsai.json_warnings('<li>Build tile preset not recognized.</li>'     ); warnings=true;}
- if(!tsai.mibi.fovs.includes(fov))       {tsai.json_warnings('<li>Build tile FOV size not recognized.</li>'   ); warnings=true;}
- if(!tsai.mibi.rasters.includes(raster)) {tsai.json_warnings('<li>Build tile raster size not recognized.</li>'); warnings=true;}
+ if(!(preset in tsai.mibi.presets[tsai.mibi.version])) {tsai.json_warnings('<li>Build tile preset not recognized</li>'     ); warnings=true;}
+ if(!tsai.mibi.fovs.includes(fov))                     {tsai.json_warnings('<li>Build tile FOV size not recognized</li>'   ); warnings=true;}
+ if(!tsai.mibi.rasters.includes(raster))               {tsai.json_warnings('<li>Build tile raster size not recognized</li>'); warnings=true;}
  if(warnings) return;
  var start=tsai.tiles.length;
- var tile=tsai.tiles.push({fov: JSON.parse(JSON.stringify(tsai.mibi.presets[preset])), map:[[1]], original: {}})-1;
+ var tile=tsai.tiles.push({fov: JSON.parse(JSON.stringify(tsai.mibi.presets[tsai.mibi.version][preset])), map:[[1]], original: {}})-1;
  // tiles_builder_slide_id();
  var microns=tsai.coregistration_to_micron(tsai.image.transform, {x: tsai.image.crop+30, y: 30});
  tsai.tiles[tile].fov.name                  =document.getElementById('tiles_build_name').value;
- tsai.tiles[tile].fov.centerPointMicrons.x  =microns.x+(fov*0.5);
- tsai.tiles[tile].fov.centerPointMicrons.y  =microns.y-(fov*0.5);
+ tsai.tiles[tile].fov.centerPointMicrons.x  =microns.x+(fov/2);
+ tsai.tiles[tile].fov.centerPointMicrons.y  =microns.y-(fov/2);
  tsai.tiles[tile].fov.fovSizeMicrons        =fov;
  tsai.tiles[tile].fov.frameSizePixels.width =raster;
  tsai.tiles[tile].fov.frameSizePixels.height=raster;
@@ -1896,7 +2435,8 @@ tiles_build()
  // tsai.tiles[tile].fov.slideId            =document.getElementById('tiles_build_slide_id').value;
  // tsai.tiles[tile].fov.slideId            =json_parse_id(tsai.tiles[tile], 'slideId');
  tsai.tiles[tile].fov.sectionId             =document.getElementById('tiles_build_section_id').value;
- tsai.tiles[tile].original={fov: JSON.stringify(tsai.tiles[tile].fov), map: JSON.stringify(tsai.tiles[tile].map)};
+ tsai.tiles[tile].active=true;
+ tsai.tiles[tile].original={fov: JSON.stringify(tsai.tiles[tile].fov), map: JSON.stringify(tsai.tiles[tile].map), active: true};
  tsai.tiles_write(start);
  tsai.tile_expand(tile);
 }
@@ -1905,15 +2445,16 @@ tiles_build()
 tiles_write(start)
 {// reset=true undoes/resets any previously deleted tile indexes
  if(start==0) document.getElementById('tiles').innerHTML='';
- if(tsai.tiles.length==0) return;
+ var tiles_length=tsai.tiles.length;
+ if(tiles_length==0) return;
  var b='';
- for(var tile=start; tile<tsai.tiles.length; tile++) b+=tsai.tile_div(tile);
+ for(var tile=start; tile<tiles_length; tile++) b+=tsai.tile_div(tile);
  document.getElementById('tiles').insertAdjacentHTML('beforeend', b);
- for(var tile=start; tile<tsai.tiles.length; tile++)
+ for(var tile=start; tile<tiles_length; tile++)
  {if(document.getElementById('tile_'+tile) && document.getElementById('tile_'+tile).classList.contains('tile_expanded')) tsai.tile_map_resize(tile);
  }
- if(start==0 && tsai.tiles.length>0) tsai.tile_expand(0);
- tsai.json_time(false);
+ if(start==0 && tiles_length>0) tsai.tile_expand(0);
+ tsai.json_summary(false);
  if(tsai.image.loaded) tsai.tiles_draw(tsai.canvas.draw_context, []);
 }
 
@@ -1940,24 +2481,27 @@ tile_div(tile)
   +'\n  <tr>'
   +'\n   <td colspan="3">'
   +'\n    <table class="tile_settings">'
-  +'\n     <tr><td colspan="2"><input id="tile_'+tile+'_active" type="checkbox"'
-  +((!document.getElementById('tile_'+tile+'_active') || document.getElementById('tile_'+tile+'_active').checked)?' checked':'')
-  +' onclick="tsai.tile_hover_click('+tile+')"/><input id="tile_'+tile+'_name"                type="text" value="'+tsai.tiles[tile].fov.name     +'" onchange="tsai.tile_name('      +tile+');" onfocus="tsai.labels_build('+tile+');"/></td>'+buttons_expand
-  +  '\n     <tr><td>x columns                   </td><td><input id="tile_'+tile+'_columns"    type="text" value="'+tsai.tiles[tile].map[0].length+'" onchange="tsai.tile_map_resize('+tile+'); tsai.tiles_draw(\'canvas_draw\', []);"/></td>'+buttons_columns
-  +  '\n     <tr><td>y rows                      </td><td><input id="tile_'+tile+'_rows"       type="text" value="'+tsai.tiles[tile].map.length   +'" onchange="tsai.tile_map_resize('+tile+'); tsai.tiles_draw(\'canvas_draw\', []);"/></td>'+buttons_rows
-  +  '\n     <tr><td>x center &micro;m           </td><td><input id="tile_'+tile+'_center_x"   type="text" value="'+(Math.round(tsai.tiles[tile].fov.centerPointMicrons.x*100)/100)+'" onchange="tsai.tile_position_set('+tile+');"/></td>'+buttons_nudge_x
-  +  '\n     <tr><td>y center &micro;m           </td><td><input id="tile_'+tile+'_center_y"   type="text" value="'+(Math.round(tsai.tiles[tile].fov.centerPointMicrons.y*100)/100)+'" onchange="tsai.tile_position_set('+tile+');"/></td>'+buttons_nudge_y
-  +  '\n     <tr><td>x center pixels             </td><td><input id="tile_'+tile+'_pixels_x"   type="text" value="'+(Math.round(pixels.x*100)/100)+'" readonly/></td></tr>'
-  +  '\n     <tr><td>y center pixels             </td><td><input id="tile_'+tile+'_pixels_y"   type="text" value="'+(Math.round(pixels.y*100)/100)+'" readonly/></td>'+buttons_source
-  +  '\n     <tr><td>FOV (&micro;m)              </td><td>'+selects.fovs   +'</td></tr>'
-  +  '\n     <tr><td>Raster size (pixels)        </td><td>'+selects.rasters+'</td></tr>'
-  +  '\n     <tr><td>Pixel distance (&micro;m)   </td><td><input id="tile_'+tile+'_length"     type="text" value="'+(Math.round(tsai.tiles[tile].fov.fovSizeMicrons*1000/tsai.tiles[tile].fov.frameSizePixels.width)/1000)+'" readonly/></select></td></tr>'
-  +  '\n     <tr><td>Preset                      </td><td>'+selects.presets+'</td></tr>'
-  +  '\n     <tr><td>Dwell (ms)                  </td><td>'+selects.dwells +'</td></tr>'
-  +  '\n     <tr><td>Depth                       </td><td><input id="tile_'+tile+'_depth"      type="text" value="'+parseInt(tsai.tiles[tile].fov.scanCount)+'" onchange="tsai.tile_depth('     +tile+');"/></td></tr>'
-  +  '\n     <tr><td>Section ID                  </td><td>'+selects.section_ids +'</td></tr>'
-  //+'\n     <tr><td>Section ID                  </td><td><input id="tile_'+tile+'_section_id" type="text" value="'+parseInt(tsai.tiles[tile].fov.sectionId)+'" onchange="tsai.tile_section_id('+tile+');"/></td></tr>'
-  //+'\n     <tr><td>Slide ID                    </td><td><input id="tile_'+tile+'_slide_id"   type="text" value="'+parseInt(tsai.tiles[tile].fov.slideId)  +'" onchange="tsai.tile_slide_id('  +tile+');"/></td></tr>'
+  +'\n     <tr><td colspan="2"><input id="tile_'+tile+'_active" type="checkbox"'+(tsai.tiles[tile].active?' checked':'')+' onclick="tsai.tile_hover_click('+tile+')"/>'
+                                                   +'<input id="tile_'+tile+'_name"       type="text" value="'+tsai.tiles[tile].fov.name     +'" onchange="tsai.tile_name('      +tile+');" onfocus="tsai.labels_build('+tile+');"/></td>'+buttons_expand
+  +'\n     <tr><td>x columns                </td><td><input id="tile_'+tile+'_columns"    type="text" value="'+tsai.tiles[tile].map[0].length+'" onchange="tsai.tile_map_resize('+tile+'); tsai.tiles_draw(\'canvas_draw\', []);"/></td>'+buttons_columns
+  +'\n     <tr><td>y rows                   </td><td><input id="tile_'+tile+'_rows"       type="text" value="'+tsai.tiles[tile].map.length   +'" onchange="tsai.tile_map_resize('+tile+'); tsai.tiles_draw(\'canvas_draw\', []);"/></td>'+buttons_rows
+  +'\n     <tr><td>x center &micro;m        </td><td><input id="tile_'+tile+'_center_x"   type="text" value="'+(Math.round(tsai.tiles[tile].fov.centerPointMicrons.x*100)/100)+'" onchange="tsai.tile_position_set('+tile+');"/></td>'+buttons_nudge_x
+  +'\n     <tr><td>y center &micro;m        </td><td><input id="tile_'+tile+'_center_y"   type="text" value="'+(Math.round(tsai.tiles[tile].fov.centerPointMicrons.y*100)/100)+'" onchange="tsai.tile_position_set('+tile+');"/></td>'+buttons_nudge_y
+  +'\n     <tr><td>x center pixels          </td><td><input id="tile_'+tile+'_pixels_x"   type="text" value="'+(Math.round(pixels.x*100)/100)+'" readonly/></td></tr>'
+  +'\n     <tr><td>y center pixels          </td><td><input id="tile_'+tile+'_pixels_y"   type="text" value="'+(Math.round(pixels.y*100)/100)+'" readonly/></td>'+buttons_source
+  +'\n     <tr><td>FOV (&micro;m)           </td><td>'+selects.fovs        +'</td></tr>'
+  +'\n     <tr><td>Raster size (pixels)     </td><td>'+selects.rasters     +'</td></tr>'
+  +'\n     <tr><td>Pixel distance (&micro;m)</td><td><input id="tile_'+tile+'_length"     type="text" value="'+(Math.round(tsai.tiles[tile].fov.fovSizeMicrons*1000/tsai.tiles[tile].fov.frameSizePixels.width)/1000)+'" readonly/></select></td></tr>'
+  +'\n     <tr><td>Preset                   </td><td>'+selects.presets     +'</td></tr>'
+  +'\n     <tr><td>Dwell (ms)               </td><td>'+selects.dwells      +'</td></tr>'
+  +'\n     <tr><td>Depth                    </td><td><input id="tile_'+tile+'_depth"      type="text" value="'+parseInt(tsai.tiles[tile].fov.scanCount)+'" onchange="tsai.tile_depth('     +tile+');"/></td></tr>'
+  +(parseFloat(tsai.mibi.version)>=parseFloat(tsai.mibi.version_latest)?''
+  +'\n     <tr><td>Focus only               </td><td>'+selects.focus_onlys +'</td></tr>'
+  +'\n     <tr><td>Focus site               </td><td>'+selects.focus_sites +'</td></tr>'
+  :'')
+  +'\n     <tr><td>Section ID                  </td><td>'+selects.section_ids +'</td></tr>'
+  //+'\n   <tr><td>Section ID                  </td><td><input id="tile_'+tile+'_section_id" type="text" value="'+parseInt(tsai.tiles[tile].fov.sectionId)+'" onchange="tsai.tile_section_id('+tile+');"/></td></tr>'
+  //+'\n   <tr><td>Slide ID                    </td><td><input id="tile_'+tile+'_slide_id"   type="text" value="'+parseInt(tsai.tiles[tile].fov.slideId)  +'" onchange="tsai.tile_slide_id('  +tile+');"/></td></tr>'
   +'\n    </table>'
   +'\n   </td>'
   +'\n   <td id="tile_'+tile+'_map" colspan="2" class="tile_map"></td>'
@@ -1984,14 +2528,10 @@ tile_div(tile)
 
 /* #################################################
    ##########  TILE INPUT FIELD CONTROLS  ##########
-   ################################################# */
-/*
-tsai.tiles[] contains all the data used to draw tiles_draw() and write
-json_build(). To change the canvas or JSON file, you take the user input,
-perform error-checking on it, then change the values in tsai.tiles[]. Then you
-can call tiles_draw() or json_build(). User input should not be linked directly
-to tsai.tiles[] because everything in tsai.tiles[] is assumed to be
-error-checked.
+   #################################################
+   tsai.tiles[] contains all the data used to draw tiles_draw() and write json_lists(). To change the canvas or JSON file, you take the user input, perform
+   error-checking on it, then change the values in tsai.tiles[]. Then you can call tiles_draw() or json_lists(). User input should not be linked directly to
+   tsai.tiles[] because everything in tsai.tiles[] is assumed to be error-checked.
 */
 tile_menu(tile)
 {var tile_classlist=document.getElementById('tile_'+tile).classList;
@@ -2013,7 +2553,9 @@ tile_expand(tile)
 
 tile_name(tile)
 {tsai.tiles[tile].fov.name=(document.getElementById('tile_'+tile+'_name').value).replaceAll(' ', '_').replace(/[^A-Za-z0-9_\&\*\-\+\(\)\[\]\{\}\'\"]/g, '');
- tsai.json_time(false);
+ document.getElementById('tile_'+tile+'_name').value=tsai.tiles[tile].fov.name;
+ if(tsai.canvas.slide_labels) tsai.tiles_draw(tsai.canvas.draw_context, []);
+ tsai.json_summary(false);
 }
 
 tile_position_set(tile)
@@ -2021,7 +2563,7 @@ tile_position_set(tile)
  var x=document.getElementById('tile_'+tile+'_center_x').value.replace(/[^0-9\.\-]/g, '').replace(/(^|[^\d])\./g, '$10.').replace(/\.\d*0+$/,'');
  var y=document.getElementById('tile_'+tile+'_center_y').value.replace(/[^0-9\.\-]/g, '').replace(/(^|[^\d])\./g, '$10.').replace(/\.\d*0+$/,'');
  if(x.match(/^\-?\d+\.?\d*$/)==null)
- {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' x coordinate is not a number, reset to prior value.');
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' x coordinate is not a number, reset to prior value</li>');
   document.getElementById('tile_'+tile+'_center_x').value=tsai.tiles[tile].fov.centerPointMicrons.x;
  }
  else
@@ -2029,7 +2571,7 @@ tile_position_set(tile)
   tsai.tiles[tile].fov.centerPointMicrons.x=parseFloat(x);
  }
  if(y.match(/^\-?\d+\.?\d*$/)==null)
- {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' y coordinate is not a number, reset to prior value.');
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' y coordinate is not a number, reset to prior value</li>');
   document.getElementById('tile_'+tile+'_center_y').value=tsai.tiles[tile].fov.centerPointMicrons.y;
  }
  else
@@ -2044,13 +2586,13 @@ tile_fov(tile)
 {var select=document.getElementById('tile_'+tile+'_fov');
  var fov=parseInt(select.value);
  if(isNaN(fov))
- {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' FOV size not recognized, reset to prior value.</li>');
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' FOV size not recognized, reset to prior value</li>');
   select.value=tsai.tiles[tile].fov.fovSizeMicrons;
  }
  else
  {tsai.tiles[tile].fov.fovSizeMicrons=fov;
   document.getElementById('tile_'+tile+'_length').value=Math.round(fov*1000/tsai.tiles[tile].fov.frameSizePixels.width)/1000;
-  tsai.json_time(false);
+  tsai.json_summary(false);
   tsai.tiles_draw(tsai.canvas.draw_context, []);
 }}
 
@@ -2058,46 +2600,46 @@ tile_raster(tile)
 {var select=document.getElementById('tile_'+tile+'_raster');
  var raster=parseInt(select.value);
  if(isNaN(raster))
- {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' raster size not recognized, reset to prior value.</li>');
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' raster size not recognized, reset to prior value</li>');
   select.value=tsai.tiles[tile].fov.frameSizePixels.width;
  }
  else
  {tsai.tiles[tile].fov.frameSizePixels.width=raster;
   tsai.tiles[tile].fov.frameSizePixels.height=raster;
   document.getElementById('tile_'+tile+'_length').value=Math.round(tsai.tiles[tile].fov.fovSizeMicrons*1000/raster)/1000;
-  tsai.json_time(false);
+  tsai.json_summary(false);
   tsai.tiles_draw(tsai.canvas.draw_context, []);
 }}
 
 tile_preset(tile)
 {var select=document.getElementById('tile_'+tile+'_preset');
  var preset=select.value;
- if(preset in tsai.mibi.presets) tsai.tiles[tile].fov.imagingPreset=JSON.parse(JSON.stringify(tsai.mibi.presets[preset].imagingPreset));
+ if(preset in tsai.mibi.presets[tsai.mibi.version]) tsai.tiles[tile].fov.imagingPreset=JSON.parse(JSON.stringify(tsai.mibi.presets[tsai.mibi.version][preset].imagingPreset));
  else
  {var found=false;
-  var keys=Object.keys(tsai.mibi.presets);
+  var keys=Object.keys(tsai.mibi.presets[tsai.mibi.version]);
   for(var key=0; key<keys.length; key++)
-  {if(tsai.json_equal(tsai.tiles[tile].fov.imagingPreset, tsai.mibi.presets[keys[key]].imagingPreset))
-   {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' preset not recognized, resetting to prior value.</li>');
+  {if(tsai.json_equal(tsai.tiles[tile].fov.imagingPreset, tsai.mibi.presets[tsai.mibi.version][keys[key]].imagingPreset))
+   {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' preset not recognized, resetting to prior value</li>');
     select.value=keys[key];
     preset=keys[key];
     found=true;
     break;
   }}
   if(!found)
-  {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' preset not recognized.</li>');
+  {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' preset not recognized</li>');
    return;
  }}
  if(preset in tsai.mibi.recommended)
  {if(!tsai.mibi.recommended[preset].includes(tsai.tiles[tile].fov.timingDescription))
-  {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' recommended dwell time'+(tsai.mibi.recommended[preset].length>1?'s for '+preset+' are ':' for '+preset+' is ')+(tsai.mibi.recommended[preset].join(', ')+'.</li>'));
+  {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' recommended dwell time'+(tsai.mibi.recommended[preset].length>1?'s for '+preset+' are ':' for '+preset+' is ')+(tsai.mibi.recommended[preset].join(', ')+'</li>'));
 }}}
 
 tile_dwell(tile)
 {var select=document.getElementById('tile_'+tile+'_dwell');
  var dwell=select.value.split(':');
  if(dwell[0].trim().match(/^\d+\.?\d*\s*ms$/)==null)
- {tsai.json_warnings('<li>'+tsai.tiles[tile].fov.name+' dwell time not recognized, reset to prior value.</li>');
+ {tsai.json_warnings('<li>'+tsai.tiles[tile].fov.name+' dwell time not recognized, reset to prior value</li>');
   select.value=tsai.tiles[tile].fov.timingDescription;
  }
  else
@@ -2106,27 +2648,92 @@ tile_dwell(tile)
   if(dwell[0] in tsai.mibi.recommended)
   {var preset=document.getElementById('tile_'+tile+'_preset').value;
    if(!tsai.mibi.recommended[dwell[0]].includes(preset))
-   {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' recommended preset'+(tsai.mibi.recommended[dwell[0]].length>1?'s for '+dwell[0]+' dwell time are ':' for '+dwell[0]+' dwell time is ')+(tsai.mibi.recommended[dwell[0]].join(', ')+'.</li>'));
+   {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' recommended preset'+(tsai.mibi.recommended[dwell[0]].length>1?'s for '+dwell[0]+' dwell time are ':' for '+dwell[0]+' dwell time is ')+(tsai.mibi.recommended[dwell[0]].join(', ')+'</li>'));
   }}
-  tsai.json_time(false);
+  tsai.json_summary(false);
 }}
 
 tile_depth(tile)
 {var depth=document.getElementById('tile_'+tile+'_depth').value.trim();
  if(depth.match(/^\d+$/)==null)
- {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' depth is not a positive integer, reset to prior value.</li>');
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' depth is not a positive integer, reset to prior value</li>');
   document.getElementById('tile_'+tile+'_depth').value=tsai.tiles[tile].fov.scanCount;
  }
  else
  {tsai.tiles[tile].fov.scanCount=parseInt(depth);
-  tsai.json_time(false);
+  tsai.json_summary(false);
+}}
+
+tile_focus_only(tile)
+{var select=document.getElementById('tile_'+tile+'_focus_only');
+ var only=parseInt(select.value);
+ if(tsai.mibi.focus_onlys.includes(only))
+ {tsai.tiles[tile].fov.focusOnly=only;
+  if(only==1)
+  {document.getElementById('tile_'+tile+'_focus_site').value='FOV';
+   tsai.tile_focus_site(tile);
+  }
+  else if(tsai.tiles[tile].fov.focusSite=='FOV')
+  {tsai.tiles[tile].fov.focusSite='None';
+   document.getElementById('tile_'+tile+'_focus_site').value='None';
+  }
+  tsai.json_summary(false);
+  tsai.tiles_draw(tsai.canvas.draw_context, []);
+ }
+ else
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' focus only not recognized, reset to prior value</li>');
+  select.value=tsai.tiles[tile].fov.focusOnly;
+}}
+
+tile_focus_site(tile)
+{var select=document.getElementById('tile_'+tile+'_focus_site');
+ var focus_site=select.value;
+ if(tsai.mibi.focus_sites.includes(focus_site))
+ {if(focus_site=='None')
+  {tsai.tiles[tile].fov.focusSite=focus_site;
+   tsai.tiles[tile].fov.focusOnly=0;
+   document.getElementById('tile_'+tile+'_focus_only').value=0;
+  }
+  else
+  {if(focus_site=='FOV')
+   {if(!confirm('This tile will be converted to a focus-only point which will not be imaged and FOVs other than R1C1 will be discarded. Do you wish to proceed?'))
+    {select.value=tsai.tiles[tile].fov.focusSite;
+     document.getElementById('tile_'+tile+'_focus_only').value=0;
+     return;
+    }
+    tsai.tiles[tile].fov.focusSite=focus_site;
+    tsai.tiles[tile].fov.focusOnly=1;
+    document.getElementById('tile_'+tile+'_focus_only').value=1;
+   }
+   else
+   {if((tsai.tiles[tile].map.length>1 || tsai.tiles[tile].map[0].length>1) // focus_site is not None or FOV
+     && !confirm('Focus site '+focus_site+' is incompatible with multi-FOV tiles, thus FOVs other than R1C1 will be discarded. Do you wish to proceed?'))
+    {select.value=tsai.tiles[tile].fov.focusSite;
+     document.getElementById('tile_'+tile+'_focus_only').value=0;
+     return;
+    }
+    tsai.tiles[tile].fov.focusSite=focus_site;
+    tsai.tiles[tile].fov.focusOnly=0;
+    document.getElementById('tile_'+tile+'_focus_only').value=0;
+   }
+   if(tsai.tiles[tile].map.length>1 || tsai.tiles[tile].map[0].length>1)
+   {document.getElementById('tile_'+tile+'_columns').value=1;
+    document.getElementById('tile_'+tile+'_rows'   ).value=1;
+    tsai.tile_map_resize(tile)
+  }}
+  tsai.json_summary(false);
+  tsai.tiles_draw(tsai.canvas.draw_context, []);
+ }
+ else
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' focus site not recognized, reset to prior value</li>');
+  select.value=tsai.tiles[tile].fov.focusSite;
 }}
 
 tile_slide_id(tile)
 {/*
  var slide_id=document.getElementById('tile_'+tile+'_slide_id').value.trim();
  if(slide_id.match(/^\d+$/)==null)
- {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' slide ID is not a positive integer, reset to prior value.</li>');
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' slide ID is not a positive integer, reset to prior value</li>');
   document.getElementById('tile_'+tile+'_slide_id').value=tsai.tiles[tile].fov.slideId;
  }
  else
@@ -2142,14 +2749,14 @@ tile_section_id(tile)
 {var select=document.getElementById('tile_'+tile+'_section_id');
  var section_id=parseInt(select.value);
  if(isNaN(section_id))
- {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' Section ID not recognized, reset to prior value.</li>');
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' Section ID not recognized, reset to prior value</li>');
   select.value=tsai.tiles[tile].fov.sectionId;
  }
  else tsai.tiles[tile].fov.sectionId=section_id;
  /*
  var section_id=document.getElementById('tile_'+tile+'_section_id').value.trim();
  if(section_id.match(/^\d+$/)==null)
- {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' section ID is not a positive integer, reset to prior value.</li>');
+ {tsai.json_warnings('<li>'+(tsai.tiles[tile].fov.name.trim()!=''?tsai.tiles[tile].fov.name:'Tile '+(tile+1))+' section ID is not a positive integer, reset to prior value</li>');
   document.getElementById('tile_'+tile+'_section_id').value=tsai.tiles[tile].fov.sectionId;
  }
  else tsai.tiles[tile].fov.sectionId=parseInt(section_id);
@@ -2163,7 +2770,7 @@ tile_reset(tile)
  tsai.tiles[tile].map=JSON.parse(tsai.tiles[tile].original.map);
  document.getElementById('tile_'+tile).outerHTML=tsai.tile_div(tile, false);
  tsai.tile_map_resize(tile);
- tsai.json_time(false);
+ tsai.json_summary(false);
  tsai.tiles_draw(tsai.canvas.draw_context, []);
 }
 
@@ -2171,11 +2778,12 @@ tile_delete(tile, warning)
 {if(!tsai.menus_close()) return;
  var name=(tsai.tiles[tile].fov.name.trim()!=''?' ('+tsai.tiles[tile].fov.name+')':'');
  if(warning && !confirm('Are you sure you want to delete tile '+(tile+1)+name+'?')) return;
+ tsai.tiles[tile].active=false;
  document.getElementById('tile_'+tile+'_active').checked=false;
  document.getElementById('tile_'+tile          ).style.display='none';
  document.getElementById('tile_'+tile+'_map'   ).innerHTML='';
  if(tile==tsai.action.item) tsai.action_clear(true);
- tsai.json_time(false);
+ tsai.json_summary(false);
  tsai.tiles_draw(tsai.canvas.draw_context, []);
 }
 
@@ -2200,7 +2808,7 @@ tile_map_crement(tile, row_crement, column_crement)
  {document.getElementById('tile_'+tile+'_rows'   ).value=rows_new;
   document.getElementById('tile_'+tile+'_columns').value=columns_new;
   tsai.tile_map_resize(tile);
-  tsai.json_time(false);
+  tsai.json_summary(false);
 }}
 
 tile_map_unshift(tile, axis)
@@ -2211,7 +2819,7 @@ tile_map_unshift(tile, axis)
   tsai.tiles[tile].fov.centerPointMicrons.y+=tsai.tiles[tile].fov.fovSizeMicrons*tsai.coregistration.shift.y_x;
  }
  else
- {tsai.tiles[tile].map.unshift(tsai.array_copy(tsai.tiles[tile].map[0]));
+ {tsai.tiles[tile].map.unshift(tsai.copy_array(tsai.tiles[tile].map[0]));
   document.getElementById('tile_'+tile+'_rows').value=tsai.tiles[tile].map.length;
   tsai.tiles[tile].fov.centerPointMicrons.y+=tsai.tiles[tile].fov.fovSizeMicrons*(1+tsai.coregistration.shift.y_y);
   tsai.tiles[tile].fov.centerPointMicrons.x-=tsai.tiles[tile].fov.fovSizeMicrons*tsai.coregistration.shift.x_y;
@@ -2220,7 +2828,7 @@ tile_map_unshift(tile, axis)
  document.getElementById('tile_'+tile+'_center_y').value=tsai.tiles[tile].fov.centerPointMicrons.y;
  tsai.tile_map_resize(tile);
  tsai.tile_pixels(tile);
- tsai.json_time(false);
+ tsai.json_summary(false);
  tsai.draw_reset();
 }
 
@@ -2249,16 +2857,23 @@ tile_map_resize(tile)
   b+='</tr>';
  }
  b+='\n</table>';
+ if('focusSite' in tsai.tiles[tile].fov && tsai.tiles[tile].fov.focusSite!='None' && (map_new.length>1 || map_new[0].length>1))
+ {tsai.json_warnings('<li>'+tsai.tiles[tile].fov.name+' focus site '+tsai.tiles[tile].fov.focusSite+' disabled for multi-FOV tile</li>');
+  tsai.tiles[tile].fov.focusOnly=0;
+  tsai.tiles[tile].fov.focusSite='None';
+  document.getElementById('tile_'+tile+'_focus_only').value=0;
+  document.getElementById('tile_'+tile+'_focus_site').value='None';
+ }
  tsai.tiles[tile].map=map_new;
  document.getElementById('tile_'+tile+'_map').innerHTML=b;
  if(tsai.action.item!=tile) tsai.tiles_draw(tsai.canvas.draw_context, []);
  else tsai.draw_reset();
- tsai.json_time(false);
+ tsai.json_summary(false);
 }
 
 tile_map_check(checkbox, tile, row, column)
 {tsai.tiles[tile].map[row][column]=(checkbox.checked?1:0);
- tsai.json_time(false);
+ tsai.json_summary(false);
  if(tsai.image.loaded)
  {tsai.tiles_draw(tsai.canvas.draw_context, [tile]);
   tsai.tile_draw(tsai.canvas.draw_context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, true);
@@ -2347,8 +2962,8 @@ coregistration_load()
  if(!coregistered)
  {tsai.element_toggle_on('optical_toggle');
   tsai.coregistration_set('default', tsai.coregistration.default, '');
-  if(window.location.search.indexOf('?manual=')!=-1) tsai.json_warnings('<li>Drawn tile positions will not be accurate until coregistration is complete.</li>');
-  else tsai.json_warnings('<li>Coregistration has not been performed or previously successful in this browser. Default values are loaded and drawn tile positions will not be accurate.</li>');
+  if(window.location.search.indexOf('?manual=')==0) tsai.json_warnings('<li>Optical image tile positions will not be accurate until coregistration is complete</li>');
+  else tsai.json_warnings('<li>Coregistration has not been performed or previously successful in this browser. Default values are loaded and optical image tile positions will not be accurate</li>');
 }}
 
 /* ##########################################
@@ -2422,6 +3037,7 @@ coregistration_set(type, coordinates, time)
     case 'json':
      tsai.images.optical.coordinates=from_into;
      tsai.images.optical.type=type;
+     tsai.coregistration.json=parsed;
      document.getElementById('optical_link').style.display='none';
      break;
     // case 'sed': break; // sed is set above but outputs directly to canvas.images.sed.coordinates rather than to from_into[]
@@ -2805,12 +3421,12 @@ sed_code()
   +   ' this.context.stroke();'
   +   '},'
   + ' check_burn:'
-  +  ' function(start, y, x)'
-  +  ' {var x_corrected=Math.round((start[0]+0.4*(x+(y*this.shift[1])+(x*this.shift[0])))*10000)/10000;'
-  +   ' var y_corrected=Math.round((start[1]-0.4*(y+(x*this.shift[2])+(y*this.shift[3])))*10000)/10000;'
+  +  ' function(start, y, x, last)'
+  +  ' {var x_corrected=Math.round((start[0]+0.4*((x*(1+this.shift[0]))+(y*this.shift[1])))*10000)/10000;'
+  +   ' var y_corrected=Math.round((start[1]-0.4*((y*(1+this.shift[3]))+(x*this.shift[2])))*10000)/10000;'
   +   ' document.getElementById(\'targetPosX\').value=x_corrected;'
   +   ' document.getElementById(\'targetPosY\').value=y_corrected;'
-  +   ' console.log([\'Top   \',\'Middle\',\'Bottom\'][y]+\' \'+[\'left  \',\'center\',\'right \'][x]+\': \'+x_corrected+\', \'+y_corrected);'
+  +   ' if(!last) console.log([\'Top   \',\'Middle\',\'Bottom\'][y]+\' \'+[\'left  \',\'center\',\'right \'][x]+\': \'+x_corrected+\', \'+y_corrected);'
   +   ' document.getElementById(\'targetPosX\').dispatchEvent(new Event(\'input\'));'
   +   ' document.getElementById(\'targetPosY\').dispatchEvent(new Event(\'input\'));'
   +   ' document.getElementById(\'moveStageBtn\').click();'
@@ -2834,36 +3450,38 @@ sed_code()
   +   ' document.getElementById(\'rangeMag\').dispatchEvent(new Event(\'input\'));'
   +   ' await this.wait(5000);'
   +   ' if(nine)'
-  +   ' {this.check_burn(start, 0, 0);'
+  +   ' {this.check_burn(start, 0, 0, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
-  +    ' this.check_burn(start, 2, 2);'
+  +    ' this.check_burn(start, 0, 1, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
-  +    ' this.check_burn(start, 2, 0);'
+  +    ' this.check_burn(start, 0, 2, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
-  +    ' this.check_burn(start, 0, 1);'
+  +    ' this.check_burn(start, 1, 0, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
-  +    ' this.check_burn(start, 1, 2);'
+  +    ' this.check_burn(start, 1, 1, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
-  +    ' this.check_burn(start, 2, 1);'
+  +    ' this.check_burn(start, 1, 2, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
-  +    ' this.check_burn(start, 1, 0);'
+  +    ' this.check_burn(start, 2, 0, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
-  +    ' this.check_burn(start, 0, 2);'
+  +    ' this.check_burn(start, 2, 1, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
-  +    ' this.check_burn(start, 1, 1);'
+  +    ' this.check_burn(start, 2, 2, false);'
   +    ' await this.wait(0.75*this.check_dwell);'
+  +    ' this.check_burn(start, 1, 1, true);'
   +    '}'
   +   ' else'
-  +   ' {this.check_burn(start, 0, 0);'
+  +   ' {this.check_burn(start, 0, 0, false);'
   +    ' await this.wait(this.check_dwell);'
-  +    ' this.check_burn(start, 2, 2);'
+  +    ' this.check_burn(start, 0, 2, false);'
   +    ' await this.wait(this.check_dwell);'
-  +    ' this.check_burn(start, 0, 2);'
+  +    ' this.check_burn(start, 1, 1, false);'
   +    ' await this.wait(this.check_dwell);'
-  +    ' this.check_burn(start, 2, 0);'
+  +    ' this.check_burn(start, 2, 0, false);'
   +    ' await this.wait(this.check_dwell);'
-  +    ' this.check_burn(start, 1, 1);'
+  +    ' this.check_burn(start, 2, 2, false);'
   +    ' await this.wait(this.check_dwell);'
+  +    ' this.check_burn(start, 1, 1, true);'
   +    '}'
   +   ' document.getElementById(\'rangeMag\').value=fov;'
   +   ' document.getElementById(\'rangeMag\').dispatchEvent(new Event(\'input\'));'
@@ -2911,7 +3529,7 @@ sed_code()
   +   ' document.getElementById(\'selectZoom\').dispatchEvent(new Event(\'change\'));' // set 100% pixel magnification
   +   ' var rows'+'=Math.max(1, Math.ceil(Math.ceil(Math.abs(this.coordinates[1]-this.coordinates[3])/fov_microns_y)));'
   +   ' var columns=Math.max(1, Math.ceil(Math.ceil(Math.abs(this.coordinates[0]-this.coordinates[2])/fov_microns_x)));'
-  +   ' var start=[Math.floor(Math.min(this.coordinates[0], this.coordinates[2])+(0.5*fov_microns_y)), Math.ceil(Math.max(this.coordinates[1], this.coordinates[3])-(0.5*fov_microns_y))];'
+  +   ' var start=[Math.floor(Math.min(this.coordinates[0], this.coordinates[2])+(fov_microns_y/2)), Math.ceil(Math.max(this.coordinates[1], this.coordinates[3])-(fov_microns_y/2))];'
   +   ' var delay={256: 2500, 512: 3800}[parseInt(document.getElementById(\'selectFrame\').value.split(\' \')[1])];'
   +   ' var fov_pixels_y=parseInt(document.getElementById(\'selectFrame\').value.split(\':\')[1]);'
   +   ' var fov_pixels_x=Math.floor(fov_pixels_y*(1-x_crop_left-x_crop_right));'
@@ -2925,34 +3543,32 @@ sed_code()
   +   ' document.body.appendChild(canvas);'
   +   ' var corners=['
         + 'width, height,' // original image width and height
-        +' Math.round(((0.5*fov_pixels_y)-Math.round(fov_pixels_y*x_crop_left))*1000)/1000, 0.5*fov_pixels_y,' // pixel center of top left tile x and y
-        +' Math.round((width+(fov_pixels_y*x_crop_right)-(0.5*fov_pixels_y))*1000)/1000, Math.round((height-Math.round(0.5*fov_pixels_y))*1000)/1000,' // pixel center of bottom right tile x and y
+        +' Math.round(((fov_pixels_y/2)-Math.round(fov_pixels_y*x_crop_left))*1000)/1000, fov_pixels_y/2,' // pixel center of top left tile x and y
+        +' Math.round((width+(fov_pixels_y*x_crop_right)-(fov_pixels_y/2))*1000)/1000, Math.round((height-Math.round(fov_pixels_y/2))*1000)/1000,' // pixel center of bottom right tile x and y
         +' start[0], start[1], 0, 0, 0, 0, 0, 0, this.shift[0], this.shift[1], this.shift[2], this.shift[3]];' // micron center of top left tile x and y, top right, bottom left, bottom right
   +   ' var index=0;'
-  +   ' for(var column=0; column<columns; column++)'
+  +   ' for(var row=0; row<rows; row++)'
   +   ' {if(this.stop)'
   +    ' {console.log(\'Scanning halted by user\');'
   +     ' break;'
   +     '}'
-  +    ' for(var row=0; row<rows; row++)'
+  +    ' for(var column=0; column<columns; column++)'
   +    ' {if(this.stop) break;'
-  +     ' var row_snaked=(column%2==0?row:rows-1-row);'
-  +     ' var x=parseInt(start[0]+((fov_microns_x*column' +'*(1+this.shift[0]))+(this.shift[1]*row_snaked*fov_microns_y)));'
-  +     ' var y=parseInt(start[1]-((fov_microns_y*row_snaked*(1+this.shift[3]))+(this.shift[2]*column' +'*fov_microns_x)));'
-  +     ' if(column==0 && row_snaked==rows-1) {corners[10]=x; corners[11]=y;}' // bottom left
+  +     ' var x=parseInt(start[0]+((fov_microns_x*column*(1+this.shift[0]))+(this.shift[1]*row*fov_microns_y)));'
+  +     ' var y=parseInt(start[1]-((fov_microns_y*row*(1+this.shift[3]))+(this.shift[2]*column*fov_microns_x)));'
+  +     ' if(column==0 && row==rows-1) {corners[10]=x; corners[11]=y;}' // bottom left
   +     ' else if(column==columns-1)'
-  +     ' {if('  +'row_snaked==0'  +') {corners[8]=x; corners[9]=y;}' // top right
-  +      ' else if(row_snaked==rows-1) {corners[12]=x; corners[13]=y;}' // bottom right
+  +     ' {if(row==0) {corners[8]=x; corners[9]=y;}' // top right
+  +      ' else if(row==rows-1) {corners[12]=x; corners[13]=y;}' // bottom right
   +      '}'
   +     ' document.getElementById(\'targetPosX\').value=x/1000;'
   +     ' document.getElementById(\'targetPosY\').value=y/1000;'
   +     ' document.getElementById(\'targetPosX\').dispatchEvent(new Event(\'input\'));'
   +     ' document.getElementById(\'targetPosY\').dispatchEvent(new Event(\'input\'));'
   +     ' document.getElementById(\'moveStageBtn\').click();'
-  +     ' console.log((index+1)+\'/\'+(columns*rows)+\' (\'+(column+1)+\', \'+(row_snaked+1)+\'): \'+x+\', \'+y);'
-  +     ' if(row==0 && column==0) await this.wait(5000);'
-  +     ' else await this.wait(delay);'
-  +     ' context.drawImage(this.canvas, Math.ceil(fov_pixels_y*x_crop_left), 0, fov_pixels_x, fov_pixels_y, fov_pixels_x*column, fov_pixels_y*row_snaked, fov_pixels_x, fov_pixels_y);'
+  +     ' console.log((index+1)+\'/\'+(columns*rows)+\' (\'+(column+1)+\', \'+(row+1)+\'): \'+x+\', \'+y);'
+  +     ' await this.wait(column!=0?delay:(row!=0?Math.min(parseInt(1.8*delay), 5000):5000));'
+  +     ' context.drawImage(this.canvas, Math.ceil(fov_pixels_y*x_crop_left), 0, fov_pixels_x, fov_pixels_y, fov_pixels_x*column, fov_pixels_y*row, fov_pixels_x, fov_pixels_y);'
   +     ' index++;'
   +    '}}'
   +    'var file_name=\'sed_\'+this.time().ymd+\'-\'+this.time().hms24;'
@@ -3071,16 +3687,18 @@ sed_code()
   +   '}'
   +'};}'
  +' sed.jog();'
- +' document.getElementById(\'selectedImagingPreset\').selectedIndex=3;'
- +' document.getElementById(\'selectedImagingPreset\').dispatchEvent(new Event(\'change\'));'
- +' setTimeout(()=>{console.log(\'Please wait 8 seconds.\');}, 1000);'
  +' setTimeout(()=>'
  + '{if(typeof sed_key===\'undefined\') {sed_key=function(event) {sed.key(event);}}'
  + ' document.addEventListener(\'keydown\', sed_key, false);'
  + ' console.clear();'
  + ' sed.commands();'
  + ' sed.instructions();'
- + '}, 8000);'
+ + '}, document.getElementById(\'selectedImagingPreset\').selectedIndex!=3?9000:0);'
+ +' if(document.getElementById(\'selectedImagingPreset\').selectedIndex!=3)'
+ +' {document.getElementById(\'selectedImagingPreset\').selectedIndex=3;'
+ + ' document.getElementById(\'selectedImagingPreset\').dispatchEvent(new Event(\'change\'));'
+ + ' setTimeout(()=>{console.log(\'Please wait 8 seconds.\');}, 1000);'
+ + '}' 
  navigator.clipboard.writeText(b);
 }
 
@@ -3218,7 +3836,7 @@ move_load(tile)
  tsai.action_prerender('move', tile, false);
  tsai.draw_clear(tsai.canvas.draw_context);
  tsai.canvas.draw_context.drawImage(tsai.canvas.prerender, 0, 0);
- if(document.getElementById('tile_'+tile+'_active') && document.getElementById('tile_'+tile+'_active').checked)
+ if(tsai.tiles[tile].active)
  {tsai.tile_draw(tsai.canvas.draw_context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, true);
 }}
 
@@ -3238,7 +3856,7 @@ move_nudge(event, tile, x_nudge, y_nudge)
 }
 
 move_action(type, event, position)
-{var active=(document.getElementById('tile_'+tsai.action.item+'_active') && document.getElementById('tile_'+tsai.action.item+'_active').checked);
+{var active=tsai.tiles[tsai.action.item].active;
  switch(type)
  {/* ##########  MOUSEMOVE  ########## */
   case 'mouseup':
@@ -3318,8 +3936,9 @@ move_action(type, event, position)
      event.preventDefault();
      break;
     case 'KeyD':
-     for(var tile=tsai.action.item+1; tile<tsai.tiles.length; tile++)
-     {if(document.getElementById('tile_'+tile+'_active').checked)
+     var tiles_length=tsai.tiles.length;
+     for(var tile=tsai.action.item+1; tile<tiles_length; tile++)
+     {if(tsai.tiles[tile].active)
       {tsai.action_prerender('move', tile, false);
        tsai.tile_draw(tsai.canvas.draw_context, tsai.action.item, tsai.tiles[tsai.action.item].fov.centerPointMicrons.x, tsai.tiles[tsai.action.item].fov.centerPointMicrons.y, true);
        document.getElementById('tile_'+tile+'_move').click();
@@ -3331,7 +3950,7 @@ move_action(type, event, position)
      break;
     case 'KeyA':
      for(var tile=tsai.action.item-1; tile>=0; tile--)
-     {if(document.getElementById('tile_'+tile+'_active').checked)
+     {if(tsai.tiles[tile].active)
       {tsai.action_prerender('move', tile, false);
        tsai.tile_draw(tsai.canvas.draw_context, tsai.action.item, tsai.tiles[tsai.action.item].fov.centerPointMicrons.x, tsai.tiles[tsai.action.item].fov.centerPointMicrons.y, true);
        document.getElementById('tile_'+tile+'_move').click();
@@ -3368,15 +3987,16 @@ corners_coordinates_load(options, row, column, tl, tr, br, bl)
 
 corners_coordinates(tile)
 {tsai.scratch.corners={fovs: 0, left: 0, right: 0, top: 0, bottom: 0, rows: [], columns: [], map: []};
- for(var row=0; row<tsai.tiles[tile].map.length; row++)
+ var rows=tsai.tiles[tile].map.length;
+ var columns=tsai.tiles[tile].map[0].length;
+ for(var row=0; row<rows; row++)
  {tsai.scratch.corners.rows.push([]);
   tsai.scratch.corners.map[row]=[];
-  for(var column=0; column<tsai.tiles[tile].map[0].length; column++)
+  for(var column=0; column<columns; column++)
   {tsai.scratch.corners.map[row][column]=[];
    if(row==0) tsai.scratch.corners.columns.push([]);
  }}
- if(tsai.image.type=='sed') tsai.tile_corners_shifted(tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, tsai.corners_coordinates_load, '');
- else                       tsai.tile_corners(        tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, tsai.corners_coordinates_load, '');
+ tsai.tile_fov_corners(tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, tsai.corners_coordinates_load, ''); // calls tsai.corners_coordinates_load
  tsai.scratch.corners.left=tsai.scratch.corners.columns[0][0];
  tsai.scratch.corners.right=tsai.scratch.corners.columns[tsai.scratch.corners.columns.length-1][1];
  tsai.scratch.corners.top=tsai.scratch.corners.rows[0][0];
@@ -3412,17 +4032,17 @@ corners_find(position)
    ############################# */
 click_load(tile)
 {if(!tsai.menus_close()) return;
+ tsai.tile_expand(tile);
  tsai.corners_coordinates(tile);
  tsai.action_prerender('click', tile, false);
  // tsai.tile_map_resize(tile);
  tsai.draw_clear(tsai.canvas.draw_context);
  tsai.canvas.draw_context.drawImage(tsai.canvas.prerender, 0, 0);
- if(document.getElementById('tile_'+tile+'_active') && document.getElementById('tile_'+tile+'_active').checked)
- {tsai.tile_draw(tsai.canvas.draw_context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, true);
-}}
+ if(tsai.tiles[tile].active) tsai.tile_draw(tsai.canvas.draw_context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, true);
+}
 
 click_action(type, event, position)
-{if(!document.getElementById('tile_'+tsai.action.item+'_active') || !document.getElementById('tile_'+tsai.action.item+'_active').checked) return;
+{if(!tsai.tiles[tsai.action.item].active) return;
  switch(type)
  {case 'mousemove':
    if(tsai.action.mouse_dragged)
@@ -3461,12 +4081,12 @@ erase_load(tile)
  // tsai.tile_map_resize(tile);
  tsai.draw_clear(tsai.canvas.draw_context);
  tsai.canvas.draw_context.drawImage(tsai.canvas.prerender, 0, 0);
- if(document.getElementById('tile_'+tile+'_active') && document.getElementById('tile_'+tile+'_active').checked)
+ if(tsai.tiles[tile].active)
  {tsai.tile_draw(tsai.canvas.draw_context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, true);
 }}
 
 erase_action(type, event, position)
-{if(!document.getElementById('tile_'+tsai.action.item+'_active') || !document.getElementById('tile_'+tsai.action.item+'_active').checked) return;
+{if(!tsai.tiles[tsai.action.item].active) return;
  switch(type)
  {case 'mousemove':
    if(tsai.action.mouse_dragged)
@@ -3529,12 +4149,12 @@ duplicate_tile(tile, start, end)
  var top_left={x: Math.min(micron_start.x, micron_end.x), y: Math.max(micron_start.y, micron_end.y)};
  var tile_new=tsai.tiles.push(JSON.parse(JSON.stringify(tsai.tiles[tile])))-1;
  if(!tsai.action.mouse_dragged && tsai.action.type!='polygon')
- {tsai.tiles[tile_new].fov.centerPointMicrons.x=top_left.x-(0.5*tsai.tiles[tile_new].fov.fovSizeMicrons*(tsai.tiles[tile_new].map[0].length-1));
-  tsai.tiles[tile_new].fov.centerPointMicrons.y=top_left.y+(0.5*tsai.tiles[tile_new].fov.fovSizeMicrons*(tsai.tiles[tile_new].map.length-1));
+ {tsai.tiles[tile_new].fov.centerPointMicrons.x=top_left.x-(tsai.tiles[tile_new].fov.fovSizeMicrons*(tsai.tiles[tile_new].map[0].length-1)/2);
+  tsai.tiles[tile_new].fov.centerPointMicrons.y=top_left.y+(tsai.tiles[tile_new].fov.fovSizeMicrons*(tsai.tiles[tile_new].map.length-1)/2);
  }
  else
  {var fov=tsai.tiles[tile_new].fov.fovSizeMicrons;
-  var fov_half=fov*0.5;
+  var fov_half=fov/2;
   var top_centroid=top_left.x+fov_half;
   var left_centroid=top_left.y-fov_half;
   tsai.tiles[tile_new].fov.centerPointMicrons.x=top_centroid;
@@ -3615,7 +4235,7 @@ polygon_file_revert()
  document.getElementById('tiles').innerHTML='';
  tsai.tiles_write(0);
  tsai.action_clear(true);
- tsai.json_time(false);
+ tsai.json_summary(false);
 }
 
 polygon_file_load(input)
@@ -3712,7 +4332,8 @@ polygon_in(point, vertices)
 {var x=point[0];
  var y=point[1];
  var inside=false;
- for(var i=0, j=vertices.length-1; i<vertices.length; j=i++)
+ var vertices_length=vertices.length;
+ for(var i=0, j=vertices_length-1; i<vertices_length; j=i++)
  {var xi=vertices[i][0];
   var yi=vertices[i][1];
   var xj=vertices[j][0];
@@ -3738,8 +4359,10 @@ polygon_intersect_line(a, b, c, d, p, q, r, s)
 
 polygon_intersects(x, y, fov_half, vertices_plus)
 {var box=[[x-fov_half, y-fov_half], [x+fov_half, y-fov_half], [x+fov_half, y+fov_half], [x-fov_half, y+fov_half], [x-fov_half, y-fov_half]];
- for(var i=0; i<vertices_plus.length-1; i++)
- {for(var j=0; j<box.length-1; j++)
+ var box_length_minus_1=box.length-1;
+ var vertices_plus_length_minus_1=vertices_plus.length-1;
+ for(var i=0; i<vertices_plus_length_minus_1; i++)
+ {for(var j=0; j<box_length_minus_1; j++)
   {if(tsai.polygon_intersect_line(vertices_plus[i][0], vertices_plus[i][1], vertices_plus[i+1][0], vertices_plus[i+1][1], box[j][0], box[j][1], box[j+1][0], box[j+1][1])) return true;
  }}
  return false;
@@ -3749,7 +4372,8 @@ polygon_tile()
 {tsai.scratch.polygon.push({x: tsai.scratch.polygon[0].x, y: tsai.scratch.polygon[0].y});
  var minimum=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[0]);
  var maximum=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[0]);
- for(var index=1; index<tsai.scratch.polygon.length-1; index++)
+ var scratch_polygon_length_minus_1=tsai.scratch.polygon.length-1;
+ for(var index=1; index<scratch_polygon_length_minus_1; index++)
  {var micron=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[index]);
   if(minimum.x>micron.x) minimum.x=micron.x;
   if(maximum.x<micron.x) maximum.x=micron.x;
@@ -3761,20 +4385,23 @@ polygon_tile()
  // doing conversion and conversion back because cannot assume that optical coordinate minimum always corresponds to micron coordinate minimum
  tsai.duplicate_tile(tsai.action.item, minimum, maximum);
  var vertices=[];
- for(var index=0; index<tsai.scratch.polygon.length; index++)
+ var scratch_polygon_length=scratch_polygon_length_minus_1+1;
+ for(var index=0; index<scratch_polygon_length; index++)
  {var vertex=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[index]);
   vertices.push([vertex.x, vertex.y]);
  }
- var vertices_plus=tsai.array_copy(vertices);
+ var vertices_plus=tsai.copy_array(vertices);
  if(vertices_plus.length>2) vertices_plus.push(vertices_plus[0]); // used in loop to look for line intersections
  var tile=tsai.tiles.length-1;
  var fov=tsai.tiles[tile].fov.fovSizeMicrons;
- var fov_half=fov*0.5;
+ var fov_half=fov/2;
  var x_origin=tsai.tiles[tile].fov.centerPointMicrons.x;
  var y_origin=tsai.tiles[tile].fov.centerPointMicrons.y;
  tsai.tile_map_resize(tile);
- for(var row=0; row<tsai.tiles[tile].map.length; row++)
- {for(var column=0; column<tsai.tiles[tile].map[row].length; column++)
+ var rows=tsai.tiles[tile].map.length;
+ var columns=tsai.tiles[tile].map[0].length;
+ for(var row=0; row<rows; row++)
+ {for(var column=0; column<columns; column++)
   {var x=x_origin+(fov*column);
    var y=y_origin-(fov*row   );
    if(tsai.polygon_in([x, y], vertices) || tsai.polygon_intersects(x, y, fov_half, vertices_plus))
@@ -3884,7 +4511,7 @@ tma_revert()
  document.getElementById('tiles').innerHTML='';
  tsai.tiles_write(0);
  tsai.action_clear(true);
- tsai.json_time(false);
+ tsai.json_summary(false);
 }
 
 tma_order(value)
@@ -4022,8 +4649,8 @@ tma_build(replace)
  var target_offset_x=0;
  var target_offset_y=0;
  if(document.getElementById('tile_tma_target_tile').checked)
- {target_offset_x=0.5*tsai.tiles[tsai.action.item].fov.fovSizeMicrons*(tsai.tiles[tsai.action.item].map[0].length-1);
-  target_offset_y=0.5*tsai.tiles[tsai.action.item].fov.fovSizeMicrons*(tsai.tiles[tsai.action.item].map.length-1);
+ {target_offset_x=tsai.tiles[tsai.action.item].fov.fovSizeMicrons*(tsai.tiles[tsai.action.item].map[0].length-1)/2;
+  target_offset_y=tsai.tiles[tsai.action.item].fov.fovSizeMicrons*(tsai.tiles[tsai.action.item].map.length-1)/2;
  }
  var start=tsai.tiles.length;
  var tma_perspective=tsai.matrix_perspective([0, 0, Math.max(1, tsai.tma.columns-1), 0, Math.max(1, tsai.tma.columns-1), Math.max(1, tsai.tma.rows-1), 0, Math.max(1, tsai.tma.rows-1)], tsai.tma.corners, false);
@@ -4082,7 +4709,8 @@ import_read(file)
    tsai.scratch.tiles=tsai.json_load(file_text, tsai.import_errors);
    if(tsai.scratch.tiles.length>0)
    {var options='\n<option value=""></option>';
-    for(var tile=0; tile<tsai.scratch.tiles.length; tile++) options+='\n<option value="'+tsai.scratch.tiles[tile].fov.centerPointMicrons.x+','+tsai.scratch.tiles[tile].fov.centerPointMicrons.y+'">'+tsai.scratch.tiles[tile].fov.name+'</option>';
+    var scratch_tiles_length=tsai.scratch.tiles.length;
+    for(var tile=0; tile<scratch_tiles_length; tile++) options+='\n<option value="'+tsai.scratch.tiles[tile].fov.centerPointMicrons.x+','+tsai.scratch.tiles[tile].fov.centerPointMicrons.y+'">'+tsai.scratch.tiles[tile].fov.name+'</option>';
     for(var index=0; index<4; index++) document.getElementById('import_coordinates_'+index+'_select').innerHTML=options;
  }}) ();
 }
@@ -4124,7 +4752,8 @@ import_coordinates(selected, from_into) // set up import_action
   document.getElementById('import_coordinates_'+selected+'_select').selectedIndex=0;
   var x=parseFloat(document.getElementById('import_coordinates_'+selected+'_0_x').value);
   var y=parseFloat(document.getElementById('import_coordinates_'+selected+'_0_y').value);
-  for(var tile=0; tile<tsai.scratch.tiles.length; tile++)
+  var scratch_tiles_length=tsai.scratch.tiles.length;
+  for(var tile=0; tile<scratch_tiles_length; tile++)
   {if(x==parseInt(tsai.scratch.tiles[tile].fov.centerPointMicrons.x*1000)/1000 && y==parseInt(tsai.scratch.tiles[tile].fov.centerPointMicrons.y*1000)/1000)
    {document.getElementById('import_coordinates_'+selected+'_select').selectedIndex=(tile+1);
     break;
@@ -4234,8 +4863,8 @@ import_coordinates_select(select, index)
 }
 
 import_build(append)
-{if(tsai.tiles.length        ==0) {tsai.import_errors('<li>A target JSON file must be loaded into which FOVs/tiles can be imported.</li>'); return;}
- if(tsai.scratch.tiles.length==0) {tsai.import_errors('<li>A source JSON file must be loaded from which FOVs/tiles can be imported.</li>'); return;}
+{if(tsai.tiles.length        ==0) {tsai.import_errors('<li>A target JSON file must be loaded into which FOVs/tiles can be imported</li>'); return;}
+ if(tsai.scratch.tiles.length==0) {tsai.import_errors('<li>A source JSON file must be loaded from which FOVs/tiles can be imported</li>'); return;}
  var from=[];
  var into=[];
  for(var index=0; index<4; index++)
@@ -4246,7 +4875,7 @@ import_build(append)
  }
  var identity=true;
  for(var index=0; index<8; index++)
- {if(isNaN(from[index]) || isNaN(into[index])) {tsai.import_errors('<li>Four pairs of coordinates are required.</li>'); return;}
+ {if(isNaN(from[index]) || isNaN(into[index])) {tsai.import_errors('<li>Four pairs of coordinates are required</li>'); return;}
   if(from[index]!=into[index]) identity=false;
  }
  var start=0;
@@ -4254,7 +4883,8 @@ import_build(append)
  else start=tsai.tiles.length;
  var import_perspective=(identity?null:tsai.matrix_perspective(from, into, false));
  var prepend=(document.getElementById('import_prepend').checked?document.getElementById('import_prepend_text').value:'');
- for(var tile=0; tile<tsai.scratch.tiles.length; tile++)
+ var scratch_tiles_length=tsai.scratch.tiles.length;
+ for(var tile=0; tile<scratch_tiles_length; tile++)
  {var index=tsai.tiles.length;
   tsai.tiles.push(JSON.parse(JSON.stringify(tsai.scratch.tiles[tile])));
   if(prepend!='') tsai.tiles[index].fov.name=prepend+tsai.tiles[index].fov.name;
@@ -4336,7 +4966,7 @@ navigation_code_logger()
   +    '}'
   +   ' else if(document.getElementById(\'beamCurrent\'))'
   +   ' {var preset=document.getElementById(\'selectedImagingPreset\');'
-  +    ' if(preset.options[preset.selectedIndex].text.toLowerCase().indexOf(\'coarse\')!=-1)'
+  +    ' if(preset.options[preset.selectedIndex].text.toLowerCase().includes(\'coarse\'))'
   +    ' {this.log.fc_coarse=document.getElementById(\'beamCurrent\').value;'
   +     ' this.log.l1_coarse=document.getElementById(\'lens1V\').value;'
   +     '}'
@@ -4377,8 +5007,9 @@ navigation_code_logger()
 
 navigation_code()
 {var coordinates='';
- for(var tile=0; tile<tsai.tiles.length; tile++)
- {if(document.getElementById('tile_'+tile+'_active').checked)
+ var tiles_length=tsai.tiles.length;
+ for(var tile=0; tile<tiles_length; tile++)
+ {if(tsai.tiles[tile].active)
   {if(tsai.tiles[tile].fov.name=='')
    {tsai.tiles[tile].fov.name='Tile_'+(tile+1);
     document.getElementById('tile_'+tile+'_name').value='Tile_'+(tile+1);
@@ -4386,12 +5017,14 @@ navigation_code()
    var fov=tsai.tiles[tile].fov.fovSizeMicrons;
    var x=Math.round(tsai.tiles[tile].fov.centerPointMicrons.x);
    var y=Math.round(tsai.tiles[tile].fov.centerPointMicrons.y);
-   for(var row=0; row<tsai.tiles[tile].map.length; row++)
+   var rows=tsai.tiles[tile].map.length;
+   var columns=tsai.tiles[tile].map[0].length;
+   for(var row=0; row<rows; row++)
    {var x_row=x;
-    for(var column=0; column<tsai.tiles[tile].map[row].length; column++)
+    for(var column=0; column<columns; column++)
     {if(tsai.tiles[tile].map[row][column]==1)
      {coordinates+='['+tile+',\''+tsai.tiles[tile].fov.name+'\',';
-      if(tsai.tiles[tile].map.length>1 || tsai.tiles[tile].map[0].length>1) coordinates+='\'R'+(row+1)+'C'+(column+1)+'\'';
+      if(rows>1 || columns>1) coordinates+='\'R'+(row+1)+'C'+(column+1)+'\'';
       else coordinates+='\'\'';
       coordinates+=''
        +','+(Math.round(x_row+fov*((row   *tsai.coregistration.shift.x_y)+(column*tsai.coregistration.shift.x_x)))/1000)
@@ -4450,7 +5083,7 @@ navigation_code()
   +   ' if(result==-1)'
   +   ' {for(var index=0; index<this.current.length; index++)'
   +    ' {if(query==(this.current[index][1].toUpperCase()+this.current[index][2]).replace(/\s+/g, \'\')) {result=index; break;}'
-  +     ' if(maybe==-1 && (this.current[index][1].toUpperCase()+this.current[index][2]).indexOf(query)!=-1) maybe=index;'
+  +     ' if(maybe==-1 && (this.current[index][1].toUpperCase()+this.current[index][2]).includes(query)) maybe=index;'
   +    '}}'
   +   ' if(result in this.current) {this.index=result; this.move(true); return \'\';}'
   +   ' else if(maybe in this.current) {this.index=maybe; this.move(true); return \'\';}'
@@ -4776,7 +5409,7 @@ navigation_adjust()
   var tile=adjustment.tile;
   var name=document.getElementById('tile_'+tile+'_name').value.trim();
   if(name!=adjustment.name) tsai.navigation_errors('<li>Tile name '+adjustment.name+' does not match '+name+'</li>');
-  if(!document.getElementById('tile_'+tile+'_active').checked) tsai.navigation_errors('<li>'+name+' is inactive</li>');
+  if(!tsai.tiles[tile].active) tsai.navigation_errors('<li>'+name+' is inactive</li>');
   if(adjustment.row_column=='' || adjustment.row_column=='R1C1')
   {var x=parseFloat(document.getElementById('tile_'+tile+'_center_x').value);
    var y=parseFloat(document.getElementById('tile_'+tile+'_center_y').value);

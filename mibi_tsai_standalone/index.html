@@ -36,6 +36,7 @@
         <li class="su-main-nav__item--parent" onmouseover="this.click();" onmouseout="if(this.getElementsByTagName('a')[0].getAttribute('aria-expanded')=='true') this.click(); document.activeElement.blur();">
           <a href="#" aria-expanded="false">Utilities</a>
           <ul class="su-main-nav__menu-lv2">
+            <li><a href="https://dx.doi.org/10.17504/protocols.io.4r3l27rrxg1y/v1" target="_blank">TSAI protocols.io</a></li>
             <li id="url_mibi_configuration"><a href="" target="_blank">Configuration UI</a></li>
             <li id="url_mibi_service"      ><a href="" target="_blank">Service UI</a></li>
             <li id="url_mibi_settings"     ><a href="" target="_blank">Settings UI</a></li>
@@ -54,7 +55,7 @@
   <section id="_layout_main">
     <article>
 
-<h1>MIBI Tile/SED/Array Interface 2023.05.28 Standalone</h1>
+<h1>MIBI Tile/SED/Array Interface Standalone 2023.06.18</h1>
 
 <table id="tiler">
  
@@ -164,7 +165,7 @@
        <div id="files_json" style="display:none;"></div>
       </div>
      </li>
-     <li>To append a JSON file, use the file input box below. Coregistration parameters within this file will be ignored. Slide ID will be ignored unless not previously set.
+     <li id="files_append_li" style="display:none;">To append a JSON file, use the file input box below. Coregistration parameters within this file will be ignored. Slide ID will be ignored unless not previously set.
       <div id="files_append"
        ondrop     ="event.stopPropagation(); event.preventDefault(); tsai.files_drop(event, tsai.files_append);"
        ondragenter="event.stopPropagation(); event.preventDefault();"
@@ -305,6 +306,7 @@
        <input type="button" value="&#9660;" onclick="tsai.draw_line_thickness_crement(-0.5);"/>
        <input type="button" value="&#9650;" onclick="tsai.draw_line_thickness_crement( 0.5);"/>
       </td>
+      <td><div class="shift">Shift</div><div class="key">I</div></td>
      </tr>
      <tr>
       <td colspan="2">TMA crosshair</td>
@@ -313,6 +315,7 @@
        <input type="button" value="&#9660;" onclick="tsai.draw_tma_crosshair_crement(-0.5);"/>
        <input type="button" value="&#9650;" onclick="tsai.draw_tma_crosshair_crement( 0.5);"/>
       </td>
+      <td><div class="shift">Shift</div><div class="key">M</div></td>
      </tr>
      <tr>
       <td colspan="2">Label font size</td>
@@ -321,6 +324,7 @@
        <input type="button" value="&#9660;" onclick="tsai.draw_slide_labels_size_crement(-0.5);"/>
        <input type="button" value="&#9650;" onclick="tsai.draw_slide_labels_size_crement( 0.5);"/>
       </td>
+      <td><div class="shift">Shift</div><div class="key">F</div></td>
      </tr>
      <tr>
       <td colspan="2">Brightness</td>
@@ -329,6 +333,7 @@
        <input type="button" value="&#9660;" onclick="tsai.draw_filter_crement('brightness', -0.1);"/>
        <input type="button" value="&#9650;" onclick="tsai.draw_filter_crement('brightness', 0.1);"/>
       </td>
+      <td><div class="shift">Shift</div><div class="key">B</div></td>
      </tr>
      <tr>
       <td colspan="2">Contrast</td>
@@ -337,37 +342,41 @@
        <input type="button" value="&#9660;" onclick="tsai.draw_filter_crement('contrast', -0.1);"/>
        <input type="button" value="&#9650;" onclick="tsai.draw_filter_crement('contrast', 0.1);"/>
       </td>
+      <td><div class="shift">Shift</div><div class="key">C</div></td>
      </tr>
      <tr>
       <td>Pixels</td>
       <td>x</td>
-      <td class="xy"><input id="slide_x_pixels" type="text" value=""/> &nbsp; y <input id="slide_y_pixels" type="text" value=""/>
-      </td>
+      <td class="xy" colspan="2"><input id="slide_x_pixels" type="text" value=""/> &nbsp; y <input id="slide_y_pixels" type="text" value=""/></td>
      <tr>
      <tr>
       <td>Microns</td>
       <td>x</td>
-      <td class="xy"><input id="slide_x_microns" type="text" value=""/> &nbsp; y <input id="slide_y_microns" type="text" value=""/>
-      </td>
+      <td class="xy" colspan="2"><input id="slide_x_microns" type="text" value=""/> &nbsp; y <input id="slide_y_microns" type="text" value=""/></td>
      </tr>
     </table>
    </div>
   </td>
-  <td class="tile_bar">
+  <td class="tile_bar tile_bar_title">
    <h2>Tiles</h2>
   </td>
  </tr>
  <tr id="tools">
   <td class="slide_bar">
-   <div id="slide_zoom_tab">Zoom
+   <div id="slide_zoom_tab">
+    <div class="control"><div class="shift">Shift</div><div class="key">Z</div><div class="label">oom</div></div>
     <input id="slide_zoom" type="text" value="1" onchange="tsai.draw_zoom();"/>
     <input type="button" value="&#9660;" onclick="tsai.draw_zoom_crement(1/Math.sqrt(2));"/>
     <input type="button" value="&#9650;" onclick="tsai.draw_zoom_crement(Math.sqrt(2));"/>
    </div>
    <div id="slide_tabs">&nbsp;</div>
    <div id="slide_labels_tab">
-    <input id="slide_labels" type="checkbox" onclick="tsai.draw_slide_labels(this);"/>
-    <label for="slide_labels"> Label tiles</label>
+    <input id="slide_labels" type="checkbox" onclick="tsai.draw_slide_labels();"/>
+    <label for="slide_labels"> <div class="control"><div class="key">L</div></div>abel tiles</label>
+   </div>
+   <div id="slide_focus_circles_tab">
+    <input id="slide_focus_circles" type="checkbox" onclick="tsai.draw_slide_focus_circles();"/>
+    <label for="slide_focus_circles"> F<div class="control"><div class="key">O</div></div>cus circles</label>
    </div>
   </td>
   <td class="tile_bar">
@@ -594,58 +603,80 @@
   <!-- ####################################
        ##########  JSON BUILDER  ##########
        #################################### -->
-  <td id="json" class="tile_bar">
+  <td id="json" class="tile_bar" onmouseover="tsai.json_lists(false, false);">
    <h2>Output</h2>
-   <div id="json_summary"></div>
-   <p class="json"><input id="json_time" type="datetime-local" value="" onchange="tsai.json_time();"/>
-    <!-- <br/><input type="button" onclick="tsai.json_time();" value="Estimate run time" class="_layout_blue"/> -->
-    <br/><input type="button" onclick="tsai.json_build_download(0);" value="Create JSON file (sequential order)"                             class="_layout_green"/>
-    <br/><input type="button" onclick="tsai.json_build_download(1);" value="Create JSON file (random order, keeping tiles together)"         class="_layout_green"/>
-    <br/><input type="button" onclick="tsai.json_build_download(2);" value="Create JSON file (random order, different tiles mixed together)" class="_layout_green"/>
-    <br/><input type="button" onclick="tsai.image_save(true);"       value="Save tiled image" class="_layout_blue"/>
-    <br/><input type="button" onclick="tsai.image_save(false);"      value="Save base image"  class="_layout_blue"/>
-   </p>
    <div id="json_warnings"></div>
-  
-  <!-- ################################################
-       ##########  RESUME AND/OR SPLIT JSON  ##########
-       ################################################ -->
-   <div id="json_resume_split">
-    <h2 id="json_resume_split_toggle" onclick="tsai.element_toggle(this);">[+] Resume and/or Split</h2>
-    <div style="display:none;">
-     <table>
-      <tr>
-       <td id="json_resume"></td>
-       <td id="split">
-        <h3>Split</h3>
-        <table>
-         <tr>
-          <td><input id="json_split_none" name="json_split" type="radio" checked/></td>
-          <td><label for="json_split_none">Do not split</label></td>
-         </tr>
-         <tr>
-          <td><input id="json_split_fovs" name="json_split" type="radio"/></td>
-          <td>Split by every
-           <input id="json_split_number" type="text" onfocus="tsai.json_split_select('json_split_fovs');"/> FOVs
-          </td>
-         </tr>
-         <tr>
-          <td><input id="json_split_time" name="json_split" type="radio"/></td>
-          <td>Split by every
-           <input id="json_split_hours" type="text" value="6" onfocus="tsai.json_split_select('json_split_time');"/> hours
-           <input id="json_split_minutes" type="text" value="0" onfocus="tsai.json_split_select('json_split_time');"/> minutes
-          </td>
-         </tr>
-        </table>
-       </td>
-     </tr>
-      <tr><td colspan="2"><input type="button" onclick="tsai.json_resume_split_write(0);" value="Create resume/split JSON file(s) (sequential order)" class="_layout_green"/></td></tr>
-      <tr><td colspan="2"><input type="button" onclick="tsai.json_resume_split_write(1);" value="Create resume/split JSON file(s) (random order, keeping tiles together)" class="_layout_green"/></td></tr>
-      <tr><td colspan="2"><input type="button" onclick="tsai.json_resume_split_write(2);" value="Create resume/split JSON file(s) (random order, different tiles mixed together)" class="_layout_green"/></td></tr>
-      <tr><td id="json_resume_split_buttons" colspan="2"></td></tr>
-     </table>
-    </div>
+   <div id="json_summary"><p class="initial">No FOVs loaded</p></div>
+   <table id="json_build" style="display:none;">
+    <tr>
+     <td colspan="2" id="json_resume" style="display:none;">&nbsp;</td>
+    </tr>
+    <tr>
+     <td colspan="2" id="json_autofocus" style="display:none;">
+      <h3>Autofocus</h3>
+      <table>
+       <tr>
+        <td><input id="json_autofocus_use" name="json_autofocus" type="radio" checked onchange="tsai.json_radio(this.id);"/></td>
+        <td><label for="json_autofocus_use">Use in-run autofocus as specified above</label></td>
+       </tr>
+       <tr>
+        <td><input id="json_autofocus_remove" name="json_autofocus" type="radio" onchange="tsai.json_radio(this.id);"/></td>
+        <td><label for="json_autofocus_remove">Remove all in-run autofocusing</label></td>
+       </tr>
+      </table>
+     </td>
+    </tr>
+    <tr>
+     <td id="json_group">
+      <h3>Group</h3>
+      <table>
+       <tr id="json_group_none_row">
+        <td><input id="json_group_none" name="json_group" type="radio" checked onchange="tsai.json_radio(this.id);"/></td>
+        <td><label for="json_group_none">Do not group FOVs (run sequentially)</label></td>
+       </tr>
+       <tr id="json_group_tile_row">
+        <td><input id="json_group_tile" name="json_group" type="radio" onchange="tsai.json_radio(this.id);"/></td>
+        <td><label for="json_group_tile">Group FOVs by tile</label></td>
+       </tr>
+       <tr id="json_group_autofocus_row" style="display:none;">
+        <td><input id="json_group_autofocus" name="json_group" type="radio" onchange="tsai.json_radio(this.id);"/></td>
+        <td><label for="json_group_autofocus">Group FOVs by closest autofocus</label></td>
+       </tr>
+      </table>
+     </td>
+     <td id="json_split">
+      <h3>Split</h3>
+      <table>
+       <tr>
+        <td><input id="json_split_none" name="json_split" type="radio" checked onchange="tsai.json_radio(this.id);"/></td>
+        <td><label for="json_split_none">Do not split</label></td>
+       </tr>
+       <tr>
+        <td><input id="json_split_fovs" name="json_split" type="radio" onchange="tsai.json_radio('json_split_fovs');" onclick="document.getElementById('json_split_number').select();"/></td>
+        <td><label for="json_split_fovs">Split by every </label>
+         <input id="json_split_number" type="text" value="80" onchange="tsai.json_radio('json_split_fovs');"/><label for="json_split_fovs"> FOVs</label>
+        </td>
+       </tr>
+       <tr>
+        <td><input id="json_split_time" name="json_split" type="radio" onchange="tsai.json_radio('json_split_time');" onclick="document.getElementById('json_split_hours').select();"/></td>
+        <td><label for="json_split_time">Split by every </label>
+         <input id="json_split_hours"   type="text" value="8" onchange="tsai.json_radio('json_split_time');"/><label for="json_split_time"> hours</label>
+         <input id="json_split_minutes" type="text" value="0" onchange="tsai.json_radio('json_split_time');"/><label for="json_split_time"> minutes</label>
+        </td>
+       </tr>
+      </table>
+     </td>
+    </tr>
+   </table>
+   <div id="json_rearrange" style="display:none;">
+    <h3 onclick="tsai.element_toggle(this);">[+] Rearrange</h3>
+    <div id="json_rearrange_lists"  style="display:none;">&nbsp;</div>
    </div>
+   <div id="json_download" style="display:none;">&nbsp;</div>
+   <p id="json_image_save" style="display:none;">
+         <input type="button" onclick="tsai.image_save(true);"  value="Save tiled image" class="_layout_blue"/>
+    <br/><input type="button" onclick="tsai.image_save(false);" value="Save base image"  class="_layout_blue"/>
+   </p>
   </td>
  </tr>
 </table>
@@ -665,13 +696,22 @@
 <footer id="footer" class="_layout_footer">
   <div><a href="https://tsai.stanford.edu" target="_blank"><img src="_resources/_images/logo_footer.png" width="371" height="39" alt="Tsai Laboratory"/></a></div>
   <div><span class="b">If you use this tool, please cite our paper:</span>
-   <br/>Piyadasa H, Oberlton B, Kong A, Fullaway CC, Varra SR, Sowers C, Tsai AG. Rapid setup of tissue microarray and tiled area imaging on the Multiplexed Ion Beam Imaging microscope (MIBIscope) using the Tile/SED/Array Interface (TSAI). Manuscript submitted for review
+   <br/>Piyadasa H, Oberlton B, Kong A, Fullaway CC, Varra SR, Sowers C, Tsai AG. Rapid setup of tissue microarray and tiled area imaging on the Multiplexed Ion Beam Imaging microscope (MIBIscope) using the Tile/SED/Array Interface (TSAI). preprint under screening
   </div>
-  <div><span class="b">Online version:</span>
+  <div><span class="b">Latest version:</span>
    <br/><a href="https://tsai.stanford.edu/research/mibi_tsai">https://tsai.stanford.edu/research/mibi_tsai</a>
   </div>
-  <div><span class="b">Usage instructions:</span>
-   <br/>A manuscript is submitted for review and <a href="#">protocols.io</a> instructions will be provided here if accepted.
+  <div><span class="b">Detailed protocol:</span>
+   <br/><a href="https://dx.doi.org/10.17504/protocols.io.4r3l27rrxg1y/v1">protocols.io</a>
+  </div>
+  <div><span class="b">MIBI protocols:</span>
+   <br/><a href="https://www.protocols.io/view/mibi-staining-dm6gprk2dvzp/v5">MIBI staining</a>,
+        <a href="https://www.protocols.io/view/staining-sequenza-6qpvrdeo2gmk/v1">Sequenza</a>
+   <br/><a href="https://www.protocols.io/view/metal-antibody-mibitag-conjugation-kit-261geob6jl47/v1">Metal-antibody conjugation</a>,
+        <a href="https://www.protocols.io/view/antibody-lyophilization-kxygxex5kv8j/v1">Lyophilization</a>,
+        <a href="https://www.protocols.io/view/lyophilized-metal-antibody-reconstitution-x54v9m6zzg3e/v1">Reconstitution</a>
+   <br/><a href="https://www.protocols.io/view/ihc-staining-x54v9moxmg3e/v1">Immunohistochemistry</a>
+   <br/><a href="https://www.protocols.io/view/mibi-and-ihc-solutions-261geo7wyl47/v1">MIBI and IHC solutions</a>
   </div>
 </footer>
 </body>

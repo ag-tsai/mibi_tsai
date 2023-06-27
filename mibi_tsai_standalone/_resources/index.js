@@ -7,6 +7,7 @@ var tsai=new MIBI_TSAI();
 /* #####################################
    ##########  MIBI SETTINGS  ##########
    ##################################### */
+tsai.version('1.6'); // fovFormatVersion
 tsai.url_standalone(true);
 tsai.url_run_log(     '');
 tsai.url_mibi_tracker('');
@@ -18,6 +19,11 @@ tsai.url_mibi_tracker('');
 tsai.fov_add(200); // list of allowable fov sizes
 tsai.fov_add(400);
 tsai.fov_add(800);
+tsai.dwell_add('0.25 ms', 11); // list of allowable dwell times and timing choices
+tsai.dwell_add('0.5 ms' , 10);
+tsai.dwell_add('1 ms'   ,  7);
+tsai.dwell_add('2 ms'   ,  8);
+tsai.dwell_add('4 ms'   ,  9);
 tsai.raster_add(32); // list of allowable raster sizes
 tsai.raster_add(64);
 tsai.raster_add(128);
@@ -25,15 +31,20 @@ tsai.raster_add(256);
 tsai.raster_add(512);
 tsai.raster_add(1024);
 tsai.raster_add(2048);
-tsai.dwell_add('0.25 ms', 11); // list of allowable dwell times and timing choices
-tsai.dwell_add('0.5 ms' , 10);
-tsai.dwell_add('1 ms'   ,  7);
-tsai.dwell_add('2 ms'   ,  8);
-tsai.dwell_add('4 ms'   ,  9);
+// version 1.6 presets
+tsai.preset_add('Coarse (0.65 \u00b5m)'    , {"centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "focusSite":"None", "focusOnly":0, "timingChoice":10, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"Coarse"    , "displayName":"Coarse"    }, "name":"Coarse", "standardTarget":null             , "sectionId":0, "notes":null, "slideId":0, "timingDescription":"0.5 ms" , "scanCount":1});
+tsai.preset_add('Drago (0.61 \u00b5m)'     , {"centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "focusSite":"None", "focusOnly":0, "timingChoice":12, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"Super Fine", "displayName":"Super Fine"}, "name":"Drago" , "standardTarget":null             , "sectionId":0, "notes":null, "slideId":0, "timingDescription":"0.58 ms", "scanCount":1});
+tsai.preset_add('Creed (0.6 \u00b5m)'      , {"centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "focusSite":"None", "focusOnly":0, "timingChoice":13, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"Super Fine", "displayName":"Super Fine"}, "name":"Creed" , "standardTarget":null             , "sectionId":0, "notes":null, "slideId":0, "timingDescription":"0.63 ms", "scanCount":1});
+tsai.preset_add('Fine (0.5 \u00b5m)'       , {"centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "focusSite":"None", "focusOnly":0, "timingChoice": 7, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"Fine"      , "displayName":"Fine"      }, "name":"Fine"  , "standardTarget":null             , "sectionId":0, "notes":null, "slideId":0, "timingDescription":"1 ms"   , "scanCount":1});
+tsai.preset_add('Super Fine (0.39 \u00b5m)', {"centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "focusSite":"None", "focusOnly":0, "timingChoice": 7, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"Super Fine", "displayName":"Super Fine"}, "name":"Fine"  , "standardTarget":null             , "sectionId":0, "notes":null, "slideId":0, "timingDescription":"2 ms"   , "scanCount":1});
+// tsai.preset_add('Molybdenum'               , {"centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":200, "focusSite":"None", "focusOnly":0, "timingChoice": 7, "frameSizePixels":{"width": 128, "height": 128}, "imagingPreset": {"preset":"QC - 100"  , "displayName":"QC - 100µm"}, "name":"MoQC"  , "standardTarget":"Molybdenum Foil", "sectionId":0, "notes":null, "slideId":0, "timingDescription":"1 ms"   , "scanCount":3});
+// version 1.5 presets
 tsai.preset_add('Coarse (0.65 \u00b5m)'    , {"scanCount":1, "centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "timingChoice":10, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"High Speed", "aperture":"2", "displayName":"Coarse"     , "defaults":{"timingChoice":10}, "currentMeterMode":5}, "sectionId":0, "slideId":0, "name":"Coarse", "notes":null, "timingDescription":"0.5 ms" });
+tsai.preset_add('Drago (0.61 \u00b5m)'     , {"scanCount":1, "centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "timingChoice":12, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"High Res"  , "aperture":"2", "displayName":"Super Fine" , "defaults":{"timingChoice": 8}, "currentMeterMode":5}, "sectionId":0, "slideId":0, "name":"Drago" , "notes":null, "timingDescription":"0.58 ms"});
+tsai.preset_add('Creed (0.6 \u00b5m)'      , {"scanCount":1, "centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "timingChoice":13, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"High Res"  , "aperture":"2", "displayName":"Super Fine" , "defaults":{"timingChoice": 8}, "currentMeterMode":5}, "sectionId":0, "slideId":0, "name":"Creed" , "notes":null, "timingDescription":"0.63 ms"});
 tsai.preset_add('Fine (0.5 \u00b5m)'       , {"scanCount":1, "centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "timingChoice": 7, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"Normal"    , "aperture":"2", "displayName":"Fine"       , "defaults":{"timingChoice": 7}, "currentMeterMode":5}, "sectionId":0, "slideId":0, "name":"Fine"  , "notes":null, "timingDescription":"1 ms"});
 tsai.preset_add('Super Fine (0.39 \u00b5m)', {"scanCount":1, "centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":800, "timingChoice": 7, "frameSizePixels":{"width":2048, "height":2048}, "imagingPreset": {"preset":"High Res"  , "aperture":"2", "displayName":"Super Fine" , "defaults":{"timingChoice": 8}, "currentMeterMode":5}, "sectionId":0, "slideId":0, "name":"Fine"  , "notes":null, "timingDescription":"2 ms"});
-tsai.preset_add('Molybdenum'               , {"scanCount":1, "centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":200, "timingChoice": 7, "frameSizePixels":{"width": 128, "height": 128}, "imagingPreset": {"preset":"Tuning"    , "aperture":"3", "displayName":"QC - 100Âµm", "defaults":{"timingChoice": 7}, "currentMeterMode":7}, "sectionId":0, "slideId":0, "name":"MoQC"  , "notes":null, "timingDescription":"1 ms", "standardTarget":"Molybdenum Foil"});
+// tsai.preset_add('Molybdenum'               , {"scanCount":1, "centerPointMicrons":{"x":0, "y":0}, "fovSizeMicrons":200, "timingChoice": 7, "frameSizePixels":{"width": 128, "height": 128}, "imagingPreset": {"preset":"Tuning"    , "aperture":"3", "displayName":"QC - 100Âµm", "defaults":{"timingChoice": 7}, "currentMeterMode":7}, "sectionId":0, "slideId":0, "name":"MoQC"  , "notes":null, "timingDescription":"1 ms", "standardTarget":"Molybdenum Foil"});
 tsai.preset_recommended('Moly'       , ['1 ms']); // list of recommended preset/dwell time combinations
 tsai.preset_recommended('Coarse'     , ['0.25 ms', '0.5 ms']);
 tsai.preset_recommended('Fine'       , ['1 ms']);
@@ -52,13 +63,13 @@ tsai.preset_recommended('4 ms'       , ['Super Fine']);
 tsai.coregistration_cookie('mibi_tsai');
 tsai.coregistration_default('0,0,-27.408,75.483|1131,0,51.487,76.103|0,1131,-26.609,-2.815|1131,1131,52.286,-2.196');
 // tsai.optical_crop(250);             // number of pixels to crop from left and right of image
-// tsai.optical_bounds({left: 380, right: 748, top: 0, bottom: 1132}); // rough slide boundaries in optical pixels, only used for warning user if possibly imaging outside these boundaries
+// tsai.optical_bounds({left: 0.32, right: 0.68, top: 0.25, bottom: 1}); // rough slide boundaries in percentages, only used for warning user if possibly imaging outside these boundaries
 // tsai.action_nudge_opt(20);          // default nudge distance in microns
 // tsai.action_nudge(100);             // default nudge distance in microns
 // tsai.action_nudge_shift(200);       // default nudge distance in microns
 // tsai.cursor_size(27);               // default cursor size
 // tsai.cursor_opacity(0.8);           // default cursor opacity
-// tsai.slide_labels(false);           // draw tile labels onto slide image
+// tsai.slide_labels(true);            // draw tile labels onto slide image
 // tsai.slide_labels_font('Source Sans Pro'); // default font for slide image tile labels
 // tsai.slide_labels_size(18);         // default size for slide image tile labels
 // tsai.line_thickness(2);             // default line thickness
