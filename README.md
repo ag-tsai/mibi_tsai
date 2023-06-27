@@ -31,7 +31,7 @@ Screen capture videos will be submitted as part of a manuscript submission. Usag
 ## 4. Updates
 Changes from the prior branch include:
 1. Accommodating in-run autofocus (Walkaway Mode) with addition of focusSite and focusOnly parameters. FOVs are grouped by closest autofocus point and a toggle control is added for drawing 5mm radius circles around focus sites.
-2. Tiles are labeled on the slide image by default, but can be toggled off. Saving the tiled image will include the labels (if present) into the PNG file. This is especially convenient for documentation and sending to collaborators.
+2. Tiles are labeled on the slide image by default, but labels can be toggled off. Saving the tiled image will include the labels (if present) into the PNG file. This is especially convenient for documentation and sending to collaborators.
 3. Keyboard controls are added for the slide image options, including (Z)oom, (B)rightness, and (C)ontrast.
 4. JSON output control options (FOV grouping, resume, split) are simplified and JSON build/download buttons generated dynamically as soon as options are changed.
 5. A section is added to rearrange FOVs, mainly for in-run Molybdenum Foil points.
