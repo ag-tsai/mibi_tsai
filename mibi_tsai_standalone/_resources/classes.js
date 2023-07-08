@@ -43,7 +43,7 @@
     Tile draw polygon     : polygon_example, polygon_builder, polygon_close, polygon_file_revert, polygon_file_load, polygon_file_import, polygon_action***, polygon_in, polygon_intersect_line, polygon_intersects, polygon_tile***
     TMA                   : draw_tma_crosshair, draw_tma_crosshair_crement, tma_builder, tma_resize, tma_crement, tma_name_rc, tma_close, tma_revert, tma_order, tma_action***, tma_draw***, tma_prepend, tma_build***
     Import                : import_sort, import_read, import_errors, import_errors_clear, import_coordinates_draw, import_coordinates***, import_action***, import_identity, import_prepend, import_coordinates_select, import_build***
-    FOV navigation        : navigation_code_clear, navigation_code_arrows, navigation_code_sed, navigation_code_logger,  navigation_code***, navigation_adjust_file, navigation_adjust***, navigation_errors, navigation_errors_clear
+    FOV navigation        : navigation_code_clear, navigation_code_arrows, navigation_code_move, navigation_code_sed, navigation_code_logger,  navigation_code***, navigation_adjust_file, navigation_adjust***, navigation_errors, navigation_errors_clear
    
    Animation notes:
     The background image is controlled by several <img> because it is faster than loading in and out of canvas.
@@ -894,6 +894,13 @@ image_load(key, file, crop)
    tsai.images[key].brightness=1;
    tsai.images[key].contrast=1;
    if(key=='sed') tsai.coregistration_set('sed', file.name, tsai.time_format(file.name.match(/(\d\d\d\d)\-(\d\d)\-(\d\d)\-(\d\d)(\d\d)(\d\d)/)).readable);
+   else if(key=='optical')
+   {if(tsai.images[key].coordinates.length==2 && tsai.images[key].coordinates[1][2]==1)
+    {var pixels=[0, 0, tsai.images[key].img.naturalWidth, 0, 0, tsai.images[key].img.naturalHeight, tsai.images[key].img.naturalWidth, tsai.images[key].img.naturalHeight];
+     var quads='';
+     for(var quad=0; quad<4; quad++) quads+=pixels[2*quad]+','+pixels[(2*quad)+1]+','+(tsai.images[key].coordinates[0][2*quad]/1000)+','+(tsai.images[key].coordinates[0][(2*quad)+1]/1000)+'|';
+     tsai.coregistration_set('automatic', quads, tsai.time_format().readable);
+   }}
    tsai.images[key].loaded=true; // must be AFTER coregistration_set('sed' ...
    document.getElementById('json_image_save').style.display='';
    tsai.image_tab(key, (tsai.images[key].img.naturalWidth>1500 || tsai.images[key].img.naturalHeight>1500)?0.5:1);
@@ -1101,7 +1108,7 @@ json_read(file)
     document.getElementById('navigation_adjustments').value='';
     document.getElementById('navigation_adjustments_output').innerHTML='';
     if(('fovs' in json) && json.fovs.length>0)
-    {if(('notes' in json.fovs[0]) && json.fovs[0].notes!=null && json.fovs[0].notes.replace(/[^d]/g, '')!='') // new json has possible coregistration in notes section
+    {if(('notes' in json.fovs[0]) && json.fovs[0].notes!=null && json.fovs[0].notes.replace(/[^d]/g, '')!='' && json.fovs[0].notes.trim().replace(/[A-Za-z0-9\+=\/]/g, '')=='') // new json has possible coregistration in notes section
      {if(tsai.coregistration_set('json', tsai.optical_from_base64(json.fovs[0].notes), '')) // coregistration_set will place shift into scratch.shift
       {if(!tsai.images.sed.loaded) tsai.coregistration.shift={x_x: tsai.scratch.shift.x_x, x_y: tsai.scratch.shift.x_y, y_x: tsai.scratch.shift.y_x, y_y: tsai.scratch.shift.y_y}; // sed image shift supercedes json shift
        for(var index=0; index<2; index++) // fill shift inputs
@@ -2434,7 +2441,7 @@ tiles_build()
  tsai.tiles[tile].fov.slideId               =tsai.json.slide_id;
  // tsai.tiles[tile].fov.slideId            =document.getElementById('tiles_build_slide_id').value;
  // tsai.tiles[tile].fov.slideId            =json_parse_id(tsai.tiles[tile], 'slideId');
- tsai.tiles[tile].fov.sectionId             =document.getElementById('tiles_build_section_id').value;
+ tsai.tiles[tile].fov.sectionId             =parseInt(document.getElementById('tiles_build_section_id').value);
  tsai.tiles[tile].active=true;
  tsai.tiles[tile].original={fov: JSON.stringify(tsai.tiles[tile].fov), map: JSON.stringify(tsai.tiles[tile].map), active: true};
  tsai.tiles_write(start);
@@ -3019,10 +3026,12 @@ coregistration_set(type, coordinates, time)
      tsai.image.coordinates=from_into;
      tsai.image.type=type;
      tsai.coregistration.last=type;
-     tsai.coregistration.automatic_coordinates=parsed;
-     tsai.coregistration.automatic_time=time;
-     tsai.coregistration_cookie_set();
-     document.getElementById('optical_link').style.display='';
+     if(tsai.image.coordinates[1][2]>500)
+     {tsai.coregistration.automatic_coordinates=parsed;
+      tsai.coregistration.automatic_time=time;
+      tsai.coregistration_cookie_set();
+      document.getElementById('optical_link').style.display='';
+     }
      break;
     case 'manual':
      tsai.image=tsai.images.optical;
@@ -3055,10 +3064,10 @@ coregistration_set(type, coordinates, time)
  }}}
  var b='';
  // write coregistration information
- if(     tsai.coregistration.automatic_coordinates=='') b+='Automatic coregistration has not been performed or previously successful in this browser<br/>';
+ if(     tsai.coregistration.automatic_coordinates=='') b+='Automatic coregistration has not been completed in this browser<br/>';
  else if(tsai.image.type=='automatic'                 ) b+='Using automatic coregistration performed on '+tsai.coregistration.automatic_time+'<br/>';
  else if(tsai.coregistration.automatic_coordinates!='') b+='Automatic coregistration was last performed on '+tsai.coregistration.automatic_time+'<br/>';
- if(     tsai.coregistration.manual_coordinates==''   ) b+='Manual coregistration has not been performed or previously successful in this browser';
+ if(     tsai.coregistration.manual_coordinates==''   ) b+='Manual coregistration has not been completed in this browser';
  else if(tsai.image.type=='manual'                    ) b+='Using manual coregistration performed on '+tsai.coregistration.manual_time;
  else if(tsai.coregistration.manual_coordinates!=''   ) b+='Manual coregistration was last performed on '+tsai.coregistration.manual_time;
  if(     type=='default'                              ) b='Using default coregistration<br/>'+b;
@@ -3120,27 +3129,43 @@ optical_from_base64(coordinates)
    ######################################### */
 optical_automatic_code()
 {var b=tsai.navigation_code_clear()
-+' logger.level=4;'
-+' var map={multiplier: 0, info: console.info, log: [], canvas: document.getElementsByTagName(\'canvas\')[1], rect: {}, optical: {}, quad: {}, result: \'\'};'
-+' console.info=function() {map.log.push(Array.from(arguments));};'
-+' map.rect=map.canvas.getBoundingClientRect();'
-+' map.click=function(x, y) {map.canvas.dispatchEvent(new MouseEvent(\'click\', {clientX: x, clientY: y, bubbles: true}));};'
-+' map.click(map.rect.left, map.rect.top);'
-+' map.click(map.rect.right, map.rect.bottom);'
-+' map.optical={x: map.log[0][1].x*map.rect.width/(map.log[1][1].x-map.log[0][1].x), y: map.log[0][1].y*map.rect.height/(map.log[1][1].y-map.log[0][1].y)};'
-+' map.canvas.onclick=function() {setTimeout(()=>{map.result+=map.log[map.log.length-1][1].x+\',\'+map.log[map.log.length-1][1].y+\',\'+document.getElementById(\'inputOptTPX\').value.trim()+\',\'+document.getElementById(\'inputOptTPY\').value.trim()+\'|\\n\';},500);};'
-+' map.quad='
- +'{left: '  +'map.rect.left'  +'-map.optical.x-map.multiplier*map.rect.width,'
- +' top: '   +'map.rect.top'   +'-map.optical.y-map.multiplier*map.rect.height,'
- +' right: ' +'map.rect.right' +'-map.optical.x+map.multiplier*map.rect.width,'
- +' bottom: '+'map.rect.bottom'+'-map.optical.y+map.multiplier*map.rect.height};'
-+' setTimeout(()=>{console.clear(); console.log(\'\\n\\nMIBI Coregistration Tool\\nCopyright Albert G Tsai, MD, PhD\\n\\nPlease wait 8 seconds\\n\'); map.result=\'\';}, 1000);'
-+' setTimeout(()=>{map.click(map.quad.left, map.quad.top);}, 2000);'
-+' setTimeout(()=>{map.click(map.quad.right, map.quad.top);}, 3000);'
-+' setTimeout(()=>{map.click(map.quad.left, map.quad.bottom);}, 4000);'
-+' setTimeout(()=>{map.click(map.quad.right, map.quad.bottom);}, 5000);'
-+' setTimeout(()=>{console.info=map.info; map.canvas.onclick=null; logger.level=2;'
-+ ' console.log(\'\\nTiler link:\\n'+tsai.url.tsai+'?automatic=\'+map.result.replace(/\\s*/g, \'\')+\'\\n\\n\\n\'); map=null;}, 6000);'; // need character at end of link due to truncation
++' if(document.getElementById(\'targetPosX\'))'
++' {logger.level=4;'
+ +' var map={multiplier: 0, info: console.info, log: [], canvas: document.getElementsByTagName(\'canvas\')[1], rect: {}, optical: {}, quad: {}, result: \'\'};'
+ +' console.info=function() {map.log.push(Array.from(arguments));};'
+ +' map.rect=map.canvas.getBoundingClientRect();'
+ +' map.click=function(x, y) {map.canvas.dispatchEvent(new MouseEvent(\'click\', {clientX: x, clientY: y, bubbles: true}));};'
+ +' map.click(map.rect.left, map.rect.top);'
+ +' map.click(map.rect.right, map.rect.bottom);'
+ +' map.optical={x: map.log[0][1].x*map.rect.width/(map.log[1][1].x-map.log[0][1].x), y: map.log[0][1].y*map.rect.height/(map.log[1][1].y-map.log[0][1].y)};'
+ +' map.canvas.onclick=function() {setTimeout(()=>{map.result+=map.log[map.log.length-1][1].x+\',\'+map.log[map.log.length-1][1].y+\',\'+document.getElementById(\'inputOptTPX\').value.trim()+\',\'+document.getElementById(\'inputOptTPY\').value.trim()+\'|\\n\';},500);};'
+ +' map.quad='
+  +'{left: '  +'map.rect.left'  +'-map.optical.x-map.multiplier*map.rect.width,'
+  +' top: '   +'map.rect.top'   +'-map.optical.y-map.multiplier*map.rect.height,'
+  +' right: ' +'map.rect.right' +'-map.optical.x+map.multiplier*map.rect.width,'
+  +' bottom: '+'map.rect.bottom'+'-map.optical.y+map.multiplier*map.rect.height};'
+ +' setTimeout(()=>{console.clear(); console.log(\'\\n\\nMIBI Coregistration Tool\\nCopyright Albert G Tsai, MD, PhD\\n\\nPlease wait 8 seconds\\n\'); map.result=\'\';}, 1000);'
+ +' setTimeout(()=>{map.click(map.quad.left, map.quad.top);}, 2000);'
+ +' setTimeout(()=>{map.click(map.quad.right, map.quad.top);}, 3000);'
+ +' setTimeout(()=>{map.click(map.quad.left, map.quad.bottom);}, 4000);'
+ +' setTimeout(()=>{map.click(map.quad.right, map.quad.bottom);}, 5000);'
+ +' setTimeout(()=>{console.info=map.info; map.canvas.onclick=null; logger.level=2;'
+ + ' console.log(\'\\nTiler link:\\n'+tsai.url.tsai+'?automatic=\'+map.result.replace(/\\s*/g, \'\')+\'\\n\\n\\n\'); map=null;}, 6000);' // need character at end of link due to truncation
+ +'}'
++' else'
++' {var map={canvas: document.getElementsByTagName(\'canvas\')[1], rect: {}, result: \'\'};'
+ +' map.rect=map.canvas.getBoundingClientRect();'
+ +' map.click=function(a, b, x, y)'
+ +' {map.canvas.dispatchEvent(new MouseEvent(\'click\', {clientX: x, clientY: y, bubbles: true}));'
+ + ' setTimeout(()=>{map.result+=a+\',\'+b+\',\'+document.getElementById(\'inputOptTPX\').value.trim()+\',\'+document.getElementById(\'inputOptTPY\').value.trim()+\'|\';},500);'
+ + '};'
+ +' setTimeout(()=>{console.clear(); console.log(\'\\n\\nMIBI Coregistration Tool\\nCopyright Albert G Tsai, MD, PhD\\n\\nPlease wait 8 seconds\\n\'); map.result=\'\';}, 1000);'
+ +' setTimeout(()=>{map.click(0, 0, map.rect.left, map.rect.top);}, 2000);'
+ +' setTimeout(()=>{map.click(1, 0, map.rect.right, map.rect.top);}, 3000);'
+ +' setTimeout(()=>{map.click(0, 1, map.rect.left, map.rect.bottom);}, 4000);'
+ +' setTimeout(()=>{map.click(1, 1, map.rect.right, map.rect.bottom);}, 5000);'
+ +' setTimeout(()=>{console.log(\'\\nTiler link:\\n'+tsai.url.tsai+'?automatic=\'+map.result.replace(/\\s*/g, \'\')+\'\\n\\nCoregistration will not be complete until the optical image is loaded into MIBI TSAI.\\n\\n\\n\'); map=null;}, 6000);' // need character at end of link due to truncation
+ +'}';
  navigator.clipboard.writeText(b);
 }
 
@@ -3401,7 +3426,8 @@ sed_code()
   +    '}'
   +   ' return \'\';'
   +   '},'
-  + ' check_dwell: 10000,'  // dwell time (ms)
+  +   tsai.navigation_code_move()
+  + ' check_dwell: 10000,' // dwell time (ms)
   + ' check_dwell_set:'
   +  ' function()'
   +  ' {var dwell=parseFloat(prompt(\'Change dwell time from \'+(this.check_dwell/1000)+\' seconds to\'));'
@@ -3421,33 +3447,33 @@ sed_code()
   +   ' this.context.stroke();'
   +   '},'
   + ' check_burn:'
-  +  ' function(start, y, x, last)'
+  +  ' async function(start, y, x, last)'
   +  ' {var x_corrected=Math.round((start[0]+0.4*((x*(1+this.shift[0]))+(y*this.shift[1])))*10000)/10000;'
   +   ' var y_corrected=Math.round((start[1]-0.4*((y*(1+this.shift[3]))+(x*this.shift[2])))*10000)/10000;'
-  +   ' document.getElementById(\'targetPosX\').value=x_corrected;'
-  +   ' document.getElementById(\'targetPosY\').value=y_corrected;'
+  +   ' this.target_x().value=x_corrected;'
+  +   ' this.target_x().dispatchEvent(new Event(\'change\'));'
+  +   ' this.target_x().dispatchEvent(new Event(\'input\'));'
+  +   ' await this.wait(100);'
+  +   ' this.target_y().value=y_corrected;'
+  +   ' this.target_y().dispatchEvent(new Event(\'change\'));'
+  +   ' this.target_y().dispatchEvent(new Event(\'input\'));'
+  +   ' await this.wait(100);'
   +   ' if(!last) console.log([\'Top   \',\'Middle\',\'Bottom\'][y]+\' \'+[\'left  \',\'center\',\'right \'][x]+\': \'+x_corrected+\', \'+y_corrected);'
-  +   ' document.getElementById(\'targetPosX\').dispatchEvent(new Event(\'input\'));'
-  +   ' document.getElementById(\'targetPosY\').dispatchEvent(new Event(\'input\'));'
-  +   ' document.getElementById(\'moveStageBtn\').click();'
+  +   ' this.target_move();'
   +   '},'
   + ' check:'
   +  ' async function(nine)'
   +  ' {var start=[parseFloat(document.getElementById(\'currentPosX\').value), parseFloat(document.getElementById(\'currentPosY\').value)];'
   +   ' console.log(\'\\nCheck [\'+this.shift.join(\', \')+\'] at \'+start[0]+\', \'+start[1]);'
   +   ' var fov=1300;'          // bracket check fov size
-  +   ' var length=10;'         // bracket line length
-  +   ' var width=2;'           // bracket line width
-  +   ' var opacity=0.8;'       // bracket opacity
-  +   ' var color=\'#e50808\';' // #6fc3ff
   +   ' this.context.clearRect(0, 0, this.overlay.width, this.overlay.height);'
-  +   ' if(!document.getElementById(\'rangeMag\')) document.getElementById(\'sedImage-header\').children[0].click();'
-  +   ' if(!document.getElementById(\'rangeMag\')) {console.log(\'Unable to set SED magnification, process halted.\'); return \'\';}'
+  +   ' var magnification=this.magnification();'
+  +   ' if(magnification==null) {console.log(\'Unable to set SED magnification, process halted.\'); return \'\';}'
   +   ' document.getElementById(\'selectFrame\').selectedIndex=4;' // set to 512x512
   +   ' document.getElementById(\'selectFrame\').dispatchEvent(new Event(\'change\'));'
   +   ' await this.wait(5000);'
-  +   ' document.getElementById(\'rangeMag\').value=400;'
-  +   ' document.getElementById(\'rangeMag\').dispatchEvent(new Event(\'input\'));'
+  +   ' magnification.value=400;'
+  +   ' magnification.dispatchEvent(new Event(\'input\'));'
   +   ' await this.wait(5000);'
   +   ' if(nine)'
   +   ' {this.check_burn(start, 0, 0, false);'
@@ -3483,42 +3509,48 @@ sed_code()
   +    ' await this.wait(this.check_dwell);'
   +    ' this.check_burn(start, 1, 1, true);'
   +    '}'
-  +   ' document.getElementById(\'rangeMag\').value=fov;'
-  +   ' document.getElementById(\'rangeMag\').dispatchEvent(new Event(\'input\'));'
+  +   ' magnification.value=fov;'
+  +   ' magnification.dispatchEvent(new Event(\'input\'));'
   +   ' document.getElementById(\'selectFrame\').selectedIndex=4;' // set to 512x512
   +   ' document.getElementById(\'selectFrame\').dispatchEvent(new Event(\'change\'));'
-  +   ' var marks=[(fov-1200)*this.overlay.width/fov/2];'
-  +   ' marks=marks.concat([marks[0]+length, this.overlay.width-marks[0]-length, this.overlay.width-marks[0], (this.overlay.width-length)/2, (this.overlay.width+length)/2]);'
-  +   ' this.context.lineWidth=width;'
-  +   ' this.context.strokeStyle=color;'
-  +   ' this.context.globalAlpha=opacity;'
-  +   ' this.check_bracket(marks, [0, 1, 0, 0, 1, 0]);'
-  +   ' this.check_bracket(marks, [2, 0, 3, 0, 3, 1]);'
-  +   ' this.check_bracket(marks, [3, 2, 3, 3, 2, 3]);'
-  +   ' this.check_bracket(marks, [1, 3, 0, 3, 0, 2]);'
-  +   ' this.context.globalAlpha=1;'
-  +   '},'
+  +   ' if(document.getElementById(\'targetPosX\'))'
+  +   ' {var length=10;'         // bracket line length
+  +    ' var width=2;'           // bracket line width
+  +    ' var opacity=0.8;'       // bracket opacity
+  +    ' var color=\'#e50808\';' // #6fc3ff
+  +    ' var marks=[(fov-1200)*this.overlay.width/fov/2];'
+  +    ' marks=marks.concat([marks[0]+length, this.overlay.width-marks[0]-length, this.overlay.width-marks[0], (this.overlay.width-length)/2, (this.overlay.width+length)/2]);'
+  +    ' this.context.lineWidth=width;'
+  +    ' this.context.strokeStyle=color;'
+  +    ' this.context.globalAlpha=opacity;'
+  +    ' this.check_bracket(marks, [0, 1, 0, 0, 1, 0]);'
+  +    ' this.check_bracket(marks, [2, 0, 3, 0, 3, 1]);'
+  +    ' this.check_bracket(marks, [3, 2, 3, 3, 2, 3]);'
+  +    ' this.check_bracket(marks, [1, 3, 0, 3, 0, 2]);'
+  +    ' this.context.globalAlpha=1;'
+  +   '}},'
   + ' stop: false,'
   + ' scanning: false,'
   + ' scan:'
   +  ' async function()'
-  +  ' {for(var coordinate=0; coordinate<4; coordinate++)'
+  +  ' {if(document.getElementById(\'selectMode\').value.indexOf(\'SED\')==-1) {alert(\'To scan, the MIBI must be in SED mode and the gain adjusted.\'); return;}'
+  +   ' for(var coordinate=0; coordinate<4; coordinate++)'
   +   ' {if(this.coordinates[coordinate]===null)'
   +    ' {console.log(\'Scan coordinates invalid\');'
   +     ' return;'
   +    '}}'
   +   ' console.log(\'\\nSetting up scan\');'
   +   ' if(this.scanning) return \'\';'
-  +   ' if(!document.getElementById(\'rangeMag\')) document.getElementById(\'sedImage-header\').children[0].click();'
-  +   ' if(!document.getElementById(\'rangeMag\')) return \'\';'
+  +   ' var magnification=this.magnification();'
+  +   ' if(magnification==null) return \'\';'
   +   ' this.stop=false;'
   +   ' this.scanning=true;'
   +   ' var x_crop_left='+tsai.mibi.sed_crop.left+';'
   +   ' var x_crop_right='+tsai.mibi.sed_crop.right+';'
-  +   ' var fov_microns_y=parseInt(document.getElementById(\'rangeMag\').max);' // read maximum fov size
+  +   ' var fov_microns_y=parseInt(magnification.max);' // read maximum fov size
   +   ' var fov_microns_x=parseInt(fov_microns_y*(1-x_crop_left-x_crop_right));' // set x shift
-  +   ' document.getElementById(\'rangeMag\').value=fov_microns_y;' // set fov to maximum
-  +   ' document.getElementById(\'rangeMag\').dispatchEvent(new Event(\'input\'));'
+  +   ' magnification.value=fov_microns_y;' // set fov to maximum
+  +   ' magnification.dispatchEvent(new Event(\'input\'));'
   +   ' console.log(\'Setting maximum FOV\');'
   +   ' await this.wait(5000);'
   +   ' document.getElementById(\'selectFrame\').selectedIndex=3;' // set to 256x256
@@ -3561,11 +3593,15 @@ sed_code()
   +     ' {if(row==0) {corners[8]=x; corners[9]=y;}' // top right
   +      ' else if(row==rows-1) {corners[12]=x; corners[13]=y;}' // bottom right
   +      '}'
-  +     ' document.getElementById(\'targetPosX\').value=x/1000;'
-  +     ' document.getElementById(\'targetPosY\').value=y/1000;'
-  +     ' document.getElementById(\'targetPosX\').dispatchEvent(new Event(\'input\'));'
-  +     ' document.getElementById(\'targetPosY\').dispatchEvent(new Event(\'input\'));'
-  +     ' document.getElementById(\'moveStageBtn\').click();'
+  +     ' this.target_x().value=x/1000;'
+  +     ' this.target_x().dispatchEvent(new Event(\'change\'));'
+  +     ' this.target_x().dispatchEvent(new Event(\'input\'));'
+  +     ' await this.wait(100);'
+  +     ' this.target_y().value=y/1000;'
+  +     ' this.target_y().dispatchEvent(new Event(\'change\'));'
+  +     ' this.target_y().dispatchEvent(new Event(\'input\'));'
+  +     ' await this.wait(100);'
+  +     ' this.target_move();'
   +     ' console.log((index+1)+\'/\'+(columns*rows)+\' (\'+(column+1)+\', \'+(row+1)+\'): \'+x+\', \'+y);'
   +     ' await this.wait(column!=0?delay:(row!=0?Math.min(parseInt(1.8*delay), 5000):5000));'
   +     ' context.drawImage(this.canvas, Math.ceil(fov_pixels_y*x_crop_left), 0, fov_pixels_x, fov_pixels_y, fov_pixels_x*column, fov_pixels_y*row, fov_pixels_x, fov_pixels_y);'
@@ -3589,16 +3625,20 @@ sed_code()
   +   tsai.navigation_code_sed()
   +   tsai.navigation_code_logger()
   + ' corner_move:'
-  +  ' function(corner)' // corner 0 is top left, 1 is bottom right
+  +  ' async function(corner)' // corner 0 is top left, 1 is bottom right
   +  ' {if(this.coordinates[2*corner]===null)'
   +   ' {console.log([\'Top left\', \'Bottom right\'][corner]+\' corner not set\');'
   +   ' return;'
   +    '}'
-  +   ' document.getElementById(\'targetPosX\').value=this.coordinates[2*corner]/1000;'
-  +   ' document.getElementById(\'targetPosY\').value=this.coordinates[2*corner+1]/1000;'
-  +   ' document.getElementById(\'targetPosX\').dispatchEvent(new Event(\'input\'));'
-  +   ' document.getElementById(\'targetPosY\').dispatchEvent(new Event(\'input\'));'
-  +   ' document.getElementById(\'moveStageBtn\').click();'
+  +   ' this.target_x().value=this.coordinates[2*corner]/1000;'
+  +   ' this.target_x().dispatchEvent(new Event(\'change\'));'
+  +   ' this.target_x().dispatchEvent(new Event(\'input\'));'
+  +   ' await this.wait(100);'
+  +   ' this.target_y().value=this.coordinates[2*corner+1]/1000;'
+  +   ' this.target_y().dispatchEvent(new Event(\'change\'));'
+  +   ' this.target_y().dispatchEvent(new Event(\'input\'));'
+  +   ' await this.wait(100);'
+  +   ' this.target_move();'
   +   ' console.log([\'Top left\', \'Bottom right\'][corner]+\' corner, \'+(this.coordinates[2*corner]/1000)+\', \'+(this.coordinates[2*corner+1]/1000));'
   +   '},'
   + ' corner_set:'
@@ -3698,7 +3738,7 @@ sed_code()
  +' {document.getElementById(\'selectedImagingPreset\').selectedIndex=3;'
  + ' document.getElementById(\'selectedImagingPreset\').dispatchEvent(new Event(\'change\'));'
  + ' setTimeout(()=>{console.log(\'Please wait 8 seconds.\');}, 1000);'
- + '}' 
+ + '}'
  navigator.clipboard.writeText(b);
 }
 
@@ -4931,6 +4971,34 @@ navigation_code_arrows(clear)
   +    ' case \'ArrowRight\':'+clear+' document.getElementById(\'jogRightBy\'+(event.shiftKey?3:event.altKey?1:2)+\'Btn\').click(); break;';
 }
 
+navigation_code_move()
+{return ''
+  + ' magnification:'
+  +  ' function()'
+  +  ' {if(!document.getElementById(\'rangeMag\') && !document.getElementById(\'rangeFovSize\')) document.getElementById(\'sedImage-header\').children[0].click();'
+  +   ' if(document.getElementById(\'rangeMag\')) return document.getElementById(\'rangeMag\');'
+  +   ' if(document.getElementById(\'rangeFovSize\')) return document.getElementById(\'rangeFovSize\').children[0];'
+  +   ' return null;'
+  +   '},'
+  + ' target_x:'
+  +  ' function()'
+  +  ' {if(document.getElementById(\'targetPosX\')) return document.getElementById(\'targetPosX\');'
+  +   ' if(document.getElementById(\'inputOptTPX\')) return document.getElementById(\'inputOptTPX\');'
+  +   ' return null;'
+  +   '},'
+  + ' target_y:'
+  +  ' function()'
+  +  ' {if(document.getElementById(\'targetPosY\')) return document.getElementById(\'targetPosY\');'
+  +   ' if(document.getElementById(\'inputOptTPY\')) return document.getElementById(\'inputOptTPY\');'
+  +   ' return null;'
+  +   '},'
+  + ' target_move:'
+  +  ' function()'
+  +  ' {if(document.getElementById(\'moveStageBtn\')) document.getElementById(\'moveStageBtn\').click();'
+  +   ' else if(document.getElementById(\'inputOptTPY\')) document.getElementById(\'inputOptTPY\').nextElementSibling.click();'
+  +   '},';
+}
+
 navigation_code_sed()
 {return ' sed:'
   +  ' function(name)'
@@ -5047,24 +5115,36 @@ navigation_code()
   + ' canvas: document.getElementsByTagName(\'canvas\')[2],'
   + ' overlay: document.getElementsByTagName(\'canvas\')[3],'
   + ' context: document.getElementsByTagName(\'canvas\')[3].getContext(\'2d\'),'
+  + ' wait: function(milliseconds) {return new Promise(resolve=>{setTimeout(()=>{resolve(\'\')}, milliseconds);})},'
+  +   tsai.navigation_code_move()
   + ' move:'
-  +  ' function(current)' // current==true loads from this.current, current==false loads from this.original
+  +  ' async function(current)' // current==true loads from this.current, current==false loads from this.original
   +  ' {if(this.index>=this.current.length) this.index=this.current.length-1;'
   +   ' else if(this.index<0) '          +'this.index=(this.current.length==0?-1:0);'
   +   ' if(!(this.index in this.current)) return \'\';'
   +   ' if(current)'
-  +   ' {document.getElementById(\'targetPosX\').value=this.current[this.index][3];'
-  +    ' document.getElementById(\'targetPosY\').value=this.current[this.index][4];'
+  +   ' {this.target_x().value=this.current[this.index][3];'
+  +    ' this.target_x().dispatchEvent(new Event(\'change\'));'
+  +    ' this.target_x().dispatchEvent(new Event(\'input\'));'
+  +    ' await this.wait(100);'
+  +    ' this.target_y().value=this.current[this.index][4];'
+  +    ' this.target_y().dispatchEvent(new Event(\'change\'));'
+  +    ' this.target_y().dispatchEvent(new Event(\'input\'));'
+  +    ' await this.wait(100);'
   +    ' console.log(this.current[this.index][1]+(this.current[this.index][2]==\'\'?\'\':\' \'+this.current[this.index][2])+\' loaded at (\'+this.current[this.index][3]+\', \'+this.current[this.index][4]+\')\'+(this.index==this.current.length-1?\', last FOV\':\'\'));'
   +    '}'
   +   ' else'
-  +   ' {document.getElementById(\'targetPosX\').value=this.original[this.index][3];'
-  +    ' document.getElementById(\'targetPosY\').value=this.original[this.index][4];'
+  +   ' {this.target_x().value=this.original[this.index][3];'
+  +    ' this.target_x().dispatchEvent(new Event(\'change\'));'
+  +    ' this.target_x().dispatchEvent(new Event(\'input\'));'
+  +    ' await this.wait(100);'
+  +    ' this.target_y().value=this.original[this.index][4];'
+  +    ' this.target_y().dispatchEvent(new Event(\'change\'));'
+  +    ' this.target_y().dispatchEvent(new Event(\'input\'));'
+  +    ' await this.wait(100);'
   +    ' console.log(this.current[this.index][1]+(this.current[this.index][2]==\'\'?\'\':\' \'+this.current[this.index][2])+\' rewound to (\'+this.original[this.index][3]+\', \'+this.original[this.index][4]+\')\');'
   +    '}'
-  +   ' document.getElementById(\'targetPosX\').dispatchEvent(new Event(\'input\'));'
-  +   ' document.getElementById(\'targetPosY\').dispatchEvent(new Event(\'input\'));'
-  +   ' document.getElementById(\'moveStageBtn\').click();'
+  +   ' this.target_move();'
   +   '},'
   + ' first:'+' function() {this.check(true); this.index=0; this.move(true); return \'\';},'
   + ' last:' +' function() {this.check(true); this.index=this.current.length-1; this.move(true); return \'\';},'
@@ -5209,15 +5289,15 @@ navigation_code()
   + ' zoom:'
   +  ' function(fov)'
   +  ' {this.context.clearRect(0, 0, this.overlay.width, this.overlay.height);'
-  +   ' if(!document.getElementById(\'rangeMag\')) document.getElementById(\'sedImage-header\').children[0].click();'
-  +   ' if(!document.getElementById(\'rangeMag\')) return \'\';'
+  +   ' var magnification=this.magnification();'
+  +   ' if(magnification) return \'\';'
   +   ' var length=15;'
   +   ' var width=3;'
   +   ' var opacity=0.6;'
-  +   ' var maximum=parseInt(document.getElementById(\'rangeMag\').max);'
+  +   ' var maximum=parseInt(magnification.max);'
   +   ' fov=Math.min(fov, maximum);'
-  +   ' document.getElementById(\'rangeMag\').value=fov;'
-  +   ' document.getElementById(\'rangeMag\').dispatchEvent(new Event(\'input\'));'
+  +   ' magnification.value=fov;'
+  +   ' magnification.dispatchEvent(new Event(\'input\'));'
   +   ' var brackets={400: [200], 800: [400, 200],};'
   +   ' brackets[maximum]=[800, 400];'
   +   ' this.context.lineWidth=width;'
@@ -5225,36 +5305,37 @@ navigation_code()
   +   ' {document.getElementsByClassName(\'crosshair\')[0].children[0].checked=false;'
   +    ' document.getElementsByClassName(\'crosshair\')[0].children[0].dispatchEvent(new Event(\'change\'));'
   +    ' this.context.lineCap=\'round\';'
-  +    ' for(var bracket=0; bracket<brackets[fov].length; bracket++)'
-  +    ' {var bracket_fov=brackets[fov][bracket];'
-  +     ' this.context.strokeStyle=this.zoom_colors[bracket_fov];'
-  +     ' var marks=[Math.round((fov-brackets[fov][bracket])*this.overlay.width/fov/2)];'
-  +     ' marks=marks.concat([marks[0]+length, this.overlay.width-marks[0]-length, this.overlay.width-marks[0]]);'
+  +    ' if(document.getElementById(\'targetPosX\'))'
+  +    ' {for(var bracket=0; bracket<brackets[fov].length; bracket++)'
+  +     ' {var bracket_fov=brackets[fov][bracket];'
+  +      ' this.context.strokeStyle=this.zoom_colors[bracket_fov];'
+  +      ' var marks=[Math.round((fov-brackets[fov][bracket])*this.overlay.width/fov/2)];'
+  +      ' marks=marks.concat([marks[0]+length, this.overlay.width-marks[0]-length, this.overlay.width-marks[0]]);'
+  +      ' this.context.globalAlpha=opacity;'
+  +      ' this.zoom_bracket(marks, [0, 1, 0, 0, 1, 0]);'
+  +      ' this.zoom_bracket(marks, [2, 0, 3, 0, 3, 1]);'
+  +      ' this.zoom_bracket(marks, [3, 2, 3, 3, 2, 3]);'
+  +      ' this.zoom_bracket(marks, [1, 3, 0, 3, 0, 2]);'
+  +      ' this.context.globalAlpha=1;'
+  +      ' this.context.font=(bracket_fov==800?\'normal normal bold 12px Arial\':\'normal normal normal 12px Arial\');'
+  +      ' this.context.fillStyle=this.zoom_colors[bracket_fov];'
+  +      ' this.context.fillText(bracket_fov+\' μm\', 5, 15*bracket+(fov==800?28:32));'
+  +      '}'
   +     ' this.context.globalAlpha=opacity;'
-  +     ' this.zoom_bracket(marks, [0, 1, 0, 0, 1, 0]);'
-  +     ' this.zoom_bracket(marks, [2, 0, 3, 0, 3, 1]);'
-  +     ' this.zoom_bracket(marks, [3, 2, 3, 3, 2, 3]);'
-  +     ' this.zoom_bracket(marks, [1, 3, 0, 3, 0, 2]);'
+  +     ' this.context.strokeStyle=\'#6fc3ff\';'
+  +     ' this.context.beginPath();'
+  +     ' this.context.moveTo(0'              +', this.overlay.width/2);'
+  +     ' this.context.lineTo(this.overlay.width, this.overlay.width/2);'
+  +     ' this.context.stroke();'
+  +     ' this.context.beginPath();'
+  +     ' this.context.moveTo(this.overlay.width/2, 0);'
+  +     ' this.context.lineTo(this.overlay.width/2, this.overlay.width);'
+  +     ' this.context.stroke();'
   +     ' this.context.globalAlpha=1;'
-  +     ' this.context.font=(bracket_fov==800?\'normal normal bold 12px Arial\':\'normal normal normal 12px Arial\');'
-  +     ' this.context.fillStyle=this.zoom_colors[bracket_fov];'
-  +     ' this.context.fillText(bracket_fov+\' μm\', 5, 15*bracket+(fov==800?28:32));'
-  +     '}'
-  +    ' this.context.globalAlpha=opacity;'
-  +    ' this.context.strokeStyle=\'#6fc3ff\';'
-  +    ' this.context.beginPath();'
-  +    ' this.context.moveTo(0'              +', this.overlay.width/2);'
-  +    ' this.context.lineTo(this.overlay.width, this.overlay.width/2);'
-  +    ' this.context.stroke();'
-  +    ' this.context.beginPath();'
-  +    ' this.context.moveTo(this.overlay.width/2, 0);'
-  +    ' this.context.lineTo(this.overlay.width/2, this.overlay.width);'
-  +    ' this.context.stroke();'
-  +    ' this.context.globalAlpha=1;'
-  +    ' this.context.font=(fov==800?\'normal normal bold 12px Arial\':\'normal normal normal 12px Arial\');'
-  +    ' this.context.fillStyle=\'#6fc3ff\';'
-  +    ' this.context.fillText(fov+\' μm\', 5, 15);'
-  +   '}},'
+  +     ' this.context.font=(fov==800?\'normal normal bold 12px Arial\':\'normal normal normal 12px Arial\');'
+  +     ' this.context.fillStyle=\'#6fc3ff\';'
+  +     ' this.context.fillText(fov+\' μm\', 5, 15);'
+  +   '}}},'
   + ' file:'
   +  ' function(text)'
   +  ' {var url=window.URL || window.webkitURL;'
