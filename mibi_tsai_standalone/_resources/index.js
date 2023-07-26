@@ -96,30 +96,30 @@ tsai.coregistration_default('0,0,-27.408,75.483|1131,0,51.487,76.103|0,1131,-26.
    ################################### */
    tsai.line_color_add('#e50808', '#eeeeee');  // digital red
    tsai.line_color_add('#6fc3ff', '#000000');  // digital blue
-// tsai.line_color_add('#59b3a9', '#eeeeee');  // palo verde green
    tsai.line_color_add('#59c3b9', '#000000');  // replacement green
-// tsai.line_color_add('#fedd5c', '#333333');  // illuminating yellow
    tsai.line_color_add('#fcca03', '#000000');  // replacement yellow
    tsai.line_color_add('#bd9a7a', '#000000');  // replacement brown
    tsai.line_color_add('#8383ff', '#ffffff');  // replacement lavender
 // tsai.line_color_add('#f4f4f4', '#333333');  // fog grey
-   tsai.line_color_add('#e2c9d7', '#333333');  // replacement grey
-   tsai.line_color_add('#ff39a4', '#ffffff');  // replacement pink
-// tsai.line_color_add('#009ab4', '#eeeeee');  // lagunita blue
+   tsai.line_color_add('#e2c9d7', '#333333');  // replacement light pink
+   tsai.line_color_add('#ff39a4', '#ffffff');  // replacement bright pink
    tsai.line_color_add('#006dff', '#ffffff');  // replacement blue
    tsai.line_color_add('#98ebc8', '#000000');  // replacement green
-// tsai.line_color_add('#a6b168', '#eeeeee');  // olive green
    tsai.line_color_add('#37afff', '#eeeeee');  // replacement blue
    tsai.line_color_add('#f4795b', '#eeeeee');  // spirited orange
 // tsai.line_color_add('#d4d1d1', '#000000');  // stone grey
-   tsai.line_color_add('#949191', '#000000');  // replacement grey
-// tsai.line_color_add('#c61391', '#eeeeee');  // red-purple
-// tsai.line_color_add('#734675', '#eeeeee');  // plum purple
+// tsai.line_color_add('#949191', '#000000');  // replacement grey
+   tsai.line_color_add('#c61391', '#eeeeee');  // red-purple
+   tsai.line_color_add('#009ab4', '#eeeeee');  // lagunita blue
+   tsai.line_color_add('#a6b168', '#eeeeee');  // olive green
+   tsai.line_color_add('#fedd5c', '#333333');  // illuminating yellow
+   tsai.line_color_add('#59b3a9', '#eeeeee');  // palo verde green
    tsai.line_color_add('#b346f5', '#ffffff');  // replacement purple
    tsai.line_color_add('#ff6202', '#ffffff');  // replacement red
    tsai.line_color_add('#0000ff', '#ffffff');  // replacement blue
    tsai.line_color_add('#b5651d', '#000000');  // replacement brown
-// tsai.line_color_add('#67afd2', '#eeeeee');  // sky blue
+   tsai.line_color_add('#734675', '#eeeeee');  // plum purple
+   tsai.line_color_add('#67afd2', '#eeeeee');  // sky blue
    tsai.line_color_add('#00fb50', '#000000');  // replacement green
    tsai.line_color_add('#dd20fe', '#eeeeee');  // replacement purple
    tsai.line_color_add('#e9bbba', '#000000');  // replacement pink
@@ -127,12 +127,12 @@ tsai.coregistration_default('0,0,-27.408,75.483|1131,0,51.487,76.103|0,1131,-26.
    tsai.line_color_add('#2153ff', '#ffffff');  // replacement blue
    tsai.line_color_add('#f9a44a', '#000000');  // poppy orange
    tsai.line_color_add('#b83a4b', '#eeeeee');  // cardinal red
-// tsai.line_color_add('#8fe4d7', '#000000');  // 
+   tsai.line_color_add('#ffcba9', '#000000');  // 
    tsai.line_color_add('#1aecba', '#000000');  // digital green
    tsai.line_color_add('#a3d6ef', '#000000');  // 
-   tsai.line_color_add('#ffcba9', '#000000');  // 
-// tsai.line_color_add('#ffbbb3', '#000000');  // 
-// tsai.line_color_add('#7f2d48', '#eeeeee');  // brick red
-   tsai.line_color_add('#7c8a72', '#ffffff');  // replacement grey
+   tsai.line_color_add('#8fe4d7', '#000000');  // 
+   tsai.line_color_add('#ffbbb3', '#000000');  // 
+   tsai.line_color_add('#7f2d48', '#eeeeee');  // brick red
+// tsai.line_color_add('#7c8a72', '#ffffff');  // replacement grey
    tsai.line_color_add('#ffd39a', '#000000');  // light orange
    tsai.line_color_add('#8ab8a7', '#eeeeee');  // bay green
