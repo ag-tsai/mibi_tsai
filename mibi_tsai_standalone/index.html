@@ -487,8 +487,19 @@
      <div id="tile_tma_build_replace" style="display:none;" onclick="tsai.tma_build(true );">Build TMA and replace original tile/FOV</div>
      <div id="tile_tma_revert" style="display:none;"><span onclick="javascript:tsai.tma_revert();">Revert to before last TMA</span></div>
     </div>
+    
+    <!-- ##########  COPY  ########## -->
+    <div id="tile_copy" style="display:none;">
+     <div><span onclick="tsai.copy_close();">Close [&times;]</span></div>
+     <p>Copy tile settings (FOV, raster, preset, dwell, depth) to</p>
+     <ul id="tile_copy_list"></ul>
+     <input id="tile_copy_items" type="hidden" value=""/>
+     <div id="tile_copy_button"><span onclick="javascript:tsai.copy_paste();">Apply changes</span></div>
+    </div>
+    
+    <!-- ##########  TILE LABELS  ########## -->
     <div id="tile_labels" style="display:none;"></div>
-    <input id="labels_tile" type="hidden" value="'+tile+'">
+    <input id="labels_tile" type="hidden" value="">
    </div>
   </td>
  </tr>
@@ -696,7 +707,7 @@
 <footer id="footer" class="_layout_footer">
   <div><a href="https://tsai.stanford.edu" target="_blank"><img src="_resources/_images/logo_footer.png" width="371" height="39" alt="Tsai Laboratory"/></a></div>
   <div><span class="b">If you use this tool, please cite our paper:</span>
-   <br/>Piyadasa H, Oberlton B, Kong A, Fullaway CC, Varra SR, Sowers C, Tsai AG. Rapid setup of tissue microarray and tiled area imaging on the Multiplexed Ion Beam Imaging microscope (MIBIscope) using the Tile/SED/Array Interface (TSAI). preprint under screening
+   <br/>Piyadasa H, Oberlton B, Kong A, Fullaway CC, Varra SR, Sowers C, Tsai AG. Rapid setup of tissue microarray and tiled area imaging on the Multiplexed Ion Beam Imaging microscope (MIBIscope) using the Tile/SED/Array Interface (TSAI). Under review
   </div>
   <div><span class="b">Latest version:</span>
    <br/><a href="https://tsai.stanford.edu/research/mibi_tsai">https://tsai.stanford.edu/research/mibi_tsai</a>
