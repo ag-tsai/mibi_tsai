@@ -101,7 +101,7 @@ footer._layout_footer div span.b     {font-weight:600;}
                                                     display:inline-block; max-width:none; text-align:left;   vertical-align:middle; appearance:none; -webkit-appearance:none;}
 #_layout_main textarea                             {padding:5px;}
 #_layout_main textarea.code                        {color:#222;}
-#_layout_main select                               {height:22px; padding:2px 5px 2px 5px; vertical-align:middle; background-color:var(--input_background); background-image:url('common/svg_arrow_down.svg'); background-position:right 0.8rem center; background-repeat:no-repeat; background-size:1.2rem;}
+#_layout_main select                               {height:22px; padding:2px 5px 2px 5px; vertical-align:middle; background-color:var(--input_background); background-image:url('_images/svg_arrow_down.svg'); background-position:right 0.8rem center; background-repeat:no-repeat; background-size:1.2rem;}
 #_layout_main input[type=file          ],
 #_layout_main input[type=file          ]:hover,
 #_layout_main input[type=file          ]:focus     {background-color:transparent; outline:none; box-shadow:none;}
