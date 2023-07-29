@@ -895,13 +895,6 @@ class MIBI_TSAI {
      tsai.images[key].brightness=1;
      tsai.images[key].contrast=1;
      if(key=='sed') tsai.coregistration_set('sed', file.name, tsai.time_format(file.name.match(/(\d\d\d\d)\-(\d\d)\-(\d\d)\-(\d\d)(\d\d)(\d\d)/)).readable);
-     else if(key=='optical')
-     {if(tsai.images[key].coordinates.length==2 && tsai.images[key].coordinates[1][2]==1)
-      {var pixels=[0, 0, tsai.images[key].img.naturalWidth, 0, 0, tsai.images[key].img.naturalHeight, tsai.images[key].img.naturalWidth, tsai.images[key].img.naturalHeight];
-       var quads='';
-       for(var quad=0; quad<4; quad++) quads+=pixels[2*quad]+','+pixels[(2*quad)+1]+','+(tsai.images[key].coordinates[0][2*quad]/1000)+','+(tsai.images[key].coordinates[0][(2*quad)+1]/1000)+'|';
-       tsai.coregistration_set('automatic', quads, tsai.time_format().readable);
-     }}
      tsai.images[key].loaded=true; // must be AFTER coregistration_set('sed' ...
      document.getElementById('json_image_save').style.display='';
      tsai.image_tab(key, (tsai.images[key].img.naturalWidth>1500 || tsai.images[key].img.naturalHeight>1500)?0.5:1);
@@ -2952,7 +2945,8 @@ class MIBI_TSAI {
    // check window.location.search for ?sed= or ?automatic= or ?manual=
    var search=window.location.search.toLowerCase().replace(/[^\d]+$/, '');
    if(     search.indexOf('?automatic=')==0)
-   {tsai.coregistration_set('automatic', search.substring('?automatic='.length).replaceAll('%7c', '|'), tsai.time_format().readable);
+   {if(tsai.coregistration_set('automatic', search.substring('?automatic='.length).replaceAll('%7c', '|'), tsai.time_format().readable))
+    window.location=tsai.url.tsai;
     return;
    }
    else if(search.indexOf('?manual='   )==0)
@@ -3043,13 +3037,10 @@ class MIBI_TSAI {
        tsai.image.coordinates=from_into;
        tsai.image.type=type;
        tsai.coregistration.last=type;
-       if(tsai.image.coordinates[1][2]==1) success=false;
-       else
-       {tsai.coregistration.automatic_coordinates=parsed;
-        tsai.coregistration.automatic_time=time;
-        tsai.coregistration_cookie_set();
-        document.getElementById('optical_link').style.display='';
-       }
+       tsai.coregistration.automatic_coordinates=parsed;
+       tsai.coregistration.automatic_time=time;
+       tsai.coregistration_cookie_set();
+       document.getElementById('optical_link').style.display='';
        break;
       case 'manual':
        tsai.image=tsai.images.optical;
@@ -3147,43 +3138,30 @@ class MIBI_TSAI {
      ######################################### */
   optical_automatic_code()
   {var b=tsai.navigation_code_clear()
-  +' if(document.getElementById(\'targetPosX\'))'
-  +' {logger.level=4;'
-   +' var map={multiplier: 0, info: console.info, log: [], canvas: document.getElementsByTagName(\'canvas\')[1], rect: {}, optical: {}, quad: {}, result: \'\'};'
-   +' console.info=function() {map.log.push(Array.from(arguments));};'
-   +' map.rect=map.canvas.getBoundingClientRect();'
-   +' map.click=function(x, y) {map.canvas.dispatchEvent(new MouseEvent(\'click\', {clientX: x, clientY: y, bubbles: true}));};'
-   +' map.click(map.rect.left, map.rect.top);'
-   +' map.click(map.rect.right, map.rect.bottom);'
-   +' map.optical={x: map.log[0][1].x*map.rect.width/(map.log[1][1].x-map.log[0][1].x), y: map.log[0][1].y*map.rect.height/(map.log[1][1].y-map.log[0][1].y)};'
-   +' map.canvas.onclick=function() {setTimeout(()=>{map.result+=map.log[map.log.length-1][1].x+\',\'+map.log[map.log.length-1][1].y+\',\'+document.getElementById(\'inputOptTPX\').value.trim()+\',\'+document.getElementById(\'inputOptTPY\').value.trim()+\'|\\n\';},500);};'
-   +' map.quad='
-    +'{left: '  +'map.rect.left'  +'-map.optical.x-map.multiplier*map.rect.width,'
-    +' top: '   +'map.rect.top'   +'-map.optical.y-map.multiplier*map.rect.height,'
-    +' right: ' +'map.rect.right' +'-map.optical.x+map.multiplier*map.rect.width,'
-    +' bottom: '+'map.rect.bottom'+'-map.optical.y+map.multiplier*map.rect.height};'
-   +' setTimeout(()=>{console.clear(); console.log(\'\\n\\nMIBI Coregistration Tool\\nCopyright Albert G Tsai, MD, PhD\\n\\nPlease wait 8 seconds\\n\'); map.result=\'\';}, 1000);'
-   +' setTimeout(()=>{map.click(map.quad.left, map.quad.top);}, 2000);'
-   +' setTimeout(()=>{map.click(map.quad.right, map.quad.top);}, 3000);'
-   +' setTimeout(()=>{map.click(map.quad.left, map.quad.bottom);}, 4000);'
-   +' setTimeout(()=>{map.click(map.quad.right, map.quad.bottom);}, 5000);'
-   +' setTimeout(()=>{console.info=map.info; map.canvas.onclick=null; logger.level=2;'
-   + ' console.log(\'\\nTiler link:\\n'+tsai.url.tsai+'?automatic=\'+map.result.replace(/\\s*/g, \'\')+\'\\n\\n\\n\'); map=null;}, 6000);' // need character at end of link due to truncation
-   +'}'
-  +' else'
-  +' {var map={canvas: document.getElementsByTagName(\'canvas\')[1], rect: {}, result: \'\'};'
-   +' map.rect=map.canvas.getBoundingClientRect();'
-   +' map.click=function(a, b, x, y)'
-   +' {map.canvas.dispatchEvent(new MouseEvent(\'click\', {clientX: x, clientY: y, bubbles: true}));'
-   + ' setTimeout(()=>{map.result+=a+\',\'+b+\',\'+document.getElementById(\'inputOptTPX\').value.trim()+\',\'+document.getElementById(\'inputOptTPY\').value.trim()+\'|\';},500);'
-   + '};'
-   +' setTimeout(()=>{console.clear(); console.log(\'\\n\\nMIBI Coregistration Tool\\nCopyright Albert G Tsai, MD, PhD\\n\\nPlease wait 8 seconds\\n\'); map.result=\'\';}, 1000);'
-   +' setTimeout(()=>{map.click(0, 0, map.rect.left, map.rect.top);}, 2000);'
-   +' setTimeout(()=>{map.click(1, 0, map.rect.right, map.rect.top);}, 3000);'
-   +' setTimeout(()=>{map.click(0, 1, map.rect.left, map.rect.bottom);}, 4000);'
-   +' setTimeout(()=>{map.click(1, 1, map.rect.right, map.rect.bottom);}, 5000);'
-   +' setTimeout(()=>{console.log(\'\\nTiler link:\\n'+tsai.url.tsai+'?automatic=\'+map.result.replace(/\\s*/g, \'\')+\'\\n\\nCoregistration will not be complete until the optical image is loaded into MIBI TSAI.\\n\\n\\n\'); map=null;}, 6000);' // need character at end of link due to truncation
-   +'}';
+  +' logger.level=4;'
+  +' var map={multiplier: 0, info: console.info, log: [], canvas: document.getElementsByTagName(\'canvas\')[1], rect: {}, optical: {}, quad: {}, result: \'\'};'
+  +' console.info=function() {map.log.push(Array.from(arguments));};'
+  +' map.rect=map.canvas.getBoundingClientRect();'
+  +' map.click=function(x, y) {map.canvas.dispatchEvent(new MouseEvent(\'click\', {clientX: x, clientY: y, bubbles: true}));};'
+  +' map.click(map.rect.left, map.rect.top);'
+  +' setTimeout(()=>{map.click(map.rect.right, map.rect.bottom);}, 500);'
+  +' setTimeout(()=>'
+  + '{map.optical={x: map.log[0][1].x*map.rect.width/(map.log[1][1].x-map.log[0][1].x), y: map.log[0][1].y*map.rect.height/(map.log[1][1].y-map.log[0][1].y)};'
+  + ' map.canvas.onclick=function() {setTimeout(()=>{map.result+=Math.round(map.log[map.log.length-1][1].x)+\',\'+Math.round(map.log[map.log.length-1][1].y)+\',\'+document.getElementById(\'inputOptTPX\').value.trim()+\',\'+document.getElementById(\'inputOptTPY\').value.trim()+\'|\\n\';},500);};'
+  + ' map.quad='
+  +  '{left: '  +'map.rect.left'  +'-map.optical.x-map.multiplier*map.rect.width,'
+  +  ' top: '   +'map.rect.top'   +'-map.optical.y-map.multiplier*map.rect.height,'
+  +  ' right: ' +'map.rect.right' +'-map.optical.x+map.multiplier*map.rect.width,'
+  +  ' bottom: '+'map.rect.bottom'+'-map.optical.y+map.multiplier*map.rect.height};'
+  + ' console.clear(); console.log(\'\\n\\nMIBI Coregistration Tool\\nCopyright Albert G Tsai, MD, PhD\\n\\nPlease wait 8 seconds\\n\');'
+  + ' map.result=\'\';'
+  + '}, 1000);'
+  +' setTimeout(()=>{map.click(map.quad.left, map.quad.top);}, 2000);'
+  +' setTimeout(()=>{map.click(map.quad.right, map.quad.top);}, 3000);'
+  +' setTimeout(()=>{map.click(map.quad.left, map.quad.bottom);}, 4000);'
+  +' setTimeout(()=>{map.click(map.quad.right, map.quad.bottom);}, 5000);'
+  +' setTimeout(()=>{console.info=map.info; map.canvas.onclick=null; logger.level=2;'
+  +' console.log(\'\\nTiler link:\\n'+tsai.url.tsai+'?automatic=\'+map.result.replace(/\\s*/g, \'\')+\'\\n\\n\\n\'); map=null;}, 6000);' // need character at end of link due to truncation
    navigator.clipboard.writeText(b);
   }
   
