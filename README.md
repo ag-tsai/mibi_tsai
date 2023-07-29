@@ -11,7 +11,7 @@ The Tile/SED/Array Interface (TSAI) is a tool for rapidly setting up FOVs on the
 The easiest way to use this tool is to open the working, online version at [https://tsai.stanford.edu/research/mibi_tsai](https://tsai.stanford.edu/research/mibi_tsai) on your MIBIscope computer. However, it contains presets which may not apply across all instruments. Thus, when using it you should **only** build from FOVs exported from your specific instrument's MIBIcontrol.
 
 ## 2. Local installation
-If you wish to integrate your instrument's FOV presets as well as links to your MIBItracker and run log, you may set up a local installation on your MIBI computer hard drive (e.g. Desktop) or on any web host. There are no server-side commands in this version, thus no access to PHP, Python, SQL, etc. is required.
+If you wish to integrate your instrument's FOV presets as well as links to your MIBItracker and run log, you may set up your own version on any web host. There are no server-side commands, thus no access to PHP, Python, SQL, etc. is required.
 
 1. Use MIBIcontrol to create a `.json` file containing all your preset imaging modes and dwell times.
 2. Download `mibi_tsai_standalone` to a new folder. Within the `_resources` subfolder, open `index.js` in any text editor.
@@ -22,7 +22,7 @@ If you wish to integrate your instrument's FOV presets as well as links to your 
 7. For each line `tsai.preset_recommended('...', [...]);`, edit the preset/dwell time combinations to match those recommended on your MIBIcontrol.
 8. Uncomment (remove `//` from) and edit the various other presets to change the default style settings, e.g. line thickness or arrow key nudge distance.
 9. Save your changes to `index.js`.
-10. If uploading to a web server, perform `chmod 755 *.*` on all directories.
+10. Upload `mibi_tsai_standalone` to the web server and perform `chmod 755 *.*` on all directories.
 11. Open `index.html`.
 
 ## 3. Usage instructions

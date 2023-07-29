@@ -48,13 +48,11 @@ These custom styles are shared across many pages and should be included in all s
 
 /* ##########  LAYOUT STYLES  ########## */
 section._layout_masthead             {box-shadow: 0 3px 6px rgba(0,0,0,.13),0 3px 6px rgba(0,0,0,.1); position:relative; background-color: #fff; width:100%;}
-div._layout_brand_bar                {background-color:#b1040e; width:100%; height:30px; padding:6px 0px 0px 30px; text-align:left; vertical-align:middle;}
-div._layout_brand_bar a              {display:block;}
-div._layout_lockup                   {padding:27px 0px 0px 30px; margin-bottom:12px;}
+div._layout_lockup                   {padding:20px 0px 0px 30px; margin-bottom:-10px;}
 section._layout_masthead nav         {margin-left:30px; margin-right:30px;}
-footer._layout_footer                {background-color:#f4f4f4; width:100%; padding:48px 0px 100px 50px; text-align:left;}
-footer._layout_footer div            {margin-bottom:20px; line-height:1.5em;}
-footer._layout_footer div span.b     {font-weight:600;}
+#footer                              {background-color:#f4f4f4; width:100%; padding:30px 0px 100px 30px; text-align:left;}
+#footer div                          {margin-bottom:15px; line-height:1.5em;}
+#footer div span.b                   {font-weight:600;}
 
 /* ##########  MAIN SECTION STYLES  ########## */
 #_layout_main                        {width:100%; min-height:80vh; padding-top:20px; padding-bottom:200px;}
@@ -157,15 +155,15 @@ footer._layout_footer div span.b     {font-weight:600;}
 
 /* ##########  FONTS  ########## */
 /* from https://decanter.stanford.edu/page/brand-design-elements-typography/ */
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_extra_light.ttf'       ) format('truetype'); font-weight:200; font-style:normal;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_extra_light_italic.ttf') format('truetype'); font-weight:200; font-style:italic;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_light.ttf'             ) format('truetype'); font-weight:300; font-style:normal;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_light_italic.ttf'      ) format('truetype'); font-weight:300; font-style:italic;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_regular.ttf'           ) format('truetype'); font-weight:400; font-style:normal;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_italic.ttf'            ) format('truetype'); font-weight:400; font-style:italic;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_semibold.ttf'          ) format('truetype'); font-weight:600; font-style:normal;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_semibold_italic.ttf'   ) format('truetype'); font-weight:600; font-style:italic;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_bold.ttf'              ) format('truetype'); font-weight:700; font-style:normal;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_bold_italic.ttf'       ) format('truetype'); font-weight:700; font-style:italic;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_black.ttf'             ) format('truetype'); font-weight:900; font-style:normal;}
-@font-face {font-family:'Source Sans Pro' ; src:url('font_source_sans_pro_black_italic.ttf'      ) format('truetype'); font-weight:900; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_extra_light.ttf'       ) format('truetype'); font-weight:200; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_extra_light_italic.ttf') format('truetype'); font-weight:200; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_light.ttf'             ) format('truetype'); font-weight:300; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_light_italic.ttf'      ) format('truetype'); font-weight:300; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_regular.ttf'           ) format('truetype'); font-weight:400; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_italic.ttf'            ) format('truetype'); font-weight:400; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_semibold.ttf'          ) format('truetype'); font-weight:600; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_semibold_italic.ttf'   ) format('truetype'); font-weight:600; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_bold.ttf'              ) format('truetype'); font-weight:700; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_bold_italic.ttf'       ) format('truetype'); font-weight:700; font-style:italic;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_black.ttf'             ) format('truetype'); font-weight:900; font-style:normal;}
+@font-face {font-family:'Source Sans Pro' ; src:url('_fonts/font_source_sans_pro_black_italic.ttf'      ) format('truetype'); font-weight:900; font-style:italic;}
