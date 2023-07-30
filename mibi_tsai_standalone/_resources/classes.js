@@ -2072,6 +2072,12 @@ class MIBI_TSAI {
      case 'KeyF': tsai.draw_slide_labels_size_crement(   event.shiftKey?-0.5:0.5); break;
      case 'KeyB': tsai.draw_filter_crement('brightness', event.shiftKey?-0.1:0.1); break;
      case 'KeyC': tsai.draw_filter_crement('contrast'  , event.shiftKey?-0.1:0.1); break;
+     case 'KeyV':
+      if(event.shiftKey)
+      {tsai.draw_filter_crement('brightness', 1-tsai.image.brightness);
+       tsai.draw_filter_crement('contrast'  , 1-tsai.image.contrast  );
+      }
+      break;
      case 'KeyZ': tsai.draw_zoom_crement(                event.shiftKey?1/Math.sqrt(2):Math.sqrt(2)); break;
      case 'KeyL': document.getElementById('slide_labels').click(); break;
      case 'KeyO': document.getElementById('slide_focus_circles').click(); break;
