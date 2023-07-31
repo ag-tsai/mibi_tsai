@@ -2832,7 +2832,6 @@ class MIBI_TSAI {
    {document.getElementById('tile_'+tile+'_rows'   ).value=rows_new;
     document.getElementById('tile_'+tile+'_columns').value=columns_new;
     tsai.tile_map_resize(tile);
-    tsai.json_summary(false);
   }}
   
   tile_map_unshift(tile, axis)
@@ -2852,8 +2851,6 @@ class MIBI_TSAI {
    document.getElementById('tile_'+tile+'_center_y').value=tsai.tiles[tile].fov.centerPointMicrons.y;
    tsai.tile_map_resize(tile);
    tsai.tile_pixels(tile);
-   tsai.json_summary(false);
-   tsai.draw_reset();
   }
   
   tile_map_resize(tile)
@@ -4568,7 +4565,7 @@ class MIBI_TSAI {
    tsai.action.mouse_down={};
    tsai.scratch.polygon=[];
    tsai.tiles_draw(tsai.canvas.draw_context, []);
-   tsai.draw_clear(tsai.canvas.prerender.context);
+   tsai.draw_clear(tsai.canvas.prerender_context);
    tsai.canvas.prerender_context.drawImage(tsai.canvas.draw, 0, 0);
    tsai.tiles[tile].fov.name='';
    tsai.tiles[tile].original={fov: JSON.stringify(tsai.tiles[tile].fov), map: JSON.stringify(tsai.tiles[tile].map)};

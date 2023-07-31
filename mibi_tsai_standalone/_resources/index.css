@@ -87,7 +87,7 @@ body                                                                    {overflo
 #_layout_main #tile_labels table tr td:first-child                      {padding:2px 8px 2px 0px;}
 #_layout_main #tile_labels table tr td span                             {font-size:1.6rem; background-color:#eee; padding:2px 5px 2px 5px; border-radius:5px; text-align:left; display:block; white-space:nowrap; cursor:pointer;}
 
-#_layout_main td.slide_bar                                              {width:fit-content;}
+#_layout_main td.slide_bar                                              {width:fit-content; white-space:nowrap;}
 #_layout_main h2.slide_options                                          {cursor:pointer;}
 #_layout_main div.slide_options                                         {padding:5px 0px 20px 30px;}
 #_layout_main table.slide_options tr td                                 {padding:0px;}
