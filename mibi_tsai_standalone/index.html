@@ -75,14 +75,14 @@
      <li>Click the button below to copy the code to the clipboard.
       <br/><input type="button" class="_layout_blue" value="Copy automatic coregistration code to clipboard" onclick="tsai.optical_automatic_code();"/>
      </li>
-     <li>In the MIBI Run interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
+     <li>In the MIBIcontrol interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
      <li>Paste <span class="keyboard">Ctrl+V</span> the code into the Console and press <span class="keyboard">Enter</span>. Open the link generated in the console.</li>
 
      <!-- ##########  MANUAL COREGISTRATION  ########## -->
      <li><span id="optical_manual_toggle" onclick="tsai.element_toggle(this);"><span class="b">[+]</span> <span class="optional">Not recommended</span> <a href="javascript:void(0);">Manual coregistration</a></span>
       <div style="display:none;">
        <ol>
-        <li>The automatic coregistration above infers the MIBI's optical-to-stage motor coregistration formulas. But when the MIBI's formulas are incorrect, then automatic coregistration will also be incorrect. The procedure below corrects the coregistration for this web page but not for the MIBI Run interface.</li>
+        <li>The automatic coregistration above infers the MIBI's optical-to-stage motor coregistration formulas. But when the MIBI's formulas are incorrect, then automatic coregistration will also be incorrect. The procedure below corrects the coregistration for this web page but not for the MIBIcontrol interface.</li>
         <li>Contact Ionpath to correct the MIBI's optical-to-stage motor coregistration and it should usually be fixed within an hour.</li>
         <li>If you insist on kludging it yourself, click the button below to copy the code to the clipboard.
          <br/><input type="button" class="_layout_blue" value="Copy manual coregistration code to clipboard" onclick="tsai.optical_manual_code();"/>
@@ -205,7 +205,7 @@
      </li>
      <li>Click the button below to copy the SED code to the clipboard.
       <br/><input type="button" class="_layout_blue" value="Copy SED scan and shift correction code to clipboard" onclick="tsai.sed_code();"/>
-     <li>In the MIBI Run interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
+     <li>In the MIBIcontrol interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
      <li>Paste <span class="keyboard">Ctrl+V</span> the code into the Console and press <span class="keyboard">Enter</span>.</li>
      <li>Switch to SED Mode, set the imaging mode to <span class="b">QC - 300 &micro;m</span>, adjust the gain, and focus the image.</li>
      <li><span id="sed_shift_toggle" onclick="tsai.element_toggle(this);"><span class="b">[+]</span> <span class="optional">If necessary</span> Determine the correction coefficients using the controls.</span>
@@ -595,11 +595,11 @@
    <h2 id="navigation_toggle" onclick="tsai.element_toggle(this);">[+] FOV Navigation/Adjustment</h2>
    <div id="navigation" style="display:none;">
     <ol>
-     <li><span class="recommended">Helpful for TMA</span> This adds controls for navigating/adjusting FOVs and saving SED images in the MIBI Run interface, particularly if SED tiling is unavailable (e.g., SED coefficients are inaccurate). Repositioning or changing the FOV size (&micro;m) can only be done on R1C1.</li>
+     <li><span class="recommended">Helpful for TMA</span> This adds controls for navigating/adjusting FOVs and saving SED images in the MIBIcontrol interface, particularly if SED tiling is unavailable (e.g., SED coefficients are inaccurate). Repositioning or changing the FOV size (&micro;m) can only be done on R1C1.</li>
      <li>Click the button below to copy the code to the clipboard.
       <br/><input id="navigation_code" type="button" onclick="tsai.navigation_code();" value="Copy FOV navigation code to clipboard" class="_layout_blue"/>
      </li>
-     <li>In the MIBI Run interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
+     <li>In the MIBIcontrol interface, type <span class="keyboard">Ctrl+Shift+J</span> to open the console.</li>
      <li>Paste <span class="keyboard">Ctrl+V</span> the code into the Console and press <span class="keyboard">Enter</span>.</li>
      <li>Paste the console output into the box below and click Adjust. Alternatively, drag and drop the adjustment output text file onto this page.
       <br/><textarea id="navigation_adjustments"></textarea>

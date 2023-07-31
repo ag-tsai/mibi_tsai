@@ -5440,7 +5440,7 @@ class MIBI_TSAI {
     +   '},'
     + ' import:'
     +  ' function()'
-    +  ' {if(!confirm(\'The current coordinates will be discarded and replaced with those in the MIBI run table. Are you sure?\')) return \'\';'
+    +  ' {if(!confirm(\'The current coordinates will be discarded and replaced with those in the MIBI FOV table. Are you sure?\')) return \'\';'
     +   ' this.current=[];'
     +   ' this.original=[];'
     +   ' var rows=document.getElementById(\'prerunFovs\').innerHTML.replace(/\\s*<!\\-\\-.*?\\-\\->\\s*/g, \'\').replace(/<\\\/t[dr]>\\s*/g, \'\').split(/\\s*<tr\\s.*?>\\s*/);'
