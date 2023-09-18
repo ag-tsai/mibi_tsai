@@ -897,7 +897,8 @@ class MIBI_TSAI {
      if(key=='sed') tsai.coregistration_set('sed', file.name, tsai.time_format(file.name.match(/(\d\d\d\d)\-(\d\d)\-(\d\d)\-(\d\d)(\d\d)(\d\d)/)).readable);
      tsai.images[key].loaded=true; // must be AFTER coregistration_set('sed' ...
      document.getElementById('json_image_save').style.display='';
-     tsai.image_tab(key, (tsai.images[key].img.naturalWidth>1500 || tsai.images[key].img.naturalHeight>1500)?0.5:1);
+     var pixels=Math.max(tsai.images[key].img.naturalWidth, tsai.images[key].img.naturalHeight);
+     tsai.image_tab(key, pixels>3000?0.25:pixels>2121?Math.sqrt(0.125):pixels>1500?0.5:1);
      setTimeout(()=>{tsai.draw_reset();}, 100); // I have no idea why I have to do this but otherwise tiles are drawn a few pixels off
   }}}
   
@@ -2244,8 +2245,8 @@ class MIBI_TSAI {
        column-=0.5;
        var top=tsai.coregistration_from_micron(tsai.image.transform,
         {x: x+fov*((row*(  tsai.coregistration.shift.x_y))+(column*(1+tsai.coregistration.shift.x_x))),
-         y: y-fov*((row*(1+tsai.coregistration.shift.y_y))+(column*(  tsai.coregistration.shift.y_x)))+(focus_site!='None' && focus_site.charAt(0)=='N'?110:0
-       )});
+         y: y-fov*((row*(1+tsai.coregistration.shift.y_y))+(column*(  tsai.coregistration.shift.y_x)))+(focus_site!='None' && focus_site.charAt(0)=='N'?110:0)
+       });
        context.font='normal normal normal '+tsai.canvas.slide_labels_size+'px "'+tsai.canvas.slide_labels_font+'"';
        context.fillStyle=color;
        context.fillText(tsai.tiles[tile].fov.name, top.x-tsai.image.crop, top.y-(0.3*tsai.canvas.slide_labels_size));
@@ -2983,8 +2984,7 @@ class MIBI_TSAI {
    if(!coregistered)
    {tsai.element_toggle_on('optical_toggle');
     tsai.coregistration_set('default', tsai.coregistration.default, '');
-    if(window.location.search.indexOf('?manual=')==0) tsai.json_warnings('<li>Optical image tile positions will not be accurate until coregistration is complete</li>');
-    else tsai.json_warnings('<li>Coregistration has not been performed or previously successful in this browser. Default values are loaded and optical image tile positions will not be accurate</li>');
+    tsai.json_warnings('<li>Coregistration has not been performed or previously successful in this browser. Default values are loaded and optical image tile positions will not be accurate</li>');
   }}
   
   /* ##########################################
