@@ -55,7 +55,7 @@
   <section id="_layout_main">
     <article>
 
-<h1>MIBI Tile/SED/Array Interface Standalone 2023.07.28</h1>
+<h1>MIBI Tile/SED/Array Interface Standalone 2024.08.28</h1>
 
 <table id="tiler">
  
@@ -406,6 +406,12 @@
    <div id="tiles_scroll">
     <div id="tiles">
     </div>
+    <!-- ##########  TILE CHECK  ########## -->
+    <div id="tile_check" style="display:none;">
+     <input type="button" value="Check All"   onclick="tsai.tile_check(true);"/>
+     <input type="button" value="Uncheck All" onclick="tsai.tile_check(false);"/>
+    </div>
+    
     <!-- ##########  POLYGON  ########## -->
     <div id="tile_polygon" style="display:none;">
      <div><span onclick="tsai.polygon_close();">Close [&times;]</span></div>
@@ -649,6 +655,12 @@
         <td><input id="json_group_tile" name="json_group" type="radio" onchange="tsai.json_radio(this.id);"/></td>
         <td><label for="json_group_tile">Group FOVs by tile</label></td>
        </tr>
+       <tr id="json_group_fovs_row">
+        <td><input id="json_group_fovs" name="json_group" type="radio" onchange="tsai.json_radio(this.id);"/></td>
+        <td><label for="json_group_fovs">Group by every</label>
+         <input id="json_group_number" type="text" value="20" onchange="tsai.json_radio('json_group_fovs');"/> <label for="json_group_fovs">sequential FOVs</label>
+        </td>
+       </tr>
        <tr id="json_group_autofocus_row" style="display:none;">
         <td><input id="json_group_autofocus" name="json_group" type="radio" onchange="tsai.json_radio(this.id);"/></td>
         <td><label for="json_group_autofocus">Group FOVs by closest autofocus</label></td>
@@ -664,15 +676,15 @@
        </tr>
        <tr>
         <td><input id="json_split_fovs" name="json_split" type="radio" onchange="tsai.json_radio('json_split_fovs');" onclick="document.getElementById('json_split_number').select();"/></td>
-        <td><label for="json_split_fovs">Split by every </label>
-         <input id="json_split_number" type="text" value="80" onchange="tsai.json_radio('json_split_fovs');"/><label for="json_split_fovs"> FOVs</label>
+        <td><label for="json_split_fovs">Split by every</label>
+         <input id="json_split_number" type="text" value="80" onchange="tsai.json_radio('json_split_fovs');"/> <label for="json_split_fovs">FOVs</label>
         </td>
        </tr>
        <tr>
         <td><input id="json_split_time" name="json_split" type="radio" onchange="tsai.json_radio('json_split_time');" onclick="document.getElementById('json_split_hours').select();"/></td>
-        <td><label for="json_split_time">Split by every </label>
-         <input id="json_split_hours"   type="text" value="8" onchange="tsai.json_radio('json_split_time');"/><label for="json_split_time"> hours</label>
-         <input id="json_split_minutes" type="text" value="0" onchange="tsai.json_radio('json_split_time');"/><label for="json_split_time"> minutes</label>
+        <td><label for="json_split_time">Split by every</label>
+         <input id="json_split_hours"   type="text" value="8" onchange="tsai.json_radio('json_split_time');"/> <label for="json_split_time">hours</label>
+         <input id="json_split_minutes" type="text" value="0" onchange="tsai.json_radio('json_split_time');"/> <label for="json_split_time">minutes</label>
         </td>
        </tr>
       </table>
