@@ -1142,6 +1142,7 @@ class MIBI_TSAI {
       tsai.scratch.shift={}; // clear scratch.shift so not used in import_action
       tsai.json.original=json;
       tsai.tiles_write(0);
+      document.getElementById('tile_check').style.display='';
       tsai.action_clear(true);
       tsai.json_summary(false);
       tsai.json_lists(true, true);
@@ -1530,21 +1531,27 @@ class MIBI_TSAI {
    {document.getElementById('json_group_none_row').style.display='';
     document.getElementById('json_group_autofocus_row').style.display='none';  // if resume, do not allow regrouping by autofocus
     if(document.getElementById('json_group_autofocus').checked) document.getElementById('json_group_none').click();
-    if(!autofocus || autofocus_remove) document.getElementById('json_group_tile_row').style.display=''; // if resume, allow regrouping by tile if no autofocus
+    if(!autofocus || autofocus_remove)
+    {document.getElementById('json_group_tile_row').style.display=''; // if resume, allow regrouping by tile or fovs if no autofocus
+     document.getElementById('json_group_fovs_row').style.display='';
+    }
     else
     {document.getElementById('json_group_none').click();
      document.getElementById('json_group_tile_row').style.display='None';
+     document.getElementById('json_group_fovs_row').style.display='None';
    }}
    else
    {if(!autofocus || autofocus_remove) // if no autofocus or if autofocus removed
     {document.getElementById('json_group_none_row').style.display='';
-     document.getElementById('json_group_tile_row').style.display=''; // allow grouping by tile
+     document.getElementById('json_group_tile_row').style.display=''; // allow grouping by tile or fovs
+     document.getElementById('json_group_fovs_row').style.display='';
      document.getElementById('json_group_autofocus_row').style.display='none';
      if(document.getElementById('json_group_autofocus').checked) document.getElementById('json_group_none').click(); // remove grouping by autofocus
     }
     else // autofocus present and not removed
     {document.getElementById('json_group_none_row').style.display='none';
      document.getElementById('json_group_tile_row').style.display='none';
+     document.getElementById('json_group_fovs_row').style.display='none';
      document.getElementById('json_group_autofocus_row').style.display=''; // allow grouping by autofocus, not grouping fovs runs the autofocus points sequentially
      if(!document.getElementById('json_group_autofocus').checked) document.getElementById('json_group_autofocus').click(); // remove grouping by tile as autofocus will not be in correct order
   }}}
@@ -1588,9 +1595,9 @@ class MIBI_TSAI {
    tsai.json_options(resume, autofocus); // fix options based upon resume, autofocus, and autofocus_remove
    // build list.sequential and list.random
    if(resume!=-1 || !autofocus || autofocus_remove)
-   {tsai.json.list.random=(document.getElementById('json_group_none').checked?tsai.json_random(tsai.copy_fovs_build(list), 0, list.length) // randomize all fovs
-     :tsai.json.list.random=tsai.json_group_tile_random(list) // randomize tile order, sort by tile, randomize within tiles
-    );
+   {if(     document.getElementById('json_group_fovs').checked) tsai.json.list.random=tsai.json_group_fovs_random(list); // group by number of fovs, randomize within groups
+    else if(document.getElementById('json_group_tile').checked) tsai.json.list.random=tsai.json_group_tile_random(list); // randomize tile order, sort by tile, randomize within tiles
+    else                                                        tsai.json.list.random=tsai.json_random(tsai.copy_fovs_build(list), 0, list.length); // randomize all fovs
     start =(resume!=-1?resume:0);
     prefix=(resume!=-1?' Resume ':' ');
     suffix=(resume!=-1?'_resumed':'');
@@ -1652,6 +1659,22 @@ class MIBI_TSAI {
    for(var item=0; item<random.length; item++)
    {if('standardTarget' in random[item].fov && random[item].fov.standardTarget=='Molybdenum Foil') random[item].group=-1;
     else random[item].group=remap[random[item].tile]; // remap tiles to random groups
+   }
+   return tsai.json_random_groups(random.sort(tsai.json_sort)); // sort by groups, Array.sort is stable (preserves original order)
+  }
+  
+  json_group_fovs_random(list)
+  {var number=parseInt(document.getElementById('json_group_number').value);
+   if(isNaN(number) || number<5)
+   {alert('Group FOV number is invalid, must be ≥5.');
+    document.getElementById('json_group_number').value=20;
+    number=20;
+   }
+   document.getElementById('json_split_number').value=number;
+   var random=tsai.copy_fovs_build(list);
+   for(var item=0; item<random.length; item++)
+   {if('standardTarget' in random[item].fov && random[item].fov.standardTarget=='Molybdenum Foil') random[item].group=-1;
+    else random[item].group=Math.floor(item/number); // remap tiles to random groups
    }
    return tsai.json_random_groups(random.sort(tsai.json_sort)); // sort by groups, Array.sort is stable (preserves original order)
   }
@@ -2332,7 +2355,14 @@ class MIBI_TSAI {
    {tsai.tiles[tile].active=false;
     tsai.tile_hover(tile, false);
   }}
-  
+
+  tile_check(all)
+  {if(!tsai.menus_close()) return;
+   for(var tile=0; tile<tsai.tiles.length; tile++)
+   {if(document.getElementById('tile_'+tile+'_active'))
+    {if((document.getElementById('tile_'+tile+'_active').checked ^ all)) document.getElementById('tile_'+tile+'_active').click(); // ^ = xor
+  }}}
+    
   /* ###########################################
      ##########  TILE WRITE CONTROLS  ##########
      ########################################### */
@@ -4519,27 +4549,28 @@ class MIBI_TSAI {
   }
   
   polygon_tile()
-  {tsai.scratch.polygon.push({x: tsai.scratch.polygon[0].x, y: tsai.scratch.polygon[0].y});
-   var minimum=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[0]);
-   var maximum=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[0]);
-   var scratch_polygon_length_minus_1=tsai.scratch.polygon.length-1;
-   for(var index=1; index<scratch_polygon_length_minus_1; index++)
-   {var micron=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[index]);
-    if(minimum.x>micron.x) minimum.x=micron.x;
-    if(maximum.x<micron.x) maximum.x=micron.x;
-    if(minimum.y>micron.y) minimum.y=micron.y;
-    if(maximum.y<micron.y) maximum.y=micron.y;
-   }
+  {tsai.scratch.polygon.push({x: tsai.scratch.polygon[0].x, y: tsai.scratch.polygon[0].y}); // close polygon
+   var scratch_polygon_length=tsai.scratch.polygon.length;
+   var vertices=[]; // polygon in micron coordinatese
+   var minimum;
+   var maximum;
+   for(var index=0; index<scratch_polygon_length; index++)
+   {var vertex=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[index]);
+    vertices.push([vertex.x, vertex.y]);
+    if(index==0)
+    {minimum={x: vertex.x, y:vertex.y};
+     maximum={x: vertex.x, y:vertex.y};
+    }
+    else
+    {if(minimum.x>vertex.x) minimum.x=vertex.x;
+     if(maximum.x<vertex.x) maximum.x=vertex.x;
+     if(minimum.y>vertex.y) minimum.y=vertex.y;
+     if(maximum.y<vertex.y) maximum.y=vertex.y;
+   }}
    minimum=tsai.coregistration_from_micron(tsai.image.transform, minimum);
    maximum=tsai.coregistration_from_micron(tsai.image.transform, maximum);
    // doing conversion and conversion back because cannot assume that optical coordinate minimum always corresponds to micron coordinate minimum
    tsai.duplicate_tile(tsai.action.item, minimum, maximum);
-   var vertices=[];
-   var scratch_polygon_length=scratch_polygon_length_minus_1+1;
-   for(var index=0; index<scratch_polygon_length; index++)
-   {var vertex=tsai.coregistration_to_micron(tsai.image.transform, tsai.scratch.polygon[index]);
-    vertices.push([vertex.x, vertex.y]);
-   }
    var vertices_plus=tsai.copy_array(vertices);
    if(vertices_plus.length>2) vertices_plus.push(vertices_plus[0]); // used in loop to look for line intersections
    var tile=tsai.tiles.length-1;
@@ -4552,8 +4583,17 @@ class MIBI_TSAI {
    var columns=tsai.tiles[tile].map[0].length;
    for(var row=0; row<rows; row++)
    {for(var column=0; column<columns; column++)
-    {var x=x_origin+(fov*column);
-     var y=y_origin-(fov*row   );
+    {var x=Math.round(x_origin+fov*((column*(1+tsai.coregistration.shift.x_x))+(row   *tsai.coregistration.shift.x_y)));
+     var y=Math.round(y_origin-fov*((row   *(1+tsai.coregistration.shift.y_y))+(column*tsai.coregistration.shift.y_x)));
+     /*
+     if tsai.scratch.shift is not set, need to add this code:
+     if('x_x' in tsai.scratch.shift && typeof tsai.scratch.shift.x_x!='undefined')
+     {...}
+     else
+     {var x=x_origin+(fov*column);
+      var y=y_origin-(fov*row   );
+     }
+     */
      if(tsai.polygon_in([x, y], vertices) || tsai.polygon_intersects(x, y, fov_half, vertices_plus))
      {tsai.tiles[tile].map[row][column]=1;
       document.getElementById('tile_'+tile+'_map_'+row+'_'+column).checked=true;
