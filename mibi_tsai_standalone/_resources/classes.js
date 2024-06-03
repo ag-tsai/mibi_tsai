@@ -820,7 +820,7 @@ class MIBI_TSAI {
    tsai.tma.labels=[];
    var b='';
    var columns=0;
-   var rows=textarea.value.split('\n');
+   var rows=textarea.value.replace(/\s+$/, '').split('\n');
    for(var row=0; row<rows.length; row++)
    {tsai.tma.labels.push([]);
     b+='\n<tr><td>'+(row+1)+'</td>';
@@ -833,7 +833,7 @@ class MIBI_TSAI {
      }
      else
      {tsai.tma.labels[row].push(cells[cell].replace('\\n', ' ').replace(/\s+/g, ' ').trim());
-      b+='<td><span onclick="tsai.tile_labels_select('+row+', '+cell+');">'+cells[cell].trim().replace('<', '&lt;').replace('>', '&gt;').replace('\\n', '<br/>')+'</span></td>';
+      b+='<td><span onclick="tsai.labels_select('+row+', '+cell+');">'+cells[cell].trim().replace('<', '&lt;').replace('>', '&gt;').replace('\\n', '<br/>')+'</span></td>';
     }}
     b+='</tr>';
    }
@@ -841,7 +841,7 @@ class MIBI_TSAI {
    var header='\n <tr><td>&nbsp;</td>';
    for(var column=0; column<columns; column++) header+='<td>'+(column+1)+'</td>';
    header+='</tr>';
-   document.getElementById('tile_labels').innerHTML='<div><span onclick="tsai.tile_labels_close();">Close [&times;]</span></div>\n<table>'+header+b;
+   document.getElementById('tile_labels').innerHTML='<div><span onclick="tsai.labels_close();">Close [&times;]</span></div>\n<table>'+header+b;
   }
   
   labels_build(tile)
@@ -899,7 +899,7 @@ class MIBI_TSAI {
      document.getElementById('json_image_save').style.display='';
      var pixels=Math.max(tsai.images[key].img.naturalWidth, tsai.images[key].img.naturalHeight);
      tsai.image_tab(key, pixels>3000?0.25:pixels>2121?Math.sqrt(0.125):pixels>1500?0.5:1);
-     setTimeout(()=>{tsai.draw_reset();}, 100); // I have no idea why I have to do this but otherwise tiles are drawn a few pixels off
+     setTimeout(()=>{tsai.draw_reset();}, 200); // I have no idea why I have to do this but otherwise tiles are drawn a few pixels off
   }}}
   
   /* ##########  IMAGE TAB (ZOOM/SCALE)  ########## */
@@ -4351,9 +4351,11 @@ class MIBI_TSAI {
      {tsai.tiles[tile_new].map[row]=[];
       for(var column=0; column<columns; column++) tsai.tiles[tile_new].map[row][column]=1;
    }}}
+   tsai.tiles[tile_new].fov.name='Tile_'+(tile_new+1);
    tsai.tiles_write(tile_new);
    tsai.tiles[tile_new].original={fov: JSON.stringify(tsai.tiles[tile_new].fov), map: JSON.stringify(tsai.tiles[tile_new].map)};
    document.getElementById('tile_'+tile_new+'_name').focus();
+   document.getElementById('tile_'+tile_new+'_name').select();
   }
   
   /* ###############################
@@ -4607,11 +4609,12 @@ class MIBI_TSAI {
    tsai.tiles_draw(tsai.canvas.draw_context, []);
    tsai.draw_clear(tsai.canvas.prerender_context);
    tsai.canvas.prerender_context.drawImage(tsai.canvas.draw, 0, 0);
-   tsai.tiles[tile].fov.name='';
+   tsai.tiles[tile].fov.name='Tile_'+(tile+1);
    tsai.tiles[tile].original={fov: JSON.stringify(tsai.tiles[tile].fov), map: JSON.stringify(tsai.tiles[tile].map)};
    tsai.tile_expand(tile);
-   document.getElementById('tile_'+tile+'_name').value='';
-   document.getElementById('tile_'+tile+'_name').focus();
+   document.getElementById('tile_'+tile+'_name').value=tsai.tiles[tile].fov.name;
+   document.getElementById('tile_'+tile+'_name').select();
+   tsai.labels_close();
   }
   
   /* ###########################
