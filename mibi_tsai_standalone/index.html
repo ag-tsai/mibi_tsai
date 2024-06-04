@@ -186,18 +186,18 @@
       ################################# -->
  <tr>
   <td id="sed" colspan="2">
-   <h2 id="sed_toggle" onclick="tsai.element_toggle(this);">[+] SED Tiler</h2>
+   <h2 id="sed_toggle" onclick="if(tsai.element_toggle(this)) tsai.sed_coordinates(0);">[+] SED Tiler</h2>
    <div style="display:none;">
     <ol>
      <li>Click a box in each row below and click on the optical image to select corner points for the full SED image.
       <table>
        <tr>
-        <td><input name="action_radio" id="sed_coordinates_0" type="radio" onclick="return tsai.sed_coordinates(0);"/></td>
+        <td><input name="action_radio" id="sed_coordinates_0" type="radio" onclick="tsai.sed_coordinates(0);"/></td>
         <td>x</td><td><input id="sed_coordinates_0_x" type="text" onfocus="tsai.sed_coordinates(0);" onchange="tsai.sed_coordinates(0);"/></td>
         <td>y</td><td><input id="sed_coordinates_0_y" type="text" onfocus="tsai.sed_coordinates(0);" onchange="tsai.sed_coordinates(0);"/></td>
        </tr>
        <tr>
-        <td><input name="action_radio" id="sed_coordinates_1" type="radio" onclick="return tsai.sed_coordinates(1);"/></td>
+        <td><input name="action_radio" id="sed_coordinates_1" type="radio" onclick="tsai.sed_coordinates(1);"/></td>
         <td>x</td><td><input id="sed_coordinates_1_x" type="text" onfocus="tsai.sed_coordinates(1);" onchange="tsai.sed_coordinates(1);"/></td>
         <td>y</td><td><input id="sed_coordinates_1_y" type="text" onfocus="tsai.sed_coordinates(1);" onchange="tsai.sed_coordinates(1);"/></td>
        </tr>
