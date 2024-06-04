@@ -200,7 +200,7 @@ class MIBI_TSAI {
    slide_labels_size:     18,        // default tile label font size
    slide_focus_circles:   false,     // draw autofocus circles
    line_thickness:        2,         // default line thickness
-   line_circle:           5,         // default detection radius for closing polygon and expanding tma
+   line_circle:           5,         // default detection radius for sed tiler, closing polygon, and expanding tma
    line_color:            '#ffffff', // default line color
    line_colors:           [],        // list of background/line colors and accompanying text colors for tiles
    hover_line_opacity:    0.18,      // hovered tile line opacity
@@ -468,9 +468,14 @@ class MIBI_TSAI {
   
   /* ##########  TOGGLE  ########## */
   element_toggle(element)
-  {if((typeof element=='object'?element:document.getElementById(element)).innerHTML.replace(/<.+?>/g, '').includes('[+]')) tsai.element_toggle_on(element);
-   else tsai.element_toggle_off(element);
-  }
+  {if((typeof element=='object'?element:document.getElementById(element)).innerHTML.replace(/<.+?>/g, '').includes('[+]'))
+   {tsai.element_toggle_on(element);
+    return true;
+   }
+   else
+   {tsai.element_toggle_off(element);
+    return false;
+  }}
   
   element_toggle_on(element)
   {var object=(typeof element=='object'?element:document.getElementById(element));
@@ -3964,8 +3969,24 @@ class MIBI_TSAI {
   
   sed_action(type, event, position)
   {if(!tsai.images.optical.loaded || !tsai.menus_close()) return;
+   var micron_0={x: parseFloat(document.getElementById('sed_coordinates_0_x').value), y: parseFloat(document.getElementById('sed_coordinates_0_y').value)};
+   var micron_1={x: parseFloat(document.getElementById('sed_coordinates_1_x').value), y: parseFloat(document.getElementById('sed_coordinates_1_y').value)};
    switch(type)
-   {case 'mousemove': if(!tsai.action.mouse_dragged) break; // NO forced break; only continue to draw if mousedown and dragged
+   {case 'mousemove':
+     var near_crosshair=false;
+     if(!isNaN(micron_1.x) && !isNaN(micron_1.y))
+     {var pixel=tsai.coregistration_from_micron(tsai.image.transform, micron_1);
+      if(Math.pow(position.x-pixel.x, 2)+Math.pow(position.y-pixel.y, 2)<=Math.pow(tsai.canvas.line_circle, 2)) near_crosshair=true;
+     }
+     if(!isNaN(micron_0.x) && !isNaN(micron_0.y))
+     {var pixel=tsai.coregistration_from_micron(tsai.image.transform, micron_0);
+      if(Math.pow(position.x-pixel.x, 2)+Math.pow(position.y-pixel.y, 2)<=Math.pow(tsai.canvas.line_circle, 2)) near_crosshair=true;
+     }
+     if(near_crosshair && !tsai.action.mouse_dragged) tsai.canvas.draw.style.cursor='grab';
+     else if(tsai.action.mouse_dragged) tsai.canvas.draw.style.cursor='none';
+     else tsai.canvas.draw.style.cursor='var(--crosshair)';
+     if(!tsai.action.mouse_dragged) break; // NO forced break; only continue to draw if mousedown and dragged
+     else if(!isNaN(micron_0.x) && !isNaN(micron_0.y) && (isNaN(micron_1.x) || isNaN(micron_1.y))) tsai.sed_coordinates(1);
     case 'mouseup':
      var micron=tsai.coregistration_to_micron(tsai.image.transform, position);
      tsai.coordinates.sed[tsai.action.item][0]=micron.x;
@@ -3976,8 +3997,18 @@ class MIBI_TSAI {
      tsai.sed_coordinates_draw();
      if(type!='mousemove') tsai.canvas.draw.style.cursor='var(--crosshair)';
      break;
-    case 'mouseover': tsai.canvas.draw.style.cursor='var(--crosshair)'; break;
-    case 'mousedown': tsai.canvas.draw.style.cursor='none'; break;
+    case 'mouseover': break;
+    case 'mousedown':
+     if(!isNaN(micron_1.x) && !isNaN(micron_1.y))
+     {var pixel=tsai.coregistration_from_micron(tsai.image.transform, micron_1);
+      if(Math.pow(Math.abs(position.x-pixel.x), 2)+Math.pow(Math.abs(position.y-pixel.y), 2)<=Math.pow(tsai.canvas.line_circle, 2)) tsai.sed_coordinates(1);
+      else
+      {if(!isNaN(micron_0.x) && !isNaN(micron_0.y))
+       {pixel=tsai.coregistration_from_micron(tsai.image.transform, micron_0);
+        if(Math.pow(Math.abs(position.x-pixel.x), 2)+Math.pow(Math.abs(position.y-pixel.y), 2)<=Math.pow(tsai.canvas.line_circle, 2)) tsai.sed_coordinates(0);
+     }}}
+     tsai.canvas.draw.style.cursor='none';
+     break;
     case 'keydown':
      switch(event.code)
      {case 'KeyA':
@@ -4484,7 +4515,7 @@ class MIBI_TSAI {
       tsai.draw_clear(tsai.canvas.prerender_context);
       tsai.canvas.prerender_context.drawImage(tsai.canvas.draw, 0, 0);
      }
-     else if(Math.pow(Math.abs(position.x-tsai.scratch.polygon[0].x), 2)+Math.pow(position.y-Math.abs(tsai.scratch.polygon[0].y), 2)>Math.pow(tsai.canvas.line_circle, 2)) // outside radius of first point
+     else if(Math.pow(position.x-tsai.scratch.polygon[0].x, 2)+Math.pow(position.y-tsai.scratch.polygon[0].y, 2)>Math.pow(tsai.canvas.line_circle, 2)) // outside radius of first point
      {if(tsai.scratch.polygon[tsai.scratch.polygon.length-1].x!=position.x && tsai.scratch.polygon[tsai.scratch.polygon.length-1].y!=position.y)
       {tsai.scratch.polygon.push({x: position.x, y: position.y}); // use {x: position.x, y: position.y} because behavior of pointer to position uncertain
        tsai.draw_clear(tsai.canvas.draw_context);
