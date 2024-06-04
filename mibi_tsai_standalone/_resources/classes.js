@@ -4382,6 +4382,7 @@ class MIBI_TSAI {
      {tsai.tiles[tile_new].map[row]=[];
       for(var column=0; column<columns; column++) tsai.tiles[tile_new].map[row][column]=1;
    }}}
+   tsai.tiles[tile_new].active=true;
    tsai.tiles[tile_new].fov.name='Tile_'+(tile_new+1);
    tsai.tiles_write(tile_new);
    tsai.tiles[tile_new].original={fov: JSON.stringify(tsai.tiles[tile_new].fov), map: JSON.stringify(tsai.tiles[tile_new].map)};
@@ -4640,7 +4641,6 @@ class MIBI_TSAI {
    tsai.tiles_draw(tsai.canvas.draw_context, []);
    tsai.draw_clear(tsai.canvas.prerender_context);
    tsai.canvas.prerender_context.drawImage(tsai.canvas.draw, 0, 0);
-   tsai.tiles[tile].fov.name='Tile_'+(tile+1);
    tsai.tiles[tile].original={fov: JSON.stringify(tsai.tiles[tile].fov), map: JSON.stringify(tsai.tiles[tile].map)};
    tsai.tile_expand(tile);
    document.getElementById('tile_'+tile+'_name').value=tsai.tiles[tile].fov.name;
