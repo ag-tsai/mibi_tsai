@@ -4884,7 +4884,7 @@ class MIBI_TSAI {
      else tile=tsai.tiles.push(JSON.parse(tile_string))-1;
      if(label_map)
      {if(tsai.tma.labels.length<=row || tsai.tma.labels[row].length <=column ||  tsai.tma.labels[row][column].trim()=='') tsai.tiles[tile].fov.name=label_prepend+'R'+(tsai.tma.row_start+row)+'C'+(tsai.tma.column_start+column);
-      else if(label_row_column) tsai.tiles[tile].fov.name=label_prepend+'R'+(tsai.tma.row_start+row)+'C'+(tsai.tma.column_start+column)+' '+tsai.tma.labels[row][column].trim();
+      else if(label_row_column) tsai.tiles[tile].fov.name=label_prepend+'R'+(tsai.tma.row_start+row)+'C'+(tsai.tma.column_start+column)+'_'+tsai.tma.labels[row][column].trim();
       else tsai.tiles[tile].fov.name=label_prepend+tsai.tma.labels[row][column].trim();
      }
      else tsai.tiles[tile].fov.name=label_prepend+'R'+(tsai.tma.row_start+row)+'C'+(tsai.tma.column_start+column);
