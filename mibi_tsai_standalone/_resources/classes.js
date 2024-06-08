@@ -925,6 +925,8 @@ class MIBI_TSAI {
    tsai.image.img.style.height=height+'px';
    tsai.image.img.style.marginLeft=-tsai.image.crop+'px';
    tsai.image.img.style.filter='brightness('+tsai.image.brightness+') contrast('+tsai.image.contrast+')';
+   document.getElementById('slide_brightness').value=tsai.image.brightness;
+   document.getElementById('slide_contrast').value=tsai.image.contrast;
    tsai.canvas.div_image.style.width=width+'px';
    tsai.canvas.div_image.style.height=height+'px';
    width-=2*tsai.image.crop;
@@ -3660,7 +3662,7 @@ class MIBI_TSAI {
     +   ' this.filter_crement(0, 0);' // set brightness and contrast
     +   ' this.scan_rows'+'=Math.max(1, Math.ceil(Math.ceil(Math.abs(this.coordinates[1]-this.coordinates[3])/fov_microns_y)));'
     +   ' this.scan_columns=Math.max(1, Math.ceil(Math.ceil(Math.abs(this.coordinates[0]-this.coordinates[2])/fov_microns_x)));'
-    +   ' var start=[Math.floor(Math.min(this.coordinates[0], this.coordinates[2])+(fov_microns_y/2)), Math.ceil(Math.max(this.coordinates[1], this.coordinates[3])-(fov_microns_y/2))];'
+    +   ' var top_left=[Math.floor(Math.min(this.coordinates[0], this.coordinates[2])+(fov_microns_y/2)), Math.ceil(Math.max(this.coordinates[1], this.coordinates[3])-(fov_microns_y/2))];'
     +   ' var fov_pixels_y=parseInt(document.getElementById(\'selectFrame\').value.split(\':\')[1]);'
     +   ' var fov_pixels_x=Math.floor(fov_pixels_y*(1-x_crop_left-x_crop_right));'
     +   ' var width=Math.round(fov_pixels_x*this.scan_columns);'
@@ -3678,9 +3680,13 @@ class MIBI_TSAI {
           + 'width, height,' // original image width and height
           +' Math.round(((fov_pixels_y/2)-Math.round(fov_pixels_y*x_crop_left))*1000)/1000, fov_pixels_y/2,' // pixel center of top left tile x and y
           +' Math.round((width+(fov_pixels_y*x_crop_right)-(fov_pixels_y/2))*1000)/1000, Math.round((height-Math.round(fov_pixels_y/2))*1000)/1000,' // pixel center of bottom right tile x and y
-          +' start[0], start[1], 0, 0, 0, 0, 0, 0, this.shift[0], this.shift[1], this.shift[2], this.shift[3]];' // micron center of top left tile x and y, top right, bottom left, bottom right
+          +' top_left[0], top_left[1], 0, 0, 0, 0, 0, 0, this.shift[0], this.shift[1], this.shift[2], this.shift[3]];' // micron center of top left tile x and y, top right, bottom left, bottom right
     +    '}'
+    +   ' var time_estimate=(this.scan_queue.length==0?2.5*this.scan_rows*this.scan_columns:3*this.scan_queue.length);'
     +   ' var time_start=new Date();'
+    +   ' var time_end=new Date();'
+    +   ' time_end.setSeconds(time_end.getSeconds()+time_estimate);'
+    +   ' console.log(\'Estimated scan time \'+Math.floor(time_estimate/60)+\' minutes\'+(time_estimate%60==0?\'\':\', \'+Math.round(time_estimate%60)+\' seconds\')+\'\\nEstimated end \'+time_end.toLocaleTimeString().replace(/\\:\\d\\d\\s/, \' \'));'
     +   ' var index=0;'
     +   ' var last=[-8, -8];'
     +   ' for(var row=0; row<this.scan_rows; row++)'
@@ -3691,8 +3697,8 @@ class MIBI_TSAI {
     +    ' for(var column=0; column<this.scan_columns; column++)'
     +    ' {if(this.stop) break;'
     +     ' if(this.scan_queue.length>0 && !this.scan_queue.includes(row+\',\'+column)) continue;' // check scan queue
-    +     ' var x=parseInt(start[0]+((fov_microns_x*column*(1+this.shift[0]))+(this.shift[1]*row*fov_microns_y)));'
-    +     ' var y=parseInt(start[1]-((fov_microns_y*row*(1+this.shift[3]))+(this.shift[2]*column*fov_microns_x)));'
+    +     ' var x=parseInt(top_left[0]+((fov_microns_x*column*(1+this.shift[0]))+(this.shift[1]*row*fov_microns_y)));'
+    +     ' var y=parseInt(top_left[1]-((fov_microns_y*row*(1+this.shift[3]))+(this.shift[2]*column*fov_microns_x)));'
     +     ' if(this.scan_queue.length==0)'
     +     ' {if(column==0 && row==this.scan_rows-1) {this.scan_corners[10]=x; this.scan_corners[11]=y;}' // bottom left
     +     '  else if(column==this.scan_columns-1)'
@@ -3749,7 +3755,8 @@ class MIBI_TSAI {
     +     ' document.body.removeChild(anchor);'
     +    '});'
     +   ' this.scan_queue=[];'
-    +   ' console.log(\'Finished full SED: \'+(this.scan_rows*this.scan_columns)+\' FOVs, \'+fov_microns_x+\'×\'+fov_microns_y+\' μm at \'+(Math.round(fov_pixels_x*100)/100)+\'×\'+fov_pixels_y+\', \'+(Math.round(((new Date())-time_start)/100)/10)+\' seconds\\n\\n\');'
+    +   ' var time_actual=Math.round(((new Date())-time_start)/1000);'
+    +   ' console.log(\'Finished full SED: \'+(this.scan_rows*this.scan_columns)+\' FOVs, \'+fov_microns_x+\'×\'+fov_microns_y+\' μm at \'+(Math.round(fov_pixels_x*100)/100)+\'×\'+fov_pixels_y+\', \'+(Math.floor(time_actual/60)+\' minutes\'+(time_actual%60==0?\'\':\', \'+Math.round(time_actual%60)+\' seconds\'))+\'\\n\\n\');'
     +   ' this.scanning=false;'
     +   '},'
     +   tsai.navigation_code_sed_save()
