@@ -20,7 +20,7 @@
      scratch              : tiles, polygon***, polygons, polygons_revert, corners, shift***
      coordinates          : optical, import, sed, crosshair, line_color_default, line_thickness, line_opacity, line_colors
     Body onload           : onload***
-    General               : cookie_set, cookie_get, copy_array, time_pad, time_format, element_position***, element_toggle, element_toggle_on, element_toggle_off, menus_close
+    General               : cookie_set, cookie_get, copy_array, time_pad, time_format, element_rect***, element_toggle, element_toggle_on, element_toggle_off, menus_close
     Matrix                : matrix_diagonal, matrix_identity, matrix_inverse, matrix_transpose, matrix_dot_matrix, matrix_dot_vector, matrix_perspective_coefficients***, matrix_perspective***, matrix_perspective_transform***, matrix_perspective_reverse***
     General action        : action_position***, action_event***, action_clear, action_prerender***
     Files                 : files_drop, files_append, files_drag_over, files_drag_leave, files_load***, files_sort***
@@ -335,6 +335,7 @@ class MIBI_TSAI {
    document        .addEventListener('dragenter', function(event) {event.stopPropagation(); event.preventDefault();}, false);
    document        .addEventListener('dragover' , function(event) {event.stopPropagation(); event.preventDefault();}, false);
    // miscellaneous cosmetic setup
+   tsai.version(tsai.mibi.version); // start up with default version
    tsai.tiles=tsai.json_load('{"exportDateTime": "'+tsai.time_format().json+'", "fovFormatVersion": "'+tsai.mibi.version+'", "fovs": []}');
    document.getElementById('labels_table'        ).style.width=(parseFloat(document.getElementById('tiles_scroll').getBoundingClientRect().right)-80)+'px';
    document.getElementById('slide_cursor_size'   ).value=tsai.canvas.cursor_size;
@@ -343,7 +344,6 @@ class MIBI_TSAI {
    document.getElementById('slide_tma_crosshair' ).value=tsai.tma.crosshair;
    document.getElementById('slide_labels'        ).checked=tsai.canvas.slide_labels;
    document.getElementById('slide_labels_size'   ).value=tsai.canvas.slide_labels_size;
-   tsai.version(tsai.mibi.version);
    tsai.draw_cursor();
    for(var index=0; index<4; index++)
    {for(var system=0; system<2; system++)
@@ -455,8 +455,27 @@ class MIBI_TSAI {
   }
   
   /* ##########  POSITIONING  ########## */
-  element_position(element)
-  {var left=0;
+  // getBoundingClientRect is relative to the viewport, need scrollX and scrollY to correct to page coordinates
+  
+  /* ##########  POSITIONING  ########## */
+  element_rect(element)
+  {if(!element) return {top:0, bottom:0, left:0, right:0, x:0, y:0, width:0, height:0, right_window: window.innerWidth, left_window: window.innerHeight};
+   var rect=element.getBoundingClientRect();
+   return {
+    top   : rect.top   +window.scrollY,
+    bottom: rect.bottom+window.scrollY,
+    left  : rect.left  +window.scrollX,
+    right : rect.right +window.scrollX,
+    x     : rect.x     +window.scrollX,
+    y     : rect.y     +window.scrollY,
+    width : rect.width,
+    height: rect.height,
+    // right_window : window.innerWidth -rect.right,
+    // bottom_window: window.innerHeight-rect.bottom
+   };
+  }
+   /*
+   var left=0;
    var top=0;
    if(element.offsetParent)
    {do
@@ -464,7 +483,8 @@ class MIBI_TSAI {
      top+=element.offsetTop;
     } while (element=element.offsetParent);
     return {top: top, left: left};
-  }}
+   }
+   */
   
   /* ##########  TOGGLE  ########## */
   element_toggle(element)
@@ -525,11 +545,22 @@ class MIBI_TSAI {
    return diagonal;
   }
   
+/*
   matrix_identity(length)
   {var identity=new Array(length);
    for(var row=0; row<length; row++)
    {identity[row]=new Array(length);
     for(var column=0; column<length; column++) identity[row][column]=(row==column?1:0);
+   }
+   return identity;
+  }
+*/
+  
+  matrix_identity(length)
+  {var identity=new Array(length);
+   for(var row=0; row<length; row++)
+   {identity[row]=new Array(length).fill(0);
+    identity[row][row]=1;
    }
    return identity;
   }
@@ -680,10 +711,10 @@ class MIBI_TSAI {
     case 'mousemove':
      if('x' in tsai.action.mouse_down && (position.x!=tsai.action.mouse_down.x || position.y!=tsai.action.mouse_down.y)) tsai.action.mouse_dragged=true;
      var microns=tsai.coregistration_to_micron(tsai.image.transform, position);
-     document.getElementById('slide_x_microns').value=Math.round(microns .x*100)/100;
-     document.getElementById('slide_y_microns').value=Math.round(microns .y*100)/100;
-     document.getElementById('slide_x_pixels' ).value=Math.round(position.x*100)/100;
-     document.getElementById('slide_y_pixels' ).value=Math.round(position.y*100)/100;
+     document.getElementById('slide_x_microns').value=Math.round(microns .x*1000)/1000;
+     document.getElementById('slide_y_microns').value=Math.round(microns .y*1000)/1000;
+     document.getElementById('slide_x_pixels' ).value=Math.round(position.x*1000)/1000;
+     document.getElementById('slide_y_pixels' ).value=Math.round(position.y*1000)/1000;
      break;
     case 'mouseout':
      tsai.action.mouse_down={};
@@ -859,17 +890,18 @@ class MIBI_TSAI {
    var div=document.getElementById('tile_labels');
    div.style.display='';
    div.style.top=0;
-   div.style.top=(tsai.element_position(name).top-tsai.element_position(div).top+name.offsetHeight+3)+'px';
+   div.style.top=(tsai.element_rect(name).top-tsai.element_rect(div).top+name.offsetHeight+3)+'px';
    div.style.left='8px';
   }
   
   labels_select(row, column)
-  {if(!tsai.menus_close()) return;
+  {if(!tsai.menus_close('labels')) return;
    var tile=parseInt(document.getElementById('labels_tile').value);
    if(!isNaN(tile))
    {var value=tsai.tma.labels[row][column];
     tsai.tiles[tile].fov.name=value;
     document.getElementById('tile_'+tile+'_name').value=value.replace('&lt;', '<').replace('&gt;', '>');
+    tsai.tile_hover(tile, false); // change name on canvas
   }}
   
   labels_close()
@@ -1123,6 +1155,10 @@ class MIBI_TSAI {
         {tsai.coregistration_load(); // if no coregistration_set, use last coregistration settings and load scratch.shift from tsai.coregistration.shift
          tsai.scratch.shift={x_x: tsai.coregistration.shift.x_x, x_y: tsai.coregistration.shift.x_y, y_x: tsai.coregistration.shift.y_x, y_y: tsai.coregistration.shift.y_y};
        }}
+       else if(tsai.images.optical.type=='json') // some prior json is loaded, but new json does not have coregistration -> do NOT use prior json coregistration or scratch.shift for current JSON
+       {tsai.coregistration_load();
+        tsai.scratch.shift={};
+       }
        var fovs=json.fovs.length;
        for(var index=0; index<fovs; index++) // must set tsai.json.slide_id before tsai.json_load()
        {var fov=json.fovs[index];
@@ -1138,10 +1174,6 @@ class MIBI_TSAI {
          }
          else if(!tsai.json.section_ids.includes(section_id)) tsai.json.section_ids.push(section_id);
       }}}
-      else if(tsai.images.optical.type=='json') // some prior json is loaded, but new json does not have coregistration -> do NOT use prior json coregistration or scratch.shift for current JSON
-      {tsai.coregistration_load();
-       tsai.scratch.shift={};
-      }
       tsai.json_warnings_clear();
       if(warnings!='') tsai.json_warnings(warnings);
       if(tsai.image.loaded) tsai.image_tab(tsai.image.key, tsai.image.scale);
@@ -1615,10 +1647,9 @@ class MIBI_TSAI {
     prefix=' Autofocus ';
     suffix='_autofocus';
    }
-   var b='<p><span class="optional">Optional</span> Rearranging FOVs is primarily intended for molybdenum foil FOVs. '
-    +'It is otherwise not recommended when autofocus FOVs are present (focus sites within parentheses). '
+   var b='<p><span class="optional">Optional</span> Drag and drop FOVs to the desired imaging order. '
     +'FOVs are colored by <span class="u">sorting group</span>, <span class="i">not</span> by tile. '
-    +'Autofocus/FOV order is not error-checked here.';
+    +'Rearranging FOVs is not recommended when autofocus FOVs are present (focus sites within parentheses) since autofocus/FOV order is not error-checked after rearrangement.';
    var colors=tsai.canvas.line_colors.length;
    for(var order=0; order<2; order++)
    {b+='<h4>'+['Sequential', 'Random'][order]+'</h4>\n<ul id="json_rearrange_'+(['sequential', 'random'][order])+'">';
@@ -4436,9 +4467,9 @@ class MIBI_TSAI {
    div.style.display='';
    div.style.top=0;
    div.style.left=0;
-   var div_position=tsai.element_position(div);
+   var div_position=tsai.element_rect(div);
    var tile_label=document.getElementById('tile_'+tile+'_polygon').nextElementSibling;
-   var tile_position=tsai.element_position(tile_label);
+   var tile_position=tsai.element_rect(tile_label);
    div.style.top=(tile_position.top-div_position.top+tile_label.offsetHeight+3)+'px';
    div.style.left=Math.max(10, tile_position.left+tile_label.getBoundingClientRect().width-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
   }
@@ -4683,9 +4714,9 @@ class MIBI_TSAI {
    div.style.display='';
    div.style.top=0;
    div.style.left=0;
-   var div_position=tsai.element_position(div);
+   var div_position=tsai.element_rect(div);
    var tile_label=document.getElementById('tile_'+tile+'_tma').nextElementSibling;
-   var tile_position=tsai.element_position(tile_label);
+   var tile_position=tsai.element_rect(tile_label);
    div.style.top=(tile_position.top-div_position.top+tile_label.offsetHeight+3)+'px';
    div.style.left=Math.max(10, tile_position.left+tile_label.getBoundingClientRect().width-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
   }
@@ -4933,7 +4964,7 @@ class MIBI_TSAI {
     items+=','+item;
     count++;
    }
-   if(count<=1) tsai.copy_close();
+   if(count==0) tsai.copy_close();
    else
    {document.getElementById('tile_copy_items').value=items.substring(1);
     document.getElementById('tile_copy_list').innerHTML=b;
@@ -4941,9 +4972,9 @@ class MIBI_TSAI {
     div.style.display='';
     div.style.top=0;
     div.style.left=0;
-    var div_position=tsai.element_position(div);
+    var div_position=tsai.element_rect(div);
     var tile_label=document.getElementById('tile_'+tile+'_copy').nextElementSibling;
-    var tile_position=tsai.element_position(tile_label);
+    var tile_position=tsai.element_rect(tile_label);
     div.style.top=(tile_position.top-div_position.top+tile_label.offsetHeight+3)+'px';
     div.style.left=Math.max(10, tile_position.left+tile_label.getBoundingClientRect().width-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
   }}
