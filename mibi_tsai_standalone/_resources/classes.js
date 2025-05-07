@@ -15,7 +15,7 @@
      action               : type***, item***, mouse_down, mouse_up, mouse_dragged, nudge_opt, nudge, nudge_shift
      tiles***             : [] -> {active, fov, map, original}
      image***, images*** {optical, sed, import} -> name, key***, img, type, crop, coordinates***, scale***, transform***, brightness, contrast, loaded
-     canvas               : draw***, draw_context***, prerender***, prerender_context***, div, optical_crop, optical_bounds {left, right, top, bottom}, cursor_size, cursor_opacity, cursor_color, slide_labels, slide_labels_font, slide_labels_size, line_thickness, line_circle, line_color, line_colors, hover_line_opacity, hover_fill_opacity
+     canvas               : draw***, draw_context***, prerender***, prerender_context***, div, optical_crop, optical_bounds {left, right, top, bottom}, cursor_size, cursor_opacity, cursor_color_optical, cursor_color_sed, slide_labels, slide_labels_font, slide_labels_size, line_thickness, line_circle, line_color, line_colors, hover_line_opacity, hover_fill_opacity
      tma                  : crosshair, line_opacity, labels, rows, columns, row_start, column_start, order, orders {tl0, tl1, tr0, tr1, br0, br1, bl0, bl}, points, corners, corner_adjust, corner_start, revert
      scratch              : tiles, polygon***, polygons, polygons_revert, corners, shift***
      coordinates          : optical, import, sed, crosshair, line_color_default, line_thickness, line_opacity, line_colors
@@ -28,7 +28,7 @@
     Image                 : image_load***, image_tab***, image_tab_reset, image_save
     JSON parse            : json_equal, json_equal_strict, json_parse_id, json_parse_preset, json_warnings, json_warnings_clear, json_read***, json_append, json_load***
     JSON build            : json_summary***, json_radio, json_fovs***, json_empty, json_resume, json_lists***, json_sort, json_random, json_random_groups, json_buttons, json_dragover, json_dragdrop, json_dragstart, json_dragbefore, json_split, json_split_fovs, json_split_time, json_time, json_export
-    Draw shapes           : draw_clear***, draw_line***, draw_rect, draw_cursor, draw_cursor_size, draw_cursor_color, draw_cursor_size_crement, draw_cursor_opacity, draw_cursor_opacity_crement, draw_line_thickness, draw_line_thickness_crement
+    Draw shapes           : draw_clear***, draw_line***, draw_rect, draw_cursor, draw_cursor_size, draw_cursor_color_optical, draw_cursor_color_sed, draw_cursor_size_crement, draw_cursor_opacity, draw_cursor_opacity_crement, draw_line_thickness, draw_line_thickness_crement
     Draw image            : draw_zoom, draw_zoom_crement, draw_filter, draw_filter_crement, draw_key, draw_reset***
     Tile draw general     : tile_fov_corners***, tile_draw_autofocus***, tile_draw_fov***, tiles_draw***, tile_draw***, draw_slide_labels, draw_slide_labels_size, draw_slide_labels_size_crement, draw_slide_focus_circles, tile_hover***, tile_hover_click
     Tile builder          : tiles_selects, tiles_builder, tiles_builder_slide_id, tiles_build
@@ -194,7 +194,8 @@ class MIBI_TSAI {
    optical_bounds:        {left: 0.32, right: 0.68, top: 0.25, bottom: 1}, // rough slide boundaries in percentages, only used for warning user if possibly imaging outside these boundaries
    cursor_size:           27,        // default cursor size
    cursor_opacity:        0.8,       // default cursor opacity
-   cursor_color:          '#fff',    // default cursor color
+   cursor_color_optical:  '#fff',    // default cursor color for optical images
+   cursor_color_sed:      '#000',    // default cursor color for sed images
    slide_labels:          true,      // draw FOV labels onto slide image
    slide_labels_font:     'Source Sans Pro', // default tile label font
    slide_labels_size:     18,        // default tile label font size
@@ -697,7 +698,7 @@ class MIBI_TSAI {
   {var canvas_rect=tsai.canvas.draw.getBoundingClientRect();
    return {x: event.clientX-canvas_rect.left+tsai.image.crop, y: event.clientY-canvas_rect.top};
   }
-  
+
   action_event(type, event)
   {var position=tsai.action_position(event);
    switch(type)
@@ -968,6 +969,7 @@ class MIBI_TSAI {
    tsai.canvas.prerender.height=height;
    tsai.canvas.div_slide.style.height=height+'px';
    tsai.canvas.div_slide.style.width=(width+17)+'px';
+   tsai.draw_cursor();
    // tsai.canvas.div_slide.style.width=(width+(window.innerHeight<height-80?17:0))+'px';
    tsai.image.scale=scale;
    Object.keys(tsai.images).forEach((image)=>{tsai.images[image].img.style.display=(image==key?'block':'none');});
@@ -1142,9 +1144,11 @@ class MIBI_TSAI {
       tsai.navigation_errors_clear();
       document.getElementById('navigation_adjustments').value='';
       document.getElementById('navigation_adjustments_output').innerHTML='';
-      if(('fovs' in json) && json.fovs.length>0)
-      {if(('notes' in json.fovs[0]) && json.fovs[0].notes!=null && json.fovs[0].notes.replace(/[^d]/g, '')!='' && json.fovs[0].notes.trim().replace(/[A-Za-z0-9\+=\/]/g, '')=='') // new json has possible coregistration in notes section
-       {if(tsai.coregistration_set('json', tsai.optical_from_base64(json.fovs[0].notes), '')) // coregistration_set will place shift into scratch.shift
+      // handle coregistration in notes section
+      var notes_first='';
+      if(('notes' in json.fovs[0]) && json.fovs[0].notes!=null) notes_first=json.fovs[0].notes;
+      if(notes_first.replace(/[^d]/g, '')!='' && notes_first.trim().replace(/[A-Za-z0-9\+=\/]/g, '')=='') // new json has possible coregistration in notes section
+      {if(tsai.coregistration_set('json', tsai.optical_from_base64(notes_first), '')) // coregistration_set will place shift into scratch.shift
         {if(!tsai.images.sed.loaded) tsai.coregistration.shift={x_x: tsai.scratch.shift.x_x, x_y: tsai.scratch.shift.x_y, y_x: tsai.scratch.shift.y_x, y_y: tsai.scratch.shift.y_y}; // sed image shift supercedes json shift
          for(var index=0; index<2; index++) // fill shift inputs
          {for(var axis=0; axis<2; axis++) document.getElementById('sed_shift_'+['x', 'y'][index]+'_'+['x', 'y'][axis]).value=tsai.coregistration.shift[['x', 'y'][index]+'_'+['x', 'y'][axis]];
@@ -1159,6 +1163,7 @@ class MIBI_TSAI {
        {tsai.coregistration_load();
         tsai.scratch.shift={};
        }
+       // get slideId and sectionIds
        var fovs=json.fovs.length;
        for(var index=0; index<fovs; index++) // must set tsai.json.slide_id before tsai.json_load()
        {var fov=json.fovs[index];
@@ -1173,7 +1178,7 @@ class MIBI_TSAI {
           if(tsai.json.section_ids.length>0) fov.sectionId=tsai.json.section_ids[0];
          }
          else if(!tsai.json.section_ids.includes(section_id)) tsai.json.section_ids.push(section_id);
-      }}}
+      }}
       tsai.json_warnings_clear();
       if(warnings!='') tsai.json_warnings(warnings);
       if(tsai.image.loaded) tsai.image_tab(tsai.image.key, tsai.image.scale);
@@ -1227,7 +1232,7 @@ class MIBI_TSAI {
    var fovs=JSON.parse(json_input).fovs;
    var fovs_length=fovs.length;
    for(var index=0; index<fovs_length; index++)
-   {var fov=JSON.parse(JSON.stringify(fovs[index])); // make a duplicate FOV for adjusting
+   {var fov=JSON.parse(JSON.stringify(fovs[index])); // duplicate the fov into an intermediary for editing/adjusting before adding to the fov list
     if(!('name' in fov)) fov.name='Tile_'+(index+1);
     var name_rows_columns=fov.name.match(/^(.*)_R(\d+)C(\d+)$/);
     if(name_rows_columns==null) tiles.push({fov: fov, map: [[1]]}); // not R#C# format
@@ -1299,7 +1304,7 @@ class MIBI_TSAI {
   /* ####################################
      ##########  JSON SUMMARY  ##########
      #################################### */
-  json_summary(return_minutes)
+  json_summary(return_time_readable)
   {var tile_names={};
    var tiles_length=tsai.tiles.length;
    for(var tile=0; tile<tiles_length; tile++)
@@ -1363,7 +1368,6 @@ class MIBI_TSAI {
        total_fovs+=fovs;
        total_tiles++;
    }}}}
-   if(return_minutes) return Math.ceil(total_time/60000);
    if(total_time==0) return;
    var time_run=total_time/1000; // time in s
    var time_days=Math.floor(time_run/86400);
@@ -1375,13 +1379,17 @@ class MIBI_TSAI {
    time_readable+=(time_hours  >0?(time_readable!=''?', ':'')+time_hours  +' hour'  +(time_hours  >1?'s':''):'');
    time_readable+=(time_minutes>0?(time_readable!=''?', ':'')+time_minutes+' minute'+(time_minutes>1?'s':''):'');
    time_readable+=(time_seconds>0?(time_readable!=''?', ':'')+time_seconds+' second'+(time_seconds>1?'s':''):'');
+   if(return_time_readable) return time_readable;
    var b='<table class="estimate">'
     +calculation
+    /*
     +'\n <tr><td colspan="2">&nbsp;</td><td colspan="7">= '+Math.round(time_run)+' seconds</td></tr>'
     +'\n <tr><td colspan="2">&nbsp;</td><td colspan="7">= '+(Math.round(time_run/60*100)/100)+' minutes</td></tr>'
     +'\n <tr><td colspan="2">&nbsp;</td><td colspan="7">= '+(Math.round(time_run/3600*100)/100)+' hours</td></tr>'
     +'\n <tr><td colspan="2">&nbsp;</td><td colspan="7">= '+(Math.round(time_run/86400*100)/100)+' days</td></tr>'
     +(time_run>86400?'\n <tr><td colspan="2">&nbsp;</td><td colspan="7">= '+time_readable+'</td></tr>':'')
+    */
+    +'\n <tr><td colspan="2">&nbsp;</td><td colspan="7">= '+time_readable+'</td></tr>'
     +'\n <tr><td colspan="9">&nbsp;</td></tr>'
     +'\n <tr><td colspan="9">'+total_tiles+' tile'+(total_tiles>1?'s':'')+', '+total_fovs+' FOV'+(total_fovs>1?'s':'')+'</td></tr>'
     +'\n <tr><td colspan="2">Estimated area  </td><td colspan="7">'+(Math.round(total_area*100)/100)+' mm<sup>2</sup></td></tr>'
@@ -1517,7 +1525,7 @@ class MIBI_TSAI {
     return false;
   }}
   
-  json_resume(reset)
+  json_resume(reset) // returns true if resume index changed, returns false if unchanged, reset==true rebuilds select list and sets tsai.json.changed to false
   {var resume=-1;
    var select=document.getElementById('json_resume_select');
    if(select)
@@ -1595,9 +1603,9 @@ class MIBI_TSAI {
      if(!document.getElementById('json_group_autofocus').checked) document.getElementById('json_group_autofocus').click(); // remove grouping by tile as autofocus will not be in correct order
   }}}
   
-  json_lists(build, reset)
+  json_lists(build, reset) // build==true forces rebuild of json.list, reset==true rebuilds select list and sets tsai.json.changed to false
   {if(tsai.json_empty()) return;
-   if(!tsai.json_resume(reset) // need to run json_resume regardless of build, must be first
+   if(!tsai.json_resume(reset) // check if resume index changed, need to run json_resume regardless of build, must be first
     && !build
     && tsai.tiles.length==tsai.json.tiles.length
     && tsai.json_equal_strict(tsai.tiles, tsai.json.tiles)
@@ -1989,7 +1997,7 @@ class MIBI_TSAI {
   {var size=tsai.canvas.cursor_size;
    var center=(size-1)/2;
    var opacity='<line opacity="'+tsai.canvas.cursor_opacity+'" x1="';
-   var line='" style="stroke:'+tsai.canvas.cursor_color+'; stroke-width:'+tsai.canvas.line_thickness+';"/>'; // can adjust +/-0.5 or so here
+   var line='" style="stroke:'+(typeof tsai.image==='object' && 'key' in tsai.image && tsai.image.key=='sed'?tsai.canvas.cursor_color_sed:tsai.canvas.cursor_color_optical)+'; stroke-width:'+tsai.canvas.line_thickness+';"/>'; // can adjust +/-0.5 or so here
    var svg='<svg version="1.1" id="crosshair" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '
     +'width="'+size+'px" height="'+size+'px" '
     +'viewBox="0 0 '+size+' '+size+'" '
@@ -2029,11 +2037,19 @@ class MIBI_TSAI {
     tsai.draw_cursor();
   }}
   
-  draw_cursor_color(color)
-  {if(!color.match(/\s*#[0-9A-Fa-f]{3}\s*/) && !color.match(/\s*#[0-9A-Fa-f]{6}\s*/)) document.getElementById('draw_cursor_color').value=tsai.canvas.cursor_color;
+  draw_cursor_color_optical(color)
+  {if(!color.match(/\s*#[0-9A-Fa-f]{3}\s*/) && !color.match(/\s*#[0-9A-Fa-f]{6}\s*/)) document.getElementById('draw_cursor_color_optical').value=tsai.canvas.cursor_color_optical;
    else
-   {tsai.canvas.cursor_color=color.replace(/\s/g, '');
-    document.getElementById('slide_cursor_color').value=tsai.canvas.cursor_color;
+   {tsai.canvas.cursor_color_optical=color.replace(/\s/g, '');
+    document.getElementById('slide_cursor_colo_optical').value=tsai.canvas.cursor_color_optical;
+    tsai.draw_cursor();
+  }}
+  
+  draw_cursor_color_sed(color)
+  {if(!color.match(/\s*#[0-9A-Fa-f]{3}\s*/) && !color.match(/\s*#[0-9A-Fa-f]{6}\s*/)) document.getElementById('draw_cursor_color_sed').value=tsai.canvas.cursor_color_sed;
+   else
+   {tsai.canvas.cursor_color_sed=color.replace(/\s/g, '');
+    document.getElementById('slide_cursor_color_sed').value=tsai.canvas.cursor_color_sed;
     tsai.draw_cursor();
   }}
   
@@ -3077,6 +3093,25 @@ class MIBI_TSAI {
      tsai.images.sed.coordinates=[
       [parseFloat(sed[7]), parseFloat(sed[8]), parseFloat(sed[9]), parseFloat(sed[10]), parseFloat(sed[11]), parseFloat(sed[12]), parseFloat(sed[13]), parseFloat(sed[14])],
       [sed[3], sed[4], sed[5], sed[4], sed[3], sed[6], sed[5], sed[6]]];
+     if( Math.abs(tsai.coregistration.shift.x_x-parseFloat(sed[15]))>0.0001
+      || Math.abs(tsai.coregistration.shift.x_y-parseFloat(sed[16]))>0.0001
+      || Math.abs(tsai.coregistration.shift.y_x-parseFloat(sed[17]))>0.0001
+      || Math.abs(tsai.coregistration.shift.y_y-parseFloat(sed[18]))>0.0001)
+     {tsai.json_warnings('<li>'
+       +'Unloading user shift coefficients'
+       +'<br/>x_x: '+tsai.coregistration.shift.x_x
+       +'<br/>x_y: '+tsai.coregistration.shift.x_y
+       +'<br/>y_x: '+tsai.coregistration.shift.y_x
+       +'<br/>y_y: '+tsai.coregistration.shift.y_y
+       +'<br/>&nbsp;'
+       +'<br/>Loading tiled SED image shift cofficients'
+       +'<br/>x_x: '+parseFloat(sed[15])
+       +'<br/>x_y: '+parseFloat(sed[16])
+       +'<br/>y_x: '+parseFloat(sed[17])
+       +'<br/>y_y: '+parseFloat(sed[18])
+       +'<br/>&nbsp;'+'</li>'
+      );
+	 }
      tsai.coregistration.shift={x_x: parseFloat(sed[15]), x_y: parseFloat(sed[16]), y_x: parseFloat(sed[17]), y_y: parseFloat(sed[18])};
      tsai.image=tsai.images.sed;
      document.getElementById('optical_link').style.display='none';
@@ -3658,7 +3693,7 @@ class MIBI_TSAI {
     +      ' console.log(\'Rescan queue: [\'+this.scan_queue.join(\'], [\')+\']\');'
     +   '}}}},'
     + ' scan:'
-    +  ' async function()'
+    +  ' async function(stabilization_delay)'
     +  ' {if(document.getElementById(\'selectMode\').value.indexOf(\'SED\')==-1) {console.log(\'To scan, please put the MIBI into SED mode and adjust the gain.\'); return;}'
     +   ' for(var coordinate=0; coordinate<4; coordinate++)'
     +   ' {if(this.coordinates[coordinate]===null)'
@@ -3713,7 +3748,7 @@ class MIBI_TSAI {
           +' Math.round((width+(fov_pixels_y*x_crop_right)-(fov_pixels_y/2))*1000)/1000, Math.round((height-Math.round(fov_pixels_y/2))*1000)/1000,' // pixel center of bottom right tile x and y
           +' top_left[0], top_left[1], 0, 0, 0, 0, 0, 0, this.shift[0], this.shift[1], this.shift[2], this.shift[3]];' // micron center of top left tile x and y, top right, bottom left, bottom right
     +    '}'
-    +   ' var time_estimate=(this.scan_queue.length==0?2.5*this.scan_rows*this.scan_columns:3*this.scan_queue.length);'
+    +   ' var time_estimate=(this.scan_queue.length==0?(2.5+0.001*(stabilization_delay-880))*this.scan_rows*this.scan_columns:(3+0.001*(stabilization_delay-880))*this.scan_queue.length);'
     +   ' var time_start=new Date();'
     +   ' var time_end=new Date();'
     +   ' time_end.setSeconds(time_end.getSeconds()+time_estimate);'
@@ -3768,7 +3803,7 @@ class MIBI_TSAI {
     +       ' await this.wait(80);' // otherwise wait until stopped moving
     +       ' current.cycle++;'
     +      '}}' // if at destination break to scan, otherwise not at destination and reinput
-    +     ' await this.wait(880);' // wait for scan, roughly 638ms per scan at 256x256
+    +     ' await this.wait(stabilization_delay);' // wait for scan, roughly 638ms per scan at 256x256
     +     ' this.scan_context.drawImage(this.canvas, Math.ceil(fov_pixels_y*x_crop_left), 0, fov_pixels_x, fov_pixels_y, fov_pixels_x*column, fov_pixels_y*row, fov_pixels_x, fov_pixels_y);'
     +     ' last=[row, column];'
     +     ' index++;'
@@ -3844,7 +3879,8 @@ class MIBI_TSAI {
     +    ' case \'KeyB\'  : this.filter_crement(event.shiftKey?-0.1:0.1, 0); break;'
     +    ' case \'KeyC\'  : this.filter_crement(0, event.shiftKey?-0.1:0.1); break;'
     +    ' case \'KeyV\'  : if(event.shiftKey) this.filter_crement(1-this.filter_brightness, 1-this.filter_contrast); break;'
-    +    ' case \'KeyT\'  : if(event.shiftKey) this.scan(); break;'
+    +    ' case \'KeyT\'  : if(event.shiftKey) this.scan(880); break;'
+    +    ' case \'KeyU\'  : if(event.shiftKey) this.scan(2000); break;'
     +    ' case \'Slash\' : if(event.shiftKey && confirm(\'Are you sure you want to halt any ongoing scan?\')) {this.stop=true; this.scanning=false; break;}'
     +    ' case \'KeyR\'  : if(event.shiftKey) this.scan_queue_add(); break;'
     +    ' case \'KeyE\'  : if(event.shiftKey) this.scan_queue_clear(); break;'
@@ -3878,7 +3914,8 @@ class MIBI_TSAI {
     +    '\\nShift+C: Decrease SED contrast'
     +    '\\nShift+V: Reset SED brightness and contrast'
     +    '\\n'
-    +    '\\nShift+T: Start SED tile scan/stitch'
+    +    '\\nShift+T: Start SED tile scan/stitch, 880ms SED stabilization delay'
+    +    '\\nShift+U: Start SED tile scan/stitch, 2000ms SED stabilization delay'
     +    '\\nShift+/: Halt  SED tile scan/stitch'
     +    '\\nA      : Check SED tile top left corner'
     +    '\\nD      : Check SED tile bottom right corner'
@@ -3939,6 +3976,7 @@ class MIBI_TSAI {
      else tsai.coregistration.shift[['x', 'y'][index]+'_'+['x', 'y'][axis]]=value;
    }}
    tsai.coregistration_cookie_set();
+   tsai.json_lists(true, false);
   }
   
   sed_coordinates_draw()
@@ -4471,7 +4509,7 @@ class MIBI_TSAI {
    var tile_label=document.getElementById('tile_'+tile+'_polygon').nextElementSibling;
    var tile_position=tsai.element_rect(tile_label);
    div.style.top=(tile_position.top-div_position.top+tile_label.offsetHeight+3)+'px';
-   div.style.left=Math.max(10, tile_position.left+tile_label.getBoundingClientRect().width-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
+   div.style.left=Math.max(10, tile_label.getBoundingClientRect().right-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
   }
   
   polygon_close()
@@ -4718,7 +4756,7 @@ class MIBI_TSAI {
    var tile_label=document.getElementById('tile_'+tile+'_tma').nextElementSibling;
    var tile_position=tsai.element_rect(tile_label);
    div.style.top=(tile_position.top-div_position.top+tile_label.offsetHeight+3)+'px';
-   div.style.left=Math.max(10, tile_position.left+tile_label.getBoundingClientRect().width-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
+   div.style.left=Math.max(10, tile_label.getBoundingClientRect().right-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
   }
   
   tma_resize(input, dimension)
@@ -4976,7 +5014,7 @@ class MIBI_TSAI {
     var tile_label=document.getElementById('tile_'+tile+'_copy').nextElementSibling;
     var tile_position=tsai.element_rect(tile_label);
     div.style.top=(tile_position.top-div_position.top+tile_label.offsetHeight+3)+'px';
-    div.style.left=Math.max(10, tile_position.left+tile_label.getBoundingClientRect().width-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
+    div.style.left=Math.max(10, tile_label.getBoundingClientRect().right-div.getBoundingClientRect().left-div.getBoundingClientRect().width)+'px';
   }}
   
   copy_menu_all(bool)
