@@ -21,6 +21,11 @@ body                                                                    {overflo
 #_layout_main #tiler ul li                                              {font-size:1.6rem;}
 #_layout_main #tiler p.file                                             {margin-bottom:0px;}
 
+#_layout_main #citation                                                 {padding:0px 20px 5px 0px;}
+#_layout_main #citation h2                                              {cursor:pointer;}
+#_layout_main #citation ol                                              {margin:2px 0px 0px 30px;}
+#_layout_main #citation ol li                                           {font-size:1.6rem; padding:0px 0px 0px 5px; margin:0px 0px 5px 0px;}
+
 #_layout_main #optical                                                  {padding:0px 20px 5px 0px;}
 #_layout_main #optical h2                                               {cursor:pointer;}
 #_layout_main #optical ol                                               {margin:2px 0px 0px 30px;}
@@ -91,9 +96,9 @@ body                                                                    {overflo
 #_layout_main h2.slide_options                                          {cursor:pointer;}
 #_layout_main div.slide_options                                         {padding:5px 0px 20px 30px;}
 #_layout_main table.slide_options tr td                                 {padding:0px;}
-#_layout_main table.slide_options tr:nth-child(3) td,
-#_layout_main table.slide_options tr:nth-child(8) td                    {padding-bottom:8px;}
-#_layout_main table.slide_options tr:nth-child(3) td input[type=button] {width:22px; height:22px;}
+#_layout_main table.slide_options tr:nth-child(4) td,
+#_layout_main table.slide_options tr:nth-child(9) td                    {padding-bottom:8px;}
+#_layout_main table.slide_options tr:nth-child(4) td input[type=button] {width:22px; height:22px;}
 #_layout_main table.slide_options tr td:first-child                     {padding-right:8px; text-align:left; font-size:1.6rem; font-weight:600;}
 #_layout_main table.slide_options input                                 {margin:0px 0px 3px 0px;}
 #_layout_main table.slide_options input[type=text]                      {width:80px; margin:0px 0px 3px 0px; padding:1px 3px 1px 3px;}
@@ -208,6 +213,11 @@ body                                                                    {overflo
 #_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_up                   {padding:0px 0px 2px 0px;}
 #_layout_main #tiles div.tile_form table.tile_settings tr td input[type=button].tile_down                 {padding:2px 0px 0px 0px;}
 }
+
+#_layout_main #tile_check                                                    {padding:50px 0px 20px 0px;}
+#_layout_main #tile_check input                                              {width:225px; margin:0px 10px 5px 0px;}
+#_layout_main #tile_check input:first-child                                  {background-color:var(--button_green);}
+#_layout_main #tile_check input:last-child                                   {background-color:var(--button_red);}
 
 #_layout_main #tile_polygon                                                  {background-color:var(--menu); width:350px; padding:5px 8px 8px 8px; border-radius:5px; position:relative;}
 #_layout_main #tile_polygon div:first-child                                  {text-align:right; line-height:1em; padding:3px 0px 8px 0px;}
