@@ -86,6 +86,7 @@
         <li>Contact Ionpath to correct the MIBI's optical-to-stage motor coregistration and it should usually be fixed within an hour.</li>
         <li>If you insist on kludging it yourself, click the button below to copy the code to the clipboard.
          <br/><input type="button" class="_layout_blue" value="Copy manual coregistration code to clipboard" onclick="tsai.optical_manual_code();"/>
+        </li>
         <li>Paste <span class="keyboard">Ctrl+V</span> the code into the Console and press <span class="keyboard">Enter</span>. For each fiducial, center it in the SED view and store it by typing <span class="keyboard">1</span>, <span class="keyboard">2</span>, <span class="keyboard">3</span>, or <span class="keyboard">4</span>. When finished, type <span class="keyboard">Escape</span> and open the link generated in the console.</li>
         <li>Load the image file. Drag and drop onto the page or use the file input box below.</li>
         <li>Click each <span class="b">Optical</span> button and click on the center of the corresponding fiducial in the image. When finished, click Use manual coregistration.
@@ -132,13 +133,13 @@
          </table>
          <input type="button" class="_layout_blue" value="Use manual coregistration" onclick="tsai.optical_set();"/>
         </li>
+        <li id="optical_link">To use the optical coregistration settings on another computer or browser, click the button below and paste/send the link.
+         <br/><input type="button" class="_layout_blue" value="Copy coregistered link to clipboard" onclick="tsai.coregistration_link();"/>
+        </li>
        </ol>
-      </li>
-      <li id="optical_link">To use the optical coregistration settings on another computer or browser, click the button below and paste/send the link.
-       <br/><input type="button" class="_layout_blue" value="Copy coregistered link to clipboard" onclick="tsai.coregistration_link();"/>
-      </li>
-     </ol>
-    </div>
+      </div>
+     </li>
+    </ol>
    </div>
   </td>
  </tr>
@@ -270,7 +271,6 @@
   </td>
  </tr>
  <tr>
- <tr>
   <td class="slide_bar">
    <h2 class="slide_options" onclick="tsai.element_toggle(this);">[+] Slide Options</h2>
    <div class="slide_options" style="display:none;">
@@ -292,11 +292,19 @@
       </td>
      </tr>
      <tr>
-      <td colspan="2">Cursor color</td>
+      <td colspan="2">Cursor color optical</td>
       <td>
-       <input id="slide_cursor_color" type="text" value="#ffffff" onchange="tsai.draw_cursor_color(this.value);"/>
-       <input type="button" onclick="tsai.draw_cursor_color('#ffffff');" style="background-color: #fff; border:1px solid #ccc;"/>
-       <input type="button" onclick="tsai.draw_cursor_color('#000000');" style="background-color: #000; border:1px solid #ccc;"/>
+       <input id="slide_cursor_color_optical" type="text" value="#ffffff" onchange="tsai.draw_cursor_color_optical(this.value);"/>
+       <input type="button" onclick="tsai.draw_cursor_color_optical('#ffffff');" style="background-color: #fff; border:1px solid #ccc;"/>
+       <input type="button" onclick="tsai.draw_cursor_color_optical('#000000');" style="background-color: #000; border:1px solid #ccc;"/>
+      </td>
+     </tr>
+     <tr>
+      <td colspan="2">Cursor color SED</td>
+      <td>
+       <input id="slide_cursor_color_sed" type="text" value="#000000" onchange="tsai.draw_cursor_color_sed(this.value);"/>
+       <input type="button" onclick="tsai.draw_cursor_color_sed('#ffffff');" style="background-color: #fff; border:1px solid #ccc;"/>
+       <input type="button" onclick="tsai.draw_cursor_color_sed('#000000');" style="background-color: #000; border:1px solid #ccc;"/>
       </td>
      </tr>
      <tr>
@@ -708,7 +716,7 @@
      ##########  HIDDEN ELEMENTS  ##########
      ####################################### -->
 <canvas id="canvas_prerender" width="1" height="1" style="display:none;"></canvas>
-<script type="text/javascript">/* <![CDATA[ */ tsai.onload(); /* ]]> */ </script>
+<script type="text/javascript">tsai.onload();</script>
 
 <!-- ##############################
      ##########  FOOTER  ##########
