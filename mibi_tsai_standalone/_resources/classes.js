@@ -17,7 +17,7 @@
      image***, images*** {optical, sed, import} -> name, key***, img, type, crop, coordinates***, scale***, transform***, brightness, contrast, loaded
      canvas               : draw***, draw_context***, prerender***, prerender_context***, div, optical_crop, optical_bounds {left, right, top, bottom}, cursor_size, cursor_opacity, cursor_color_optical, cursor_color_sed, slide_labels, slide_labels_font, slide_labels_size, line_thickness, line_circle, line_color, line_colors, hover_line_opacity, hover_fill_opacity
      tma                  : crosshair, line_opacity, labels, rows, columns, row_start, column_start, order, orders {tl0, tl1, tr0, tr1, br0, br1, bl0, bl}, points, corners, corner_adjust, corner_start, revert
-     scratch              : tiles, polygon***, polygons, polygons_revert, corners, shift***
+     scratch              : tiles, polygon***, polygons, polygons_revert, click_transform, shift***
      coordinates          : optical, import, sed, crosshair, line_color_default, line_thickness, line_opacity, line_colors
     Body onload           : onload***
     General               : cookie_set, cookie_get, copy_array, time_pad, time_format, element_rect***, element_toggle, element_toggle_on, element_toggle_off, menus_close
@@ -38,7 +38,7 @@
     Optical coregistration: optical_to_base64, optical_from_base64, optical_automatic_code***, optical_coordinates_fill, optical_manual_code***, optical_coordinates_draw, optical_coordinates***, optical_action***, optical_set
     SED                   : sed_crop, sed_code***, sed_shift_set, sed_coordinates_draw, sed_coordinates***, sed_action***
     Tile draw move        : move_load, move_nudge, move_action***
-    Tile draw click/erase : corners_coordinates_load***, corners_coordinates***, corners_find, click_load, click_action***, erase_load, erase_action***
+    Tile draw click/erase : click_load_transform***, click_find, click_load, click_action***, erase_load, erase_action***
     Tile draw duplicate   : duplicate_load, duplicate_action***, duplicate_tile***
     Tile draw polygon     : polygon_example, polygon_builder, polygon_close, polygon_file_revert, polygon_file_load, polygon_file_import, polygon_action***, polygon_in, polygon_intersect_line, polygon_intersects, polygon_tile***
     TMA                   : draw_tma_crosshair, draw_tma_crosshair_crement, tma_builder, tma_resize, tma_crement, tma_name_rc, tma_close, tma_revert, tma_order, tma_action***, tma_draw***, tma_prepend, tma_build***
@@ -228,7 +228,8 @@ class MIBI_TSAI {
    polygon:               [],        // array of coordinates for polygon [{x: x, y: y}]
    polygons:              [],        // coordinates for polygon import
    polygons_revert:       '',        // stringified json prior to polygon import
-   corners:               {},        // coordinates of corners of tiled fovs
+   click_transform:       {},        // transformation coefficients to convert tile micron coordinates to tile r#c#, using micron coordinates rather than pixel coordinates means no issues with zoom
+   click_dimensions:      [],        // numbers of columns and rows in loaded tile map corresponding to click_transform
    shift:                 {}         // json correction coefficients for mibi shift
   }
   coordinates={
@@ -1333,7 +1334,7 @@ class MIBI_TSAI {
      else
      {var fovs=0;
       var calculation_tile='';
-      var rows=tsai.tiles[tile].map.length;
+      var rows   =tsai.tiles[tile].map.length;
       var columns=tsai.tiles[tile].map[0].length;
       for(var row=0; row<rows; row++)
       {for(var column=0; column<columns; column++)
@@ -2195,6 +2196,8 @@ class MIBI_TSAI {
      ######################################## */
   
   /*
+   given micron coordinate (x, y) as center point of top left fov of tile, calls action function on each fov of tile, passing it pixel coordinates of fov corners
+   
    tile_fov_corners notes:
     // no start shift correction
      var x_start=x_row-fov_half*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y);
@@ -2215,10 +2218,10 @@ class MIBI_TSAI {
   tile_fov_corners(tile, x, y, action, action_options)
   {var fov=tsai.tiles[tile].fov.fovSizeMicrons;
    var fov_half=fov/2;
-   var rows=tsai.tiles[tile].map.length;
+   var rows   =tsai.tiles[tile].map.length;
    var columns=tsai.tiles[tile].map[0].length;
    for(var row=0; row<rows; row++)
-   {var x_row=x;
+   {var x_row=x; // reset x coordinate back to start after finishing each row
     for(var column=0; column<columns; column++)
     {var x_start=x_row-fov_half*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y)+fov*((row   *tsai.coregistration.shift.x_y)+(column*tsai.coregistration.shift.x_x)); // start shift correction
      var y_start=y    +fov_half*(1+tsai.coregistration.shift.y_x+tsai.coregistration.shift.y_y)-fov*((column*tsai.coregistration.shift.y_x)+(row   *tsai.coregistration.shift.y_y));
@@ -2228,9 +2231,9 @@ class MIBI_TSAI {
       tsai.coregistration_from_micron(tsai.image.transform, {x: x_start+fov*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y), y: y_start-fov*(1+tsai.coregistration.shift.y_x+tsai.coregistration.shift.y_y)}),
       tsai.coregistration_from_micron(tsai.image.transform, {x: x_start+fov*tsai.coregistration.shift.x_y, y: y_start-fov*(1+tsai.coregistration.shift.y_y)})
      );
-     x_row+=fov;
+     x_row+=fov; // increment x by fov
     }
-    y-=fov;
+    y-=fov; // increment y by fov after finishing each row
   }}
   
   tile_draw_fov(options, row, column, tl, tr, br, bl)
@@ -2312,7 +2315,7 @@ class MIBI_TSAI {
    context.globalAlpha=1;
    if(tsai.canvas.slide_labels)
    {var found=false;
-    var rows=tsai.tiles[tile].map.length;
+    var rows   =tsai.tiles[tile].map.length;
     var columns=tsai.tiles[tile].map[0].length;
     for(var row=0; row<rows; row++)
     {for(var column=0; column<columns; column++)
@@ -2372,7 +2375,7 @@ class MIBI_TSAI {
    if(tsai.tiles[tile].active)
    {tsai.tile_draw(tsai.canvas.draw_context, tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, (tsai.action.item==tile && ['move', 'click', 'erase'].includes(tsai.action.type)) || mouse_over);
     if(mouse_over)
-    {var rows=tsai.tiles[tile].map.length;
+    {var rows   =tsai.tiles[tile].map.length;
      var columns=tsai.tiles[tile].map[0].length;
      var results={found: 0, x: -1, y:-1, threshold: 50};
      for(var sum=0; sum<rows+columns-1 && results.found<=results.threshold; sum++)
@@ -2936,13 +2939,14 @@ class MIBI_TSAI {
    document.getElementById('tile_'+tile+'_center_y').value=tsai.tiles[tile].fov.centerPointMicrons.y;
    tsai.tile_map_resize(tile);
    tsai.tile_pixels(tile);
+   if(tsai.action.type=='click') tsai.click_load(tile);
   }
   
   tile_map_resize(tile)
-  {var columns_new=parseInt(document.getElementById('tile_'+tile+'_columns').value);
-   var rows_new   =parseInt(document.getElementById('tile_'+tile+'_rows'   ).value);
-   var columns_original=tsai.tiles[tile].map[0].length;
+  {var rows_new   =parseInt(document.getElementById('tile_'+tile+'_rows'   ).value);
+   var columns_new=parseInt(document.getElementById('tile_'+tile+'_columns').value);
    var rows_original   =tsai.tiles[tile].map.length;
+   var columns_original=tsai.tiles[tile].map[0].length;
    if(isNaN(columns_new) || columns_new<1) {columns_new=columns_original; document.getElementById('tile_'+tile+'_columns').value=columns_original;}
    if(isNaN(rows_new   ) || rows_new   <1) {rows_new   =rows_original   ; document.getElementById('tile_'+tile+'_rows'   ).value=rows_original   ;}
    document.getElementById('tile_'+tile+'_columns').value=columns_new;
@@ -3905,7 +3909,7 @@ class MIBI_TSAI {
     +    '\\n4      : Set y f(y) correction'
     +    '\\nShift+5: Check corrections (5-square checkerboard)'
     +    '\\nShift+9: Check corrections (3×3)'
-    +    '\\nShift+M: Set check dwell time (ms)'
+    +    '\\nShift+M: Set check dwell time (seconds)'
     +    '\\nS      : Save corrections to PNG'
     +    '\\n'
     +    '\\nB      : Increase SED brightness'
@@ -4254,65 +4258,29 @@ class MIBI_TSAI {
   /* ###############################
      ##########  CORNERS  ##########
      ############################### */
-  corners_coordinates_load(options, row, column, tl, tr, br, bl)
-  {tsai.scratch.corners.fovs++;
-   var x0=Math.min(tl.x, bl.x);
-   var x1=Math.max(tr.x, br.x);
-   var y0=Math.min(tl.y, tr.y); // pixel coordinates are from top left, so y0 = up = lower y, y1 = down = higher y
-   var y1=Math.max(bl.y, br.y);
-   if(tsai.scratch.corners.columns[column].length==0) tsai.scratch.corners.columns[column]=[x0, x1];
-   else
-   {if(x0<tsai.scratch.corners.columns[column][0]) tsai.scratch.corners.columns[column][0]=x0;
-    if(x1>tsai.scratch.corners.columns[column][1]) tsai.scratch.corners.columns[column][1]=x1;
-   }
-   if(tsai.scratch.corners.rows[row].length==0) tsai.scratch.corners.rows[row]=[y0, y1];
-   else
-   {if(y0<tsai.scratch.corners.rows[row][0]) tsai.scratch.corners.rows[row][0]=y0;
-    if(y1>tsai.scratch.corners.rows[row][1]) tsai.scratch.corners.rows[row][1]=y1;
-   }
-   tsai.scratch.corners.map[row][column]=[x0, x1, y0, y1, [[bl.x, bl.y], [br.x, br.y], [tr.x, tr.y], [tl.x, tl.y]]];
+  click_load_transform(tile)
+  {var fov=tsai.tiles[tile].fov.fovSizeMicrons;
+   var fov_half=fov/2;
+   var x=tsai.tiles[tile].fov.centerPointMicrons.x-fov_half;
+   var y=tsai.tiles[tile].fov.centerPointMicrons.y+fov_half;
+   var fovs_height=tsai.tiles[tile].map.length+1;
+   var fovs_width =tsai.tiles[tile].map[0].length+1;
+   var corners=[
+    {x: x, y: y},
+    {x: x+fovs_width*fov*(1+tsai.coregistration.shift.x_x), y: y-fovs_height*fov*tsai.coregistration.shift.y_x},
+    {x: x+fovs_width*fov*(1+tsai.coregistration.shift.x_x+tsai.coregistration.shift.x_y), y: y-fovs_height*fov*(1+tsai.coregistration.shift.y_x+tsai.coregistration.shift.y_y)},
+    {x: x+fovs_width*fov*tsai.coregistration.shift.x_y, y: y-fovs_height*fov*(1+tsai.coregistration.shift.y_y)}
+   ];
+   tsai.scratch.click_transform=tsai.matrix_perspective([corners[0].x, corners[0].y, corners[1].x, corners[1].y, corners[2].x, corners[2].y, corners[3].x, corners[3].y], [0, 0, fovs_width, 0, fovs_width, fovs_height, 0, fovs_height], false);
+   tsai.scratch.click_dimensions=[fovs_width-1, fovs_height-1];
   }
   
-  corners_coordinates(tile)
-  {tsai.scratch.corners={fovs: 0, left: 0, right: 0, top: 0, bottom: 0, rows: [], columns: [], map: []};
-   var rows=tsai.tiles[tile].map.length;
-   var columns=tsai.tiles[tile].map[0].length;
-   for(var row=0; row<rows; row++)
-   {tsai.scratch.corners.rows.push([]);
-    tsai.scratch.corners.map[row]=[];
-    for(var column=0; column<columns; column++)
-    {tsai.scratch.corners.map[row][column]=[];
-     if(row==0) tsai.scratch.corners.columns.push([]);
-   }}
-   tsai.tile_fov_corners(tile, tsai.tiles[tile].fov.centerPointMicrons.x, tsai.tiles[tile].fov.centerPointMicrons.y, tsai.corners_coordinates_load, ''); // calls tsai.corners_coordinates_load
-   tsai.scratch.corners.left=tsai.scratch.corners.columns[0][0];
-   tsai.scratch.corners.right=tsai.scratch.corners.columns[tsai.scratch.corners.columns.length-1][1];
-   tsai.scratch.corners.top=tsai.scratch.corners.rows[0][0];
-   tsai.scratch.corners.bottom=tsai.scratch.corners.rows[tsai.scratch.corners.rows.length-1][1];
-  }
-  
-  corners_find(position)
-  {var row=-1;
-   var column=-1;
-   if('map' in tsai.scratch.corners && position.y>=tsai.scratch.corners.top && position.y<=tsai.scratch.corners.bottom && position.x>=tsai.scratch.corners.left && position.x<=tsai.scratch.corners.right)
-   {var bounds=[[0, tsai.scratch.corners.rows.length-1], [0, tsai.scratch.corners.columns.length-1]];
-    if(tsai.scratch.corners.fovs>9)
-    {while(position.y>tsai.scratch.corners.rows[   bounds[0][0]][0] && bounds[0][0]<bounds[0][1]) bounds[0][0]++;
-     while(position.y<tsai.scratch.corners.rows[   bounds[0][1]][1] && bounds[0][1]>bounds[0][0]) bounds[0][1]--;
-     while(position.x>tsai.scratch.corners.columns[bounds[1][0]][0] && bounds[1][0]<bounds[1][1]) bounds[1][0]++;
-     while(position.x<tsai.scratch.corners.columns[bounds[1][1]][1] && bounds[1][1]>bounds[0][1]) bounds[1][1]--;
-     if(bounds[0][0]!=0) bounds[0][0]--;
-     if(bounds[0][1]!=tsai.scratch.corners.rows.length-1) bounds[0][1]++;
-     if(bounds[1][0]!=0) bounds[1][0]--;
-     if(bounds[1][1]!=tsai.scratch.corners.columns.length-1) bounds[1][1]++;
-    }
-    for(row=bounds[0][0]; row<=bounds[0][1]; row++)
-    {for(column=bounds[1][0]; column<=bounds[1][1]; column++)
-     {var cell=tsai.scratch.corners.map[row][column];
-      if(position.x<cell[0] || position.x>cell[1] || position.y<cell[2] || position.y>cell[3]) continue;
-      if(tsai.polygon_in([position.x, position.y], cell[4])) return [row, column];
-   }}}
-   return [];
+  click_find(position)
+  {var rc=tsai.matrix_perspective_transform(tsai.scratch.click_transform, tsai.coregistration_to_micron(tsai.image.transform, position));
+   rc.x=Math.floor(rc.x);
+   rc.y=Math.floor(rc.y);
+   if(rc.x>=0 && rc.x<tsai.scratch.click_dimensions[0] && rc.y>=0 && rc.y<tsai.scratch.click_dimensions[1]) return [rc.y, rc.x];
+   else return [];
   }
   
   /* #############################
@@ -4320,8 +4288,7 @@ class MIBI_TSAI {
      ############################# */
   click_load(tile)
   {if(!tsai.menus_close()) return;
-   tsai.tile_expand(tile);
-   tsai.corners_coordinates(tile);
+   tsai.click_load_transform(tile);
    tsai.action_prerender('click', tile, false);
    // tsai.tile_map_resize(tile);
    tsai.draw_clear(tsai.canvas.draw_context);
@@ -4334,7 +4301,7 @@ class MIBI_TSAI {
    switch(type)
    {case 'mousemove':
      if(tsai.action.mouse_dragged)
-     {var rc=tsai.corners_find(position);
+     {var rc=tsai.click_find(position);
       if(rc.length==2)
       {tsai.tiles[tsai.action.item].map[rc[0]][rc[1]]=1;
        document.getElementById('tile_'+tsai.action.item+'_map_'+rc[0]+'_'+rc[1]).checked=true;
@@ -4342,7 +4309,7 @@ class MIBI_TSAI {
     break;
     case 'mouseup':
      if(!tsai.action.mouse_dragged)
-     {var rc=tsai.corners_find(position);
+     {var rc=tsai.click_find(position);
       if(rc.length==2)
       {var checked=(tsai.tiles[tsai.action.item].map[rc[0]][rc[1]]!=0);
        tsai.tiles[tsai.action.item].map[rc[0]][rc[1]]=(checked?0:1);
@@ -4364,7 +4331,7 @@ class MIBI_TSAI {
      ############################# */
   erase_load(tile)
   {if(!tsai.menus_close()) return;
-   tsai.corners_coordinates(tile);
+   tsai.click_load_transform(tile);
    tsai.action_prerender('erase', tile, false);
    // tsai.tile_map_resize(tile);
    tsai.draw_clear(tsai.canvas.draw_context);
@@ -4378,7 +4345,7 @@ class MIBI_TSAI {
    switch(type)
    {case 'mousemove':
      if(tsai.action.mouse_dragged)
-     {var rc=tsai.corners_find(position);
+     {var rc=tsai.click_find(position);
       if(rc.length==2)
       {tsai.tiles[tsai.action.item].map[rc[0]][rc[1]]=0;
        document.getElementById('tile_'+tsai.action.item+'_map_'+rc[0]+'_'+rc[1]).checked=false;
@@ -4386,7 +4353,7 @@ class MIBI_TSAI {
     break;
     case 'mouseup':
      if(!tsai.action.mouse_dragged)
-     {var rc=tsai.corners_find(position);
+     {var rc=tsai.click_find(position);
       if(rc.length==2)
       {tsai.tiles[tsai.action.item].map[rc[0]][rc[1]]=0;
        document.getElementById('tile_'+tsai.action.item+'_map_'+rc[0]+'_'+rc[1]).checked=false;
